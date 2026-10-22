@@ -1,0 +1,532 @@
+"""Original procedural art: layered cut-paper landscapes and animated silhouettes.
+
+No external images or fonts are needed. Geometry and textures are seeded, so the
+same location always looks the same, including after a restart.
+"""
+import math
+import random
+from functools import lru_cache
+import pygame as pg
+from .levels import ERAS
+
+W, H = 1280, 720
+INK = (15, 23, 33)
+PAPER = (238, 236, 217)
+MUTED = (158, 176, 178)
+CYAN = (116, 237, 219)
+GOLD = (242, 189, 112)
+
+
+def mix(a, b, t):
+    return tuple(round(x + (y - x) * t) for x, y in zip(a, b))
+
+
+def rect(surface, color, box, radius=0, width=0):
+    pg.draw.rect(surface, color, pg.Rect(box), width, border_radius=radius)
+
+
+def line(surface, color, a, b, width=1):
+    pg.draw.line(surface, color, a, b, width)
+
+
+def circle(surface, color, pos, radius, width=0):
+    pg.draw.circle(surface, color, (int(pos[0]), int(pos[1])), max(1, int(radius)), width)
+
+
+def polygon(surface, color, points, width=0):
+    pg.draw.polygon(surface, color, [(int(x), int(y)) for x, y in points], width)
+
+
+@lru_cache(maxsize=120)
+def font(size, bold=False, serif=False):
+    return pg.font.SysFont('cambria' if serif else 'segoeui', size, bold=bold)
+
+
+def text(surface, value, pos, size=20, color=PAPER, bold=False, anchor='topleft', serif=False):
+    image = font(size, bold, serif).render(str(value), True, color)
+    bounds = image.get_rect(**{anchor: (int(pos[0]), int(pos[1]))})
+    surface.blit(image, bounds)
+    return bounds
+
+
+def tracked(surface, value, pos, size=13, color=MUTED, spacing=3):
+    x, y = pos
+    f = font(size, True)
+    for ch in value:
+        glyph = f.render(ch, True, color)
+        surface.blit(glyph, (x, y))
+        x += glyph.get_width() + spacing
+    return x
+
+
+@lru_cache(maxsize=64)
+def glow_image(radius, color):
+    size = radius * 2 + 2
+    s = pg.Surface((size, size), pg.SRCALPHA)
+    for r in range(radius, 0, -3):
+        alpha = int(28 * (1 - r / radius) ** 1.3)
+        circle(s, (*color, alpha), (radius + 1, radius + 1), r)
+    return s
+
+
+def glow(surface, pos, radius=60, color=CYAN):
+    surface.blit(glow_image(radius, color), (int(pos[0] - radius), int(pos[1] - radius)))
+
+
+def diamond(surface, pos, size, color, filled=True):
+    x, y = pos
+    polygon(surface, color, [(x, y-size), (x+size*.65, y), (x, y+size), (x-size*.65, y)], 0 if filled else 1)
+
+
+def clock_icon(surface, x, y, radius=16, color=CYAN, time=0):
+    circle(surface, color, (x, y), radius, 2)
+    line(surface, color, (x, y), (x+math.sin(time)*radius*.55, y-math.cos(time)*radius*.55), 2)
+    line(surface, color, (x, y), (x-radius*.37, y-radius*.25), 2)
+    for angle in range(0, 360, 90):
+        a = math.radians(angle)
+        line(surface, color, (x+math.cos(a)*(radius-3), y+math.sin(a)*(radius-3)),
+             (x+math.cos(a)*(radius-6), y+math.sin(a)*(radius-6)), 1)
+
+
+def fern(surface, x, y, scale, color, flip=1):
+    # Curved stem with alternating cut-paper leaflets.
+    tip = (x + 28*scale*flip, y - 87*scale)
+    line(surface, color, (x, y), tip, max(1, int(3*scale)))
+    for i in range(1, 9):
+        t = i/10
+        bx = x + 28*scale*flip*t
+        by = y - 87*scale*t
+        length = 27*scale*math.sin(t*math.pi)
+        for side in (-1, 1):
+            polygon(surface, color, [(bx, by+4*scale), (bx+side*length, by-16*scale),
+                                     (bx+side*length*.6, by-19*scale), (bx, by-3*scale)])
+
+
+def tree(surface, x, base, height, color, kind='jungle'):
+    if kind == 'jungle':
+        polygon(surface, color, [(x-10, base), (x+12, base), (x+5, base-height), (x-4, base-height)])
+        for side in (-1, 1):
+            for j in range(4):
+                top = base-height+18+j*18
+                reach = (75-j*8)*side
+                polygon(surface, color, [(x, top), (x+reach*.7, top-24), (x+reach, top+10),
+                                         (x+reach*.6, top-2), (x, top+12)])
+    else:
+        rect(surface, color, (x-4, base-height*.7, 8, height*.7))
+        for j in range(4):
+            yy = base-height+j*height*.17
+            half = height*(.16+j*.035)
+            polygon(surface, color, [(x, yy), (x-half, yy+height*.37), (x+half, yy+height*.37)])
+
+
+class Artist:
+    def __init__(self):
+        self.backgrounds = {}
+        self.tiles = {}
+        self.vignette = pg.Surface((W, H), pg.SRCALPHA)
+        # Soft edges, without dimming the playable centre.
+        for n in range(110):
+            alpha=int(42*(1-n/110)**2)
+            line(self.vignette,(5,12,20,alpha),(n,0),(n,H))
+            line(self.vignette,(5,12,20,alpha),(W-1-n,0),(W-1-n,H))
+        for n in range(60):
+            line(self.vignette,(5,12,20,int(35*(1-n/60))),(0,H-1-n),(W,H-1-n))
+        self.menu_shade = pg.Surface((W, H), pg.SRCALPHA)
+        for x in range(W):
+            alpha = int(230 * max(0, 1-x/W) ** .55)
+            line(self.menu_shade, (8, 17, 25, alpha), (x, 0), (x, H))
+
+    def background(self, surface, index, camera, time):
+        era = ERAS[index]
+        if index not in self.backgrounds:
+            sky = pg.Surface((W, H))
+            for y in range(H):
+                line(sky, mix(era.sky, era.horizon, min(1, y/640)), (0, y), (W, y))
+            rng = random.Random(106+index)
+            for _ in range(90):
+                x, y = rng.randrange(W), rng.randrange(30, 370)
+                circle(sky, mix(era.sky, PAPER, rng.uniform(.12, .38)), (x, y), 1)
+            self.backgrounds[index] = sky
+        surface.blit(self.backgrounds[index], (0, 0))
+        sunx = 930 - camera*.035
+        suny = 190 if index != 3 else 156
+        glow(surface, (sunx, suny), 160, era.accent)
+        circle(surface, mix(era.accent, era.horizon, .35), (sunx, suny), 59 if index != 1 else 48)
+        if index == 3:
+            circle(surface, mix(era.sky, era.horizon, .13), (sunx+20, suny-13), 52)
+        # Clouds are thin, long torn shapes instead of repeating image rectangles.
+        for j in range(6):
+            x = ((j*311-camera*.06+time*(2+j%3)) % 1650)-200
+            y = 135+j%3*55
+            color = mix(era.horizon, era.sky, .5)
+            polygon(surface, color, [(x,y+8), (x+45,y), (x+103,y+4), (x+155,y-5), (x+240,y+8)])
+        if era.kind=='ice':
+            aurora=pg.Surface((W,300),pg.SRCALPHA)
+            for band in range(3):
+                points=[(x,130+band*29+math.sin(x*.005+time*.12+band)*38) for x in range(-20,W+40,25)]
+                points += [(x,y+12+band*7) for x,y in reversed(points)]
+                polygon(aurora,(115,222,206,16-band*3),points)
+            surface.blit(aurora,(0,25))
+        landmark_x=1040-camera*.17
+        landmark_color=mix(era.far,era.horizon,.12)
+        if era.kind=='jungle':
+            # A distant sauropod makes the first world's scale immediately clear.
+            x,y=landmark_x,437
+            pg.draw.ellipse(surface,landmark_color,(int(x-72),int(y-43),137,61))
+            for dx in (-43,-21,31,48):
+                line(surface,landmark_color,(x+dx,y),(x+dx-8,y+62),10)
+            line(surface,landmark_color,(x+45,y-19),(x+72,y-110),22)
+            line(surface,landmark_color,(x+72,y-110),(x+65,y-151),17)
+            pg.draw.ellipse(surface,landmark_color,(int(x+55),int(y-163),41,19))
+            polygon(surface,landmark_color,[(x-60,y-30),(x-157,y-10),(x-62,y-8)])
+        elif era.kind=='ruins':
+            x,y=landmark_x,443
+            rect(surface,landmark_color,(x-132,y-113,264,150))
+            polygon(surface,landmark_color,[(x-156,y-113),(x,y-208),(x+156,y-113)])
+            polygon(surface,mix(landmark_color,era.horizon,.12),[(x-115,y-132),(x,y-193),(x+115,y-132)])
+            for n in range(6):
+                rect(surface,era.far,(x-108+n*40,y-98,15,125))
+        elif era.kind=='factory':
+            x,y=landmark_x,387
+            for n in range(12):
+                a=n*math.tau/12+time*.025
+                points=[]
+                for rr,aa in ((63,a-.1),(87,a-.1),(87,a+.1),(63,a+.1)):
+                    points.append((x+math.cos(aa)*rr,y+math.sin(aa)*rr))
+                polygon(surface,landmark_color,points)
+            circle(surface,landmark_color,(x,y),68,18)
+            circle(surface,landmark_color,(x,y),17)
+            for n in range(6):
+                a=n*math.tau/6+time*.025
+                line(surface,landmark_color,(x,y),(x+math.cos(a)*62,y+math.sin(a)*62),7)
+        for layer, (factor, base, color) in enumerate(((.12,480,era.far), (.27,555,era.near))):
+            offset = camera*factor
+            first = int(offset//320)-1
+            for n in range(first, first+7):
+                rng = random.Random(n*177+layer*47+index*2301)
+                x = n*320-offset
+                peak = base-rng.randint(110,245)
+                polygon(surface, color, [(x-80, H), (x-60,base-20), (x+60,peak+44),
+                                         (x+140,peak), (x+200,peak+55), (x+350,base-20), (x+410,H)])
+                if era.kind == 'ice':
+                    polygon(surface, mix(color, era.top, .35), [(x+60,peak+44), (x+140,peak),
+                        (x+205,peak+58), (x+148,peak+37), (x+118,peak+64), (x+99,peak+47)])
+                if era.kind in ('jungle', 'ice', 'castle'):
+                    for j in range(3):
+                        tree(surface, x+j*110, base+30, rng.randint(100,210), color,
+                             'jungle' if era.kind == 'jungle' else 'pine')
+                elif era.kind == 'ruins':
+                    for j in range(3):
+                        xx = x+j*90
+                        height = rng.randint(110,200)
+                        rect(surface, color, (xx, base-height, 20, height+150))
+                        rect(surface, color, (xx-7, base-height, 34, 13))
+                    rect(surface, color, (x-15, base-190, 230, 18))
+                elif era.kind == 'factory':
+                    for j in range(3):
+                        xx, yy = x+j*93, base-rng.randint(90,170)
+                        rect(surface, color, (xx, yy, 85, 300))
+                        rect(surface, color, (xx+20, yy-75, 16, 90))
+                        for wy in range(int(yy+18), int(base), 30):
+                            rect(surface, mix(color, era.accent, .2), (xx+14, wy, 9, 14))
+                            rect(surface, mix(color, era.accent, .15), (xx+50, wy, 9, 14))
+            if era.kind == 'castle':
+                for n in range(first, first+6):
+                    x = n*430-offset
+                    by = 460+layer*45
+                    rect(surface, color, (x,by-180,64,300))
+                    polygon(surface, color, [(x-12,by-180), (x+32,by-246), (x+76,by-180)])
+                    rect(surface, color, (x+64,by-100,150,200))
+                    for j in range(6):
+                        rect(surface, color, (x+60+j*29,by-116,17,25))
+                    rect(surface, mix(color, era.accent, .3), (x+27,by-151,10,26), 5)
+        # Slowly drifting mote field gives each era a different atmosphere.
+        for i in range(26):
+            x = (i*137.31 - camera*.4 + math.sin(time*.2+i)*22) % W
+            y = (i*89.4 + time*(13 if index == 1 else -5)) % 650
+            brightness = .3+.22*math.sin(time+i)
+            circle(surface, mix(era.near, era.accent, brightness), (x,y), 2 if i%4==0 else 1)
+
+    def platform_image(self, p, index):
+        era = ERAS[index]
+        key = (index, int(p.rect.w), int(p.rect.h), int(p.origin), p.moving)
+        if key in self.tiles:
+            return self.tiles[key]
+        width, height = int(p.rect.w), int(p.rect.h)
+        s = pg.Surface((width, height+18), pg.SRCALPHA)
+        rng = random.Random(int(p.origin)+index*31)
+        if p.moving:
+            polygon(s, era.rock, [(0,0),(width,0),(width-14,20),(14,20)])
+            rect(s, era.accent, (0,0,width,3))
+            rect(s, era.near, (12,7,width-24,6))
+            for x in range(20,width-10,20):
+                diamond(s,(x,11),3,CYAN)
+        else:
+            polygon(s, era.rock, [(0,0),(width,0),(width,height-9),(width-12,height),
+                                  (17,height),(0,height-12)])
+            # Wide facets, stratified seams and sparse mineral flecks.
+            for _ in range(max(3, width//55)):
+                x = rng.randrange(width)
+                y = rng.randrange(9,max(10,height))
+                col = mix(era.rock, era.near, rng.uniform(.15,.7))
+                polygon(s,col,[(x,y),(min(width,x+60),y-5),(min(width,x+34),min(height,y+40))])
+            for y in range(37,height,38):
+                line(s, mix(era.rock, INK,.2), (0,y),(width,y+9),2)
+            rect(s, mix(era.top, era.rock,.5),(0,5,width,9))
+            rect(s, era.top,(0,0,width,5))
+            for x in range(4,width-4,12):
+                if era.kind == 'jungle':
+                    line(s, era.top,(x,3),(x+rng.randint(-5,5),-rng.randint(0,6)),2)
+                    if rng.random()<.22:
+                        line(s,mix(era.top,era.rock,.45),(x,7),(x-2,20),2)
+                elif era.kind == 'ice':
+                    if rng.random()<.35:
+                        polygon(s,era.top,[(x,6),(x+8,6),(x+3,rng.randint(13,24))])
+                elif era.kind in ('ruins','castle'):
+                    line(s,mix(era.rock,INK,.35),(x+6,6),(x+6,14))
+            for _ in range(width//28):
+                x,y = rng.randrange(width), rng.randrange(12,max(13,height))
+                line(s, mix(era.rock,era.top,.2),(x,y),(x+4,y))
+        self.tiles[key] = s
+        return s
+
+    def scenery(self, surface, world, camera, time):
+        era = ERAS[world.index]
+        if world.index==0:
+            for wx,label in ((315,'ESPACIO · MANTÉN PARA SALTAR'),(682,'SHIFT · IMPULSO TEMPORAL')):
+                if abs(world.player.rect.centerx-wx)<280:
+                    text(surface,label,(wx-camera,351),11,mix(era.accent,PAPER,.3),True,'center')
+        # Landmarks live in world space, and never obscure hazards or pickups.
+        for n, wx in enumerate((190, 870, 1720, 2520, 3400, 4170)):
+            x = wx-camera
+            if x < -250 or x > W+250:
+                continue
+            if era.kind == 'jungle':
+                tree(surface,x,584,230+n%2*60,mix(era.near,era.rock,.5))
+                fern(surface,x+40,584,.8,era.near,-1)
+            elif era.kind == 'ice':
+                polygon(surface,mix(era.near,era.top,.19),[(x-30,584),(x-10,438),(x+35,399),(x+61,584)])
+                polygon(surface,mix(era.near,era.top,.28),[(x-10,438),(x+35,399),(x+15,584)])
+            elif era.kind == 'ruins':
+                rect(surface,mix(era.rock,era.top,.15),(x,386,30,198))
+                rect(surface,mix(era.rock,era.top,.25),(x-12,380,54,20))
+                rect(surface,mix(era.rock,era.top,.2),(x-8,565,46,19))
+                for j in range(3):
+                    line(surface,era.rock,(x+7+j*7,410),(x+7+j*7,555),2)
+            elif era.kind == 'castle':
+                rect(surface,era.near,(x,405,12,179))
+                polygon(surface,mix(era.accent,era.near,.45),[(x+12,407),(x+73,413),(x+54,447),(x+12,442)])
+                circle(surface,era.accent,(x+38,427),5,1)
+            else:
+                rect(surface,era.near,(x,429,15,155))
+                line(surface,era.near,(x+7,429),(x+42,429),6)
+                rect(surface,era.accent,(x+29,434,24,28),5)
+                glow(surface,(x+41,447),55,era.accent)
+        for p in world.platforms:
+            r=p.rect
+            if r.right < camera-20 or r.left > camera+W+20:
+                continue
+            surface.blit(self.platform_image(p,world.index),(int(r.x-camera),int(r.y)))
+            if p.moving:
+                glow(surface,(r.centerx-camera,r.y+13),40,CYAN)
+        for i in range(4):
+            a=world.platforms[i].rect
+            b=world.platforms[i+1].rect
+            midpoint=(a.right+b.left)/2-camera
+            glow(surface,(midpoint,735),95,era.near)
+        for n, (wx, wy) in enumerate(world.data['checkpoints']):
+            x=wx-camera
+            active = n <= world.checkpoint
+            color=CYAN if active else era.accent
+            rect(surface,era.rock,(x-18,wy-8,36,8))
+            rect(surface,mix(era.rock,era.top,.5),(x-6,wy-77,12,70),3)
+            circle(surface,color,(x,wy-79),15,2)
+            clock_icon(surface,x,wy-79,10,color,time if active else 0)
+            if active:
+                glow(surface,(x,wy-79),65,CYAN)
+            elif abs(world.player.rect.centerx-wx)<160:
+                text(surface,'ANCLA TEMPORAL',(x,wy-110),11,color,True,'center')
+        for hazard in world.hazards:
+            x,y=hazard.x-camera,hazard.y
+            for xx in range(0,int(hazard.w)-6,13):
+                polygon(surface,(205,108,105),[(x+xx,y+14),(x+xx+6,y-2),(x+xx+13,y+14)])
+                line(surface,(243,165,135),(x+xx+6,y),(x+xx+10,y+10))
+        for i,(wx,wy) in enumerate(world.data['echoes']):
+            if i in world.echoes:
+                continue
+            x,y=wx-camera,wy+math.sin(time*2.8+i)*4
+            if -30<x<W+30:
+                glow(surface,(x,y),21,era.accent)
+                circle(surface,era.accent,(x,y),5,1)
+                circle(surface,PAPER,(x,y),2)
+        for i,(wx,wy) in enumerate(world.data['shards']):
+            if i in world.shards:
+                continue
+            x,y=wx-camera,wy+math.sin(time*2+i)*6
+            if -50<x<W+50:
+                glow(surface,(x,y),54,CYAN)
+                diamond(surface,(x,y),17,CYAN)
+                diamond(surface,(x,y),11,(210,255,235))
+                line(surface,(31,112,112),(x,y-10),(x,y+10),1)
+                for j in range(3):
+                    angle=time+j*math.tau/3
+                    circle(surface,CYAN,(x+math.cos(angle)*26,y+math.sin(angle)*18),1)
+        px,py=world.data['portal']
+        self.portal(surface,px-camera,py,time,len(world.shards)==3)
+        if abs(world.player.rect.centerx-px)<250:
+            text(surface,'AL PRESENTE' if world.index==4 else 'SIGUIENTE ÉPOCA',(px-camera,py-166),12,CYAN,True,'center')
+            text(surface,f'{len(world.shards)} / 3 fragmentos',(px-camera,py-144),13,PAPER,False,'center')
+
+    def portal(self,surface,x,y,time,active=True,scale=1):
+        color=CYAN if active else (107,137,138)
+        cx,cy=x,y-69*scale
+        glow(surface,(cx,cy),int(120*scale),color)
+        for side in (-1,1):
+            polygon(surface,(34,49,56),[(x+side*43*scale,y),(x+side*57*scale,y-26*scale),
+                (x+side*48*scale,y-118*scale),(x+side*28*scale,y-143*scale),
+                (x+side*36*scale,y-98*scale),(x+side*32*scale,y)])
+            line(surface,color,(x+side*44*scale,y-25*scale),(x+side*39*scale,y-110*scale),max(1,int(2*scale)))
+        pg.draw.ellipse(surface,color,pg.Rect(x-34*scale,y-132*scale,68*scale,127*scale),max(1,int(3*scale)))
+        pg.draw.ellipse(surface,mix(color,PAPER,.4),pg.Rect(x-28*scale,y-126*scale,56*scale,115*scale),1)
+        for j in range(18):
+            a=j*math.tau/18+time*.3
+            xx=cx+math.cos(a)*25*scale
+            yy=cy+math.sin(a)*52*scale
+            circle(surface,color,(xx,yy),2*scale)
+        if active:
+            for i in range(8):
+                a=time*.8+i*2.4
+                xx=cx+math.sin(a)*19*scale
+                yy=cy+math.cos(a*.7)*45*scale
+                line(surface,mix(color,PAPER,.2),(xx,yy),(xx,yy+6*scale),1)
+        rect(surface,(35,48,53),(x-62*scale,y-7*scale,124*scale,12*scale),3)
+        diamond(surface,(x,y-143*scale),9*scale,color)
+
+    def player(self,surface,player,camera,time,scale=1,override=None,ghost=False):
+        # The body is drawn in a local 76 x 90 canvas and flipped as a whole.
+        s=pg.Surface((82,94),pg.SRCALPHA)
+        running=abs(player.vx)>30 and player.grounded
+        phase=player.anim*2.4
+        bob=math.sin(phase*2)*1.5 if running else math.sin(time*2)*1.0
+        jump=not player.grounded
+        y=22+bob
+        dark=(30,42,53)
+        coat=(222,218,189)
+        shadow=(156,168,155)
+        if ghost:
+            coat=CYAN
+        # Trailing scarf uses time and velocity, including a soft idle flutter.
+        length=32 if abs(player.vx)>100 else 22
+        wave=math.sin(time*12)*4
+        polygon(s,(197,82,60),[(35,y+14),(21,y+17),(max(0,21-length),y+8+wave),
+                              (9,y+23+wave),(32,y+23)])
+        polygon(s,(240,137,84),[(33,y+13),(22,y+15),(6,y+11+wave),(19,y+19),(33,y+19)])
+        # Backpack, far arm, articulated legs and boots.
+        rect(s,(101,101,85),(21,y+21,13,22),4)
+        rect(s,(60,74,76),(19,y+23,6,16),2)
+        leg_swing=math.sin(phase)*10 if running else 0
+        for n,dx in enumerate((-1,1)):
+            swing=leg_swing*dx
+            knee=(36+dx*6+swing*.6,y+47-(4 if jump else 0))
+            foot=(36+dx*7+swing,y+58-(7 if jump and n==0 else 0))
+            line(s,dark,(35+dx*5,y+35),knee,8)
+            line(s,dark,knee,foot,7)
+            rect(s,(44,49,53),(foot[0]-4,foot[1]-3,13,7),2)
+            line(s,(134,126,105),(foot[0]-3,foot[1]+3),(foot[0]+8,foot[1]+3),1)
+        polygon(s,coat,[(28,y+16),(44,y+17),(48,y+39),(26,y+39)])
+        polygon(s,shadow,[(28,y+19),(34,y+21),(32,y+38),(26,y+39)])
+        line(s,(115,125,116),(38,y+20),(39,y+34),2)
+        rect(s,(78,82,75),(28,y+33,19,5),1)
+        rect(s,(214,172,104),(35,y+33,5,5),1)
+        # Head / wind-tossed dark hair / visible eye.
+        rect(s,(228,178,135),(32,y-3,17,19),5)
+        polygon(s,(45,46,49),[(29,y+4),(29,y-5),(34,y-10),(40,y-7),(49,y-9),
+                              (51,y-2),(47,y+4),(38,y),(36,y+7),(32,y+8)])
+        rect(s,(244,199,150),(46,y+6,5,5),1)
+        rect(s,(33,43,48),(45,y+4,3,3))
+        rect(s,(236,139,85),(30,y+13,19,6),2)
+        handx=49+(6 if player.dash_time>0 else math.sin(phase)*3 if running else 0)
+        line(s,coat,(43,y+21),(handx,y+30),8)
+        line(s,shadow,(handx,y+30),(handx+2,y+38),7)
+        rect(s,(40,87,91),(handx-3,y+30,9,8),2)
+        rect(s,CYAN,(handx-2,y+31,7,4),1)
+        rect(s,(225,180,137),(handx,y+38,6,6),2)
+        if player.facing<0:
+            s=pg.transform.flip(s,True,False)
+        if ghost:
+            s.set_alpha(60)
+        elif player.invincible>0 and int(time*14)%2:
+            s.set_alpha(100)
+        if scale!=1:
+            s=pg.transform.scale(s,(int(82*scale),int(94*scale)))
+        if override:
+            x,by=override
+        else:
+            x=player.rect.centerx-camera
+            by=player.rect.bottom
+        surface.blit(s,(int(x-40*scale),int(by-83*scale)))
+        if not ghost:
+            glow(surface,(x+(14 if player.facing>0 else -14)*scale,by-24*scale),int(23*scale),CYAN)
+
+    def enemy(self,surface,enemy,camera,time,index):
+        if not enemy.alive:
+            return
+        x,y=enemy.rect.centerx-camera,enemy.rect.bottom
+        if not -80<x<W+80:
+            return
+        color=ERAS[index].accent
+        dark=(39,47,51)
+        body=mix(ERAS[index].near,ERAS[index].top,.35)
+        gait=math.sin(time*10+enemy.left)*5
+        # Temporal wildlife: dinosaur, tusked beast, scarab, raven, automaton.
+        for dx in (-13,12):
+            line(surface,dark,(x+dx,y-14),(x+dx+gait*(1 if dx<0 else -1),y-2),6)
+        pg.draw.ellipse(surface,body,(int(x-24),int(y-32),45,24))
+        face=x+enemy.direction*20
+        rect(surface,body,(face-10,y-33,20,17),4)
+        line(surface,color,(face+enemy.direction*2,y-27),(face+enemy.direction*8,y-27),3)
+        if index==0:
+            polygon(surface,body,[(x-enemy.direction*17,y-19),(x-enemy.direction*40,y-37),(x-enemy.direction*27,y-12)])
+            for j in range(3):
+                polygon(surface,color,[(x-13+j*9,y-29),(x-9+j*9,y-39),(x-5+j*9,y-29)])
+        elif index==1:
+            line(surface,PAPER,(face+enemy.direction*7,y-20),(face+enemy.direction*12,y-11),3)
+            polygon(surface,body,[(face-8,y-30),(face-5,y-44),(face+2,y-30)])
+        elif index==2:
+            pg.draw.ellipse(surface,color,(int(x-14),int(y-34),28,22),2)
+            line(surface,color,(x,y-33),(x,y-13),2)
+        elif index==3:
+            polygon(surface,body,[(x-18,y-22),(x-31,y-50+gait),(x+6,y-30)])
+            polygon(surface,color,[(face+enemy.direction*8,y-28),(face+enemy.direction*19,y-22),(face+enemy.direction*8,y-21)])
+        else:
+            circle(surface,color,(x,y-23),10,2)
+            circle(surface,INK,(x,y-23),4)
+            line(surface,color,(face,y-33),(face,y-41),2)
+            circle(surface,CYAN,(face,y-42),3)
+
+    def foreground(self,surface,world,camera):
+        era=ERAS[world.index]
+        for n,wx in enumerate((65,580,1090,1440,1810,2290,2660,3060,3490,4120,4490)):
+            x=wx-camera
+            if -80<x<W+80:
+                if era.kind=='jungle':
+                    fern(surface,x,599,.65, mix(era.rock,era.top,.32),-1 if n%2 else 1)
+                elif era.kind=='ice':
+                    for dx in (-6,6):
+                        polygon(surface,era.top,[(x+dx,588),(x+dx+4,566-abs(dx)),(x+dx+10,588)])
+                else:
+                    for j in range(4):
+                        line(surface,mix(era.rock,era.top,.45),(x+j*5,588),(x+j*7,572+j%3*4),2)
+        surface.blit(self.vignette,(0,0))
+
+    def scene(self,surface,world,camera,time):
+        self.background(surface,world.index,camera,time)
+        self.scenery(surface,world,camera,time)
+        for enemy in world.enemies:
+            self.enemy(surface,enemy,camera,time,world.index)
+        p=world.player
+        if p.dash_time>0:
+            for n in (3,2,1):
+                self.player(surface,p,camera+p.facing*n*26,time,ghost=True)
+        self.player(surface,p,camera,time)
+        self.foreground(surface,world,camera)

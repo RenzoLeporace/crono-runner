@@ -1,0 +1,20 @@
+BANCO DE PREGUNTAS DE LA ESCUELA
+
+El juego incluye 180 preguntas iniciales. Para consultarlas y editarlas:
+Configuración > Ver y editar preguntas.
+
+Al guardar por primera vez se crea preguntas.json en esta carpeta.
+Las preguntas añadidas o modificadas se usan inmediatamente en la partida,
+según el mapa, archivo educativo y edad elegidos por el docente.
+
+El progreso del alumno está separado, en saves/progreso.json.
+Empezar un viaje nuevo no borra las preguntas personalizadas.
+
+Cada modificación de un banco ya guardado crea una copia previa en respaldos/.
+El botón Crear respaldo también permite guardar una copia manual.
+
+Para compartir un banco con otras computadoras, cierra el juego y copia
+preguntas.json en la carpeta contenido del otro juego. Conserva antes una
+copia de su banco anterior. No edites el archivo mientras el juego esté abierto.
+
+La distribución original no incluye partidas de alumnos ni bancos personalizados.
