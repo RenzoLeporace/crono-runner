@@ -1,6 +1,6 @@
 """Original age-graded question bank. Facts are paraphrased from cited museums.
 
-Each of 30 topics has six authored questions: two per age band, 180 total.
+Each of 48 topics has six authored questions: two per age band, 288 total.
 The correct answer's position is randomised at runtime, never encoded in the UI.
 """
 from dataclasses import dataclass
@@ -346,7 +346,8 @@ UPGRADES=[
 
 
 def next_level(era,stage):
-    return min(14,era*3+stage+1)
+    from .campaign import MAIN_LEVELS,TOTAL_LEVELS
+    return min(TOTAL_LEVELS-1 if era==7 else MAIN_LEVELS-1,era*3+stage+1)
 
 
 assert len(LESSONS)==30 and sum(len(x.questions) for x in LESSONS)==180
@@ -386,4 +387,10 @@ EASY_FACTS=(
 
 
 def fact_for(topic,band):
-    return EASY_FACTS[topic] if band==0 else LESSONS[topic].fact
+    return EASY_FACTS[topic] if band==0 and topic<len(EASY_FACTS) else LESSONS[topic].fact
+
+
+from .expansion_content import extend_content
+extend_content(Stage,lesson,STAGES,LESSONS,SOURCES)
+
+assert len(STAGES)==24 and len(LESSONS)==48

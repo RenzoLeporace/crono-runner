@@ -1,4 +1,4 @@
-CRONO · Ecos del tiempo — Beta educativa 0.4
+CRONO · Ecos del tiempo — Beta educativa 0.5
 
 El código, los mapas, el arte procedural y los sonidos nuevos están incluidos
 en este proyecto para que puedas modificarlos. Los recursos del prototipo

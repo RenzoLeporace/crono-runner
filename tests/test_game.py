@@ -122,13 +122,13 @@ class PhysicsTests(unittest.TestCase):
 
     def test_checkpoint_restores_health_and_spawn(self):
         w=self.world
-        w.player.rect.midbottom=(1460,584)
+        w.player.rect.midbottom=w.data['checkpoints'][0]
         w.player.hp=1
         w.update(STEP,Controls())
         self.assertEqual(w.checkpoint,0)
         self.assertEqual(w.player.hp,3)
         w.respawn()
-        self.assertEqual(w.player.rect.midbottom,(1460,584))
+        self.assertEqual(w.player.rect.midbottom,w.data['checkpoints'][0])
 
     def test_invulnerability_prevents_repeated_damage(self):
         p=self.world.player
@@ -166,59 +166,23 @@ class PhysicsTests(unittest.TestCase):
 
 class CampaignTests(unittest.TestCase):
     def test_all_required_routes_reachable_with_real_jump_physics(self):
-        """Build a reachability graph from simulated jumps, including all solids.
-
-        Launches may use a run-up anywhere on a platform. This does not teleport a
-        player through a level: it checks geometric routes, separately from combat.
-        No dash or moving ferry is needed for any required fragment or the exit.
-        """
-        for level_id in range(15):
-            era,stage=divmod(level_id,3)
-            w=World(era,stage)
-            solids=[p for p in w.platforms if not p.moving]
-            model=SimpleNamespace(platforms=solids,width=w.width)
-            reachable={0}
-            changed=True
-            edges=0
-            while changed:
-                changed=False
-                for source_index in tuple(reachable):
-                    source=solids[source_index]
-                    candidates=[(i,t) for i,t in enumerate(solids) if i not in reachable
-                        and t.rect.top>=source.rect.top-115
-                        and t.rect.left<source.rect.right+240 and t.rect.right>source.rect.left-240]
-                    if not candidates:
-                        continue
-                    starts=list(range(int(source.rect.left),int(source.rect.right-28)+1,28))
-                    starts.append(source.rect.right-28)
-                    for sx in starts:
-                        for direction in (-1,0,1):
-                            p=Player((sx,source.rect.top-64))
-                            p.grounded=True
-                            p.support=source
-                            p.vx=direction*RUN
-                            for tick in range(160):
-                                p.update(STEP,Controls(direction,tick==0,True),model)
-                                if p.grounded:
-                                    landed=solids.index(p.support)
-                                    if landed not in reachable:
-                                        reachable.add(landed)
-                                        edges+=1
-                                        changed=True
-                                    break
-                                if p.rect.top>800:
-                                    break
-            for x,y in w.data['shards']:
-                holders=[i for i,p in enumerate(solids) if p.rect.left<=x<=p.rect.right and 0<p.rect.top-y<60]
-                self.assertTrue(any(i in reachable for i in holders),f'Fragment {(x,y)} unreachable in era {era}; nodes={reachable}')
-            self.assertIn(4,reachable,f'Exit island unreachable in era {era}')
-            self.assertEqual(len(w.data['echoes']),17)
-            print(f'Map {era+1}.{stage+1}: all fragments and exit reachable; {len(reachable)}/{len(solids)} surfaces, {edges} links')
+        from route_probe import probe_route
+        for level_id in range(24):
+            world=World(*divmod(level_id,3))
+            reachable,failed=probe_route(world)
+            for x,y in world.data['shards']:
+                holders=[i for i,p in enumerate(world.platforms) if p.rect.left<=x<=p.rect.right and 0<p.rect.top-y<60]
+                self.assertTrue(any(i in reachable for i in holders),f'Map {level_id}, fragment {(x,y)}, failed {failed}')
+            self.assertTrue(all(i in reachable for i in world.data['main_nodes']),f'Map {level_id}: main route blocked: {failed}')
+            for x,y,topic in world.data['stations']:
+                self.assertTrue(any(i in reachable and p.rect.left<=x<=p.rect.right and p.rect.top==y for i,p in enumerate(world.platforms)))
+            self.assertEqual(len(world.data['echoes']),48)
+            print(f'Map {level_id+1}: mandatory route and three branched fragments reachable',flush=True)
 
     def test_campaign_unlocks_all_five_eras_and_ending(self):
         with tempfile.TemporaryDirectory(dir=TEMP_ROOT) as folder:
             save=Save(Path(folder)/'progress.json')
-            for level_id in range(15):
+            for level_id in range(21):
                 era,stage=divmod(level_id,3)
                 w=World(era,stage)
                 w.shards={0,1,2}
@@ -229,7 +193,7 @@ class CampaignTests(unittest.TestCase):
                 w.update(STEP,Controls())
                 self.assertTrue(w.complete)
                 save.completed(w)
-                self.assertEqual(save.data['unlocked'],min(14,level_id+1))
+                self.assertEqual(save.data['unlocked'],min(20,level_id+1))
             self.assertTrue(Save(save.path).data['finished'])
 
 
@@ -249,7 +213,7 @@ class SaveTests(unittest.TestCase):
             self.assertEqual(restored.echoes,w.echoes)
             self.assertEqual(restored.checkpoint,1)
             self.assertFalse(restored.enemies[0].alive)
-            self.assertEqual(restored.player.rect.bottom,584)
+            self.assertEqual(restored.player.rect.bottom,w.data['checkpoints'][1][1])
 
     def test_corrupt_save_is_recoverable(self):
         with tempfile.TemporaryDirectory(dir=TEMP_ROOT) as folder:
@@ -320,7 +284,7 @@ class InterfaceTests(unittest.TestCase):
 
     def test_final_portal_reaches_ending_and_continue_returns_there(self):
         game=self.game
-        game.world=World(4,2)
+        game.world=World(6,2)
         game.world.shards={0,1,2}
         game.world.boss.alive=False
         game.world.boss.hp=0

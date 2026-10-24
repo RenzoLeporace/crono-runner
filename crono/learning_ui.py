@@ -1,7 +1,7 @@
 """Educational overlays, age selection, workshop and an illustrated field guide."""
 import random
 import webbrowser
-from .education import AGE_BANDS, LESSONS, SOURCES, STAGES, UPGRADES, choose_question, fact_for
+from .education import AGE_BANDS, LESSONS, SOURCES, STAGES, UPGRADES, fact_for
 from .art import text, tracked, rect, line, circle, diamond, clock_icon, PAPER, MUTED, CYAN, GOLD, INK, W, H
 from .combat import ENEMY_NAMES, ENEMY_HINTS, BOSS_NAMES, BOSS_HINTS, Enemy
 
@@ -59,10 +59,11 @@ class LearningUI:
 
     def set_age(self,band):
         self.save.data['age_band']=band
+        self.world.set_difficulty(band)
         self.save.write()
 
     def age_switch(self,x,y,width=350):
-        tracked(self.canvas,'PREGUNTAS · EDAD',(x,y-22),10,MUTED,2)
+        tracked(self.canvas,'EDAD · PREGUNTAS Y COMBATE',(x,y-22),10,MUTED,2)
         for band,label in enumerate(('6–9 años','10–14 años','15+ años')):
             self.button(label,(x+band*(width+9)/3,y,(width-18)/3,34),lambda n=band:self.set_age(n),
                         primary=band==self.save.data['age_band'],small=True,arrow=False)
@@ -234,7 +235,7 @@ class LearningUI:
         self.educational_background()
         tracked(s,'LA MEMORIA DEL VIAJERO',(65,32),12,CYAN,3)
         text(s,'Cuaderno de campo',(62,65),41,PAPER,True,serif=True)
-        text(s,f'{len(self.save.data["solved"])} / 30 archivos resueltos',(1208,83),20,CYAN,True,'topright')
+        text(s,f'{len(self.save.data["solved"])} / {len(LESSONS)} archivos resueltos',(1208,83),20,CYAN,True,'topright')
         text(s,'La historia real se consulta aquí. Los enemigos y guardianes son ecos de ficción del reloj roto.',(65,125),15,MUTED)
         discovered=sorted(self.save.data['discovered'])
         pages=max(1,(len(discovered)+3)//4)
@@ -267,15 +268,17 @@ class LearningUI:
         for n,kind in enumerate(ENEMY_NAMES):
             x,y=65+n%3*390,146+n//3*155
             rect(s,(22,38,48),(x,y,365,135),6)
-            e=Enemy(dict(x=x+25,y=y+58,left=0,right=2000,kind=kind),n%5)
+            e=Enemy(dict(x=x+25,y=y+58,left=0,right=2000,kind=kind),self.world.index)
             if kind=='flyer':
                 e.rect.y+=100
-            self.artist.enemy(s,e,0,self.time,n%5)
+            self.artist.enemy(s,e,0,self.time,self.world.index)
             text(s,ENEMY_NAMES[kind],(x+95,y+23),21,PAPER,True)
             wrapped(s,ENEMY_HINTS[kind],(x+95,y+61),245,15,MUTED,leading=23)
-        for era in range(5):
-            y=474+era*25
-            text(s,f'{era+1}. {BOSS_NAMES[era]}',(65,y),16,GOLD,True)
-            text(s,BOSS_HINTS[era]+' Núcleo abierto: dispara F.',(420,y),15,MUTED)
+        from .campaign import ERA_LABELS
+        era=self.world.index
+        from .enemy_art import FAMILY_NAMES
+        text(s,FAMILY_NAMES[era],(65,466),22,CYAN,True)
+        text(s,BOSS_NAMES[era],(65,511),24,GOLD,True)
+        wrapped(s,BOSS_HINTS[era]+' Los perfiles mayores añaden salvas, marcas de caída y una fase más intensa.',(65,553),1120,17,MUTED)
         self.button('Volver',(65,638,200,47),lambda:self.set_state('notebook'),True,small=True)
         text(s,'Los ataques se anuncian. Aprender en el mapa del jefe prolonga su vulnerabilidad.',(1208,661),14,CYAN,False,'midright')

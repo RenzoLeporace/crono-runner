@@ -26,10 +26,10 @@ class EducationTests(unittest.TestCase):
     def tearDown(self):
         self.folder.cleanup()
 
-    def test_180_authored_questions_cover_every_age_and_map(self):
-        self.assertEqual(len(STAGES),15)
-        self.assertEqual(len(LESSONS),30)
-        self.assertEqual(sum(len(l.questions) for l in LESSONS),180)
+    def test_288_authored_questions_cover_every_age_and_map(self):
+        self.assertEqual(len(STAGES),24)
+        self.assertEqual(len(LESSONS),48)
+        self.assertEqual(sum(len(l.questions) for l in LESSONS),288)
         positions=set()
         for topic,lesson in enumerate(LESSONS):
             for band in range(3):
@@ -86,10 +86,10 @@ class EducationTests(unittest.TestCase):
         migrated.restore(w)
         self.assertEqual(w.shards,{0,2})
         self.assertEqual(w.echoes,{4,8})
-        self.assertEqual(w.checkpoint,1)
+        self.assertEqual(w.checkpoint,-1)
         migrated.capture(w)
         self.assertTrue(self.save.path.with_name('progress-v1-respaldo.json').exists())
-        self.assertEqual(Save(self.save.path).data['version'],2)
+        self.assertEqual(Save(self.save.path).data['version'],3)
 
     def test_profile_and_upgrades_persist_on_save_restore(self):
         self.save.data.update(age_band=0,knowledge=10)
@@ -157,11 +157,11 @@ class AbilityTests(unittest.TestCase):
 
     def test_every_map_mixes_three_or_more_enemy_archetypes(self):
         geometries=set()
-        for level_id in range(15):
+        for level_id in range(24):
             w=World(*divmod(level_id,3))
             self.assertGreaterEqual(len({e.kind for e in w.enemies}),3)
             geometries.add(tuple((p.rect.x,p.rect.y,p.rect.w) for p in w.platforms))
-        self.assertEqual(len(geometries),15)
+        self.assertEqual(len(geometries),24)
 
 
 class GuardianTests(unittest.TestCase):
@@ -183,7 +183,7 @@ class GuardianTests(unittest.TestCase):
 
     def test_arena_only_starts_after_required_fragments(self):
         w=World(2,2)
-        w.player.rect.midbottom=(4500,584)
+        w.player.rect.midbottom=(w.data['arena_left']+180,584)
         w.update(STEP,Controls())
         self.assertFalse(w.boss.active)
         w.shards={0,1,2}
@@ -201,16 +201,16 @@ class GuardianTests(unittest.TestCase):
 
     def test_every_guardian_can_be_defeated_without_upgrades(self):
         """Combat-only fixtures run actual AI, projectiles, damage and collisions."""
-        for era in range(5):
+        for era in range(8):
             w=World(era,2)
             w.enemies=[]
             w.hazards=[]
             w.shards={0,1,2}
-            w.player.rect.midbottom=(4490,584)
+            w.player.rect.midbottom=(w.data['arena_left']+170,584)
             for tick in range(120*100):
                 p=w.player
                 incoming=any(s.owner=='enemy' and s.vx<0 and 0<s.rect.centerx-p.rect.centerx<115
-                             and abs(s.rect.centery-p.rect.centery)<100 for s in w.projectiles)
+                             and s.rect.bottom>520 and s.rect.top<584 for s in w.projectiles)
                 w.update(STEP,Controls(jump=p.grounded and incoming,held=True,attack=True))
                 if not w.boss.alive:
                     break
@@ -291,7 +291,7 @@ class EducationalInterfaceTests(unittest.TestCase):
     def test_all_educational_screens_and_age_variants_render(self):
         g=self.game
         g.save.data['discovered']=list(range(30))
-        for level_id in range(15):
+        for level_id in range(24):
             g.world=World(*divmod(level_id,3))
             g.camera=900
             for state in ('play','intro','workshop','notebook','bestiary'):

@@ -34,17 +34,17 @@ class BankTests(unittest.TestCase):
         d.update(id=None,prompt='¿Cuál opción agregó la docente?',options=['Primera','Segunda','Tercera'],correct=1,explanation='La opción correcta de este ejemplo es Segunda.',source='Material de la docente')
         return d
 
-    def test_all_180_questions_and_correct_answers_visible_without_student_unlocks(self):
-        self.assertEqual(len(self.bank.filtered()),180)
+    def test_all_288_questions_and_correct_answers_visible_without_student_unlocks(self):
+        self.assertEqual(len(self.bank.filtered()),288)
         for q in self.bank.records:
             self.assertEqual(len(q['options']),3)
             self.assertTrue(q['options'][q['correct']])
 
     def test_add_reload_and_use_in_actual_random_pool(self):
         key=self.bank.upsert(self.draft())
-        self.assertEqual(key,180)
+        self.assertEqual(key,10108)
         loaded=QuestionBank(self.path)
-        self.assertEqual(len(loaded.records),181)
+        self.assertEqual(len(loaded.records),289)
         seen=set()
         for seed in range(60):
             q=loaded.choose(0,0,random.Random(seed))
@@ -203,15 +203,15 @@ class TeacherInterfaceTests(unittest.TestCase):
         g.edit_question(0,duplicate=True)
         g.teacher_fields[0].set_value('Una nueva pregunta para mi clase')
         g.save_question()
-        self.assertEqual(len(g.bank.records),181)
+        self.assertEqual(len(g.bank.records),289)
         self.assertEqual(g.save.data['knowledge'],0)
-        q=g.bank.get(180)
+        q=g.bank.get(10108)
         self.assertEqual(q['prompt'],'Una nueva pregunta para mi clase')
         g.save.data['age_band']=0
         g.question_history[(0,0)]=1
         g.set_state('play')
         g.open_lesson(0)
-        self.assertIn(g.question.id,(0,180))
+        self.assertIn(g.question.id,(0,10108))
 
     def test_cancel_and_window_close_protect_unsaved_work(self):
         g=self.game
@@ -296,12 +296,12 @@ class TeacherInterfaceTests(unittest.TestCase):
         g.render()
         g.teacher_picker=True
         g.render()
-        self.assertEqual(len(g.buttons),16)
+        self.assertEqual(len(g.buttons),25)
         g.teacher_picker=False
         g.teacher_discard=True
         g.render()
         self.assertEqual(len(g.buttons),2)
-        for level_id in range(15):
+        for level_id in range(24):
             g.preview_level=level_id
             g.change_scenario(0)
             g.state='scenarios'
@@ -311,9 +311,9 @@ class TeacherInterfaceTests(unittest.TestCase):
 
 class MapAppearanceTests(unittest.TestCase):
     def test_each_map_has_a_distinct_weather_or_visual_story(self):
-        self.assertEqual(len(MOODS),15)
-        self.assertEqual(len({m.weather for m in MOODS}),15)
-        self.assertEqual(len({(m.sky,m.horizon,m.weather) for m in MOODS}),15)
+        self.assertEqual(len(MOODS),24)
+        self.assertEqual(len({m.weather for m in MOODS}),24)
+        self.assertEqual(len({(m.sky,m.horizon,m.weather) for m in MOODS}),24)
         self.assertEqual(palette_for(0,2).kind,'ash')
         self.assertNotEqual(palette_for(0,0).top,palette_for(0,2).top)
         self.assertEqual(palette_for(1,1).kind,'cave')

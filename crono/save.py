@@ -4,7 +4,8 @@ import math
 import os
 from pathlib import Path
 import sys
-from .education import UPGRADES
+from .education import UPGRADES,LESSONS
+from .campaign import MAIN_LEVELS,TOTAL_LEVELS,DLC_START
 
 
 def save_path():
@@ -13,7 +14,8 @@ def save_path():
 
 
 def defaults():
-    return dict(version=2,unlocked=0,current=0,started=False,finished=False,
+    return dict(version=3,unlocked=0,current=0,started=False,finished=False,
+                dlc_unlocked=DLC_START,dlc_current=DLC_START,dlc_started=False,dlc_finished=False,dlc_progress=None,
                 sound=True,fullscreen=False,progress=None,records={},age_band=1,
                 knowledge=0,upgrades=[],solved=[],discovered=[])
 
@@ -31,25 +33,30 @@ class Save:
         try:
             raw_bytes=self.path.read_bytes()
             raw=json.loads(raw_bytes.decode('utf-8-sig'))
-            if not isinstance(raw,dict) or raw.get('version') not in (1,2):
+            if not isinstance(raw,dict) or raw.get('version') not in (1,2,3):
                 raise ValueError('Formato de guardado desconocido')
             legacy=raw.get('version')==1
-            if legacy:
+            if raw.get('version') in (1,2):
                 self.legacy_bytes=raw_bytes
             for key in ('unlocked','current'):
                 value=raw.get(key,0)
-                self.data[key]=max(0,min(14,value*(3 if legacy else 1))) if type(value) is int else 0
-            for key in ('started','finished','sound','fullscreen'):
+                self.data[key]=max(0,min(MAIN_LEVELS-1,value*(3 if legacy else 1))) if type(value) is int else 0
+            for key in ('dlc_unlocked','dlc_current'):
+                value=raw.get(key,DLC_START)
+                self.data[key]=max(DLC_START,min(TOTAL_LEVELS-1,value)) if type(value) is int else DLC_START
+            for key in ('started','finished','sound','fullscreen','dlc_started','dlc_finished'):
                 if type(raw.get(key)) is bool:
                     self.data[key]=raw[key]
             if legacy:
                 self.data['finished']=False
+            if raw.get('version')==2 and raw.get('finished'):
+                self.data.update(finished=False,current=15,unlocked=max(15,self.data['unlocked']))
             age=raw.get('age_band',1)
             self.data['age_band']=age if type(age) is int and 0<=age<3 else 1
             for key in ('solved','discovered'):
-                self.data[key]=valid_ids(raw.get(key,[]),30)
+                self.data[key]=valid_ids(raw.get(key,[]),len(LESSONS))
             knowledge=raw.get('knowledge',0)
-            self.data['knowledge']=max(0,min(60,knowledge)) if type(knowledge) is int else 0
+            self.data['knowledge']=max(0,min(len(LESSONS)*2,knowledge)) if type(knowledge) is int else 0
             upgrades=raw.get('upgrades',[])
             if isinstance(upgrades,list):
                 self.data['upgrades']=[u['id'] for u in UPGRADES if u['id'] in upgrades]
@@ -58,12 +65,15 @@ class Save:
             records=raw.get('records',{})
             if isinstance(records,dict):
                 self.data['records']={str(int(k)*3 if legacy else int(k)):v for k,v in records.items()
-                                      if str(k).isdigit() and 0<=int(k)<(5 if legacy else 15) and isinstance(v,dict)}
+                                      if str(k).isdigit() and 0<=int(k)<(5 if legacy else TOTAL_LEVELS) and isinstance(v,dict)}
             p=raw.get('progress')
-            if isinstance(p,dict) and type(p.get('index')) is int and 0<=p['index']<=4:
+            if isinstance(p,dict) and type(p.get('index')) is int and 0<=p['index']<7:
                 self.data['progress']=dict(p)
                 stage=p.get('stage',0)
                 self.data['progress']['stage']=stage if type(stage) is int and 0<=stage<3 else 0
+            p=raw.get('dlc_progress')
+            if isinstance(p,dict) and p.get('index')==7 and type(p.get('stage')) is int and 0<=p['stage']<3:
+                self.data['dlc_progress']=dict(p)
         except FileNotFoundError:
             pass
         except (OSError,ValueError,TypeError):
@@ -73,7 +83,8 @@ class Save:
         try:
             self.path.parent.mkdir(parents=True,exist_ok=True)
             if self.legacy_bytes is not None:
-                backup=self.path.with_name(self.path.stem+'-v1-respaldo.json')
+                version=json.loads(self.legacy_bytes.decode('utf-8-sig')).get('version',1)
+                backup=self.path.with_name(self.path.stem+f'-v{version}-respaldo.json')
                 if not backup.exists():
                     backup.write_bytes(self.legacy_bytes)
                 self.legacy_bytes=None
@@ -90,7 +101,7 @@ class Save:
             self.write()
 
     def answer(self,topic):
-        if type(topic) is not int or not 0<=topic<30 or topic in self.data['solved']:
+        if type(topic) is not int or not 0<=topic<len(LESSONS) or topic in self.data['solved']:
             return False
         self.data['solved'].append(topic)
         if topic not in self.data['discovered']:
@@ -111,10 +122,11 @@ class Save:
         return True
 
     def capture(self,world):
-        self.data.update(started=True,current=world.level_id)
+        dlc=world.level_id>=DLC_START
+        self.data.update(**({'dlc_started':True,'dlc_current':world.level_id} if dlc else {'started':True,'current':world.level_id}))
         self.data['upgrades']=sorted(world.upgrades)
         self.data['solved']=sorted(world.answered|set(self.data['solved']))
-        self.data['progress']=dict(index=world.index,stage=world.stage,shards=sorted(world.shards),
+        self.data['dlc_progress' if dlc else 'progress']=dict(layout_version=world.data['layout_version'],index=world.index,stage=world.stage,shards=sorted(world.shards),
             echoes=sorted(world.echoes),checkpoint=world.checkpoint,time=world.time,
             deaths=world.deaths,defeated=[i for i,e in enumerate(world.enemies) if not e.alive],
             enemy_hp=[e.hp if e.alive else 0 for e in world.enemies],boss_hp=world.boss.hp if world.boss else None)
@@ -124,8 +136,15 @@ class Save:
         world.upgrades=set(self.data['upgrades'])
         world.answered=set(self.data['solved'])
         world.player.configure(world.upgrades,True)
-        p=self.data.get('progress')
+        p=self.data.get('dlc_progress' if world.level_id>=DLC_START else 'progress')
         if not p or p.get('index')!=world.index or p.get('stage',0)!=world.stage:
+            return
+        if p.get('layout_version')!=world.data['layout_version']:
+            # Checkpoint/enemy IDs belonged to a different route. Keep learning,
+            # upgrades and the three already collected fragments, restart safely.
+            world.shards=set(valid_ids(p.get('shards',[]),3))
+            world.echoes=set(valid_ids(p.get('echoes',[]),len(world.data['echoes'])))
+            world.say('Ruta renovada: conservas fragmentos, ecos y mejoras. Recorre las nuevas anclas.')
             return
         for key,total in (('shards',3),('echoes',len(world.data['echoes']))):
             setattr(world,key,set(valid_ids(p.get(key,[]),total)))
@@ -153,11 +172,13 @@ class Save:
             world.boss.alive=world.boss.hp>0
 
     def completed(self,world):
-        self.data['unlocked']=max(self.data['unlocked'],min(14,world.level_id+1))
-        self.data['current']=min(14,world.level_id+1)
-        self.data['started']=True
-        self.data['progress']=None
-        self.data['finished']=world.level_id==14 or self.data['finished']
+        prefix='dlc_' if world.level_id>=DLC_START else ''
+        end=TOTAL_LEVELS-1 if prefix else MAIN_LEVELS-1
+        self.data[prefix+'unlocked']=max(self.data[prefix+'unlocked'],min(end,world.level_id+1))
+        self.data[prefix+'current']=min(end,world.level_id+1)
+        self.data[prefix+'started']=True
+        self.data[prefix+'progress']=None
+        self.data[prefix+'finished']=world.level_id==end or self.data[prefix+'finished']
         old=self.data['records'].get(str(world.level_id),{})
         previous=old.get('echoes',0)
         previous=previous if type(previous) is int else 0

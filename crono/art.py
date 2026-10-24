@@ -300,7 +300,7 @@ class Artist:
                 if abs(world.player.rect.centerx-wx)<280:
                     text(surface,label,(wx-camera,351),11,mix(era.accent,PAPER,.3),True,'center')
         # Landmarks live in world space, and never obscure hazards or pickups.
-        for n, wx in enumerate((190, 870, 1720, 2520, 3400, 4170)):
+        for n, wx in enumerate(range(190,int(world.width),740)):
             x = wx-camera
             if x < -250 or x > W+250:
                 continue
@@ -382,7 +382,7 @@ class Artist:
         px,py=world.data['portal']
         self.portal(surface,px-camera,py,time,len(world.shards)==3 and (not world.boss or not world.boss.alive))
         if abs(world.player.rect.centerx-px)<250:
-            text(surface,'AL PRESENTE' if world.level_id==14 else 'SIGUIENTE ÉPOCA' if world.stage==2 else 'SIGUIENTE MAPA',(px-camera,py-166),12,CYAN,True,'center')
+            text(surface,'AL PRESENTE' if world.level_id in (20,23) else 'SIGUIENTE ÉPOCA' if world.stage==2 else 'SIGUIENTE MAPA',(px-camera,py-166),12,CYAN,True,'center')
             label='Guardián por liberar' if world.boss and world.boss.alive else f'{len(world.shards)} / 3 fragmentos'
             text(surface,label,(px-camera,py-144),13,PAPER,False,'center')
 
@@ -478,73 +478,12 @@ class Artist:
             glow(surface,(x+(14 if player.facing>0 else -14)*scale,by-24*scale),int(23*scale),CYAN)
 
     def enemy(self,surface,enemy,camera,time,index,stage=0):
-        if not enemy.alive:
-            return
-        x,y=enemy.rect.centerx-camera,enemy.rect.bottom
-        if not -80<x<W+80:
-            return
-        palette=palette_for(index,stage)
-        color=palette.accent
-        dark=(39,47,51)
-        body=mix(palette.near,palette.top,.35)
-        gait=math.sin(time*10+enemy.left)*5
-        if enemy.kind=='flyer':
-            for side in (-1,1):
-                polygon(surface,body,[(x,y-21),(x+side*43,y-49+gait),(x+side*29,y-17),(x+side*46,y-7),(x,y-8)])
-        # Temporal wildlife: dinosaur, tusked beast, scarab, raven, automaton.
-        if enemy.kind!='flyer':
-            for dx in (-13,12):
-                line(surface,dark,(x+dx,y-14),(x+dx+gait*(1 if dx<0 else -1),y-2),6)
-        pg.draw.ellipse(surface,body,(int(x-24),int(y-32),45,24))
-        face=x+enemy.direction*20
-        rect(surface,body,(face-10,y-33,20,17),4)
-        line(surface,color,(face+enemy.direction*2,y-27),(face+enemy.direction*8,y-27),3)
-        if index==0:
-            polygon(surface,body,[(x-enemy.direction*17,y-19),(x-enemy.direction*40,y-37),(x-enemy.direction*27,y-12)])
-            for j in range(3):
-                polygon(surface,color,[(x-13+j*9,y-29),(x-9+j*9,y-39),(x-5+j*9,y-29)])
-        elif index==1:
-            line(surface,PAPER,(face+enemy.direction*7,y-20),(face+enemy.direction*12,y-11),3)
-            polygon(surface,body,[(face-8,y-30),(face-5,y-44),(face+2,y-30)])
-        elif index==2:
-            pg.draw.ellipse(surface,color,(int(x-14),int(y-34),28,22),2)
-            line(surface,color,(x,y-33),(x,y-13),2)
-        elif index==3:
-            polygon(surface,body,[(x-18,y-22),(x-31,y-50+gait),(x+6,y-30)])
-            polygon(surface,color,[(face+enemy.direction*8,y-28),(face+enemy.direction*19,y-22),(face+enemy.direction*8,y-21)])
-        else:
-            circle(surface,color,(x,y-23),10,2)
-            circle(surface,INK,(x,y-23),4)
-            line(surface,color,(face,y-33),(face,y-41),2)
-            circle(surface,CYAN,(face,y-42),3)
-        if enemy.kind=='armored':
-            pg.draw.ellipse(surface,mix(body,color,.25),(int(x-27),int(y-38),53,33))
-            for dx in (-17,0,17):
-                polygon(surface,color,[(x+dx-7,y-34),(x+dx,y-49),(x+dx+7,y-34)])
-        elif enemy.kind=='sentry':
-            rect(surface,dark,(x-17,y-49,34,34),4)
-            circle(surface,color,(x,y-34),10,2)
-            line(surface,color,(x,y-34),(x+enemy.direction*31,y-34),5)
-            if enemy.timer<.5:
-                glow(surface,(x+enemy.direction*31,y-34),35,color)
-        elif enemy.kind=='hopper':
-            for dx in (-1,1):
-                line(surface,color,(x+dx*11,y-19),(x+dx*25,y-6),5)
-                line(surface,dark,(x+dx*25,y-6),(x+dx*9,y),4)
-        elif enemy.kind=='charger':
-            polygon(surface,color,[(face,y-29),(face+enemy.direction*17,y-48),(face+enemy.direction*13,y-23)])
-            if enemy.mode=='warning':
-                circle(surface,(240,140,110),(x,y-58),9,2)
-                text(surface,'!',(x,y-59),14,(240,140,110),True,'center')
-        if enemy.max_hp>1:
-            for n in range(enemy.max_hp):
-                circle(surface,color if n<enemy.hp else dark,(x+(n-(enemy.max_hp-1)/2)*10,y-65),3)
-        if enemy.hit_flash:
-            circle(surface,PAPER,(x,y-22),22,2)
+        from .enemy_art import draw_enemy
+        draw_enemy(surface,enemy,camera,time,index,stage)
 
     def foreground(self,surface,world,camera):
         era=palette_for(world.index,world.stage)
-        for n,wx in enumerate((65,580,1090,1440,1810,2290,2660,3060,3490,4120,4490)):
+        for n,wx in enumerate(range(65,int(world.width),430)):
             x=wx-camera
             if -80<x<W+80:
                 if era.kind=='jungle':

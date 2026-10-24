@@ -1,39 +1,31 @@
-# Verificación de la beta educativa 0.4
+# Verificación · beta educativa 0.5
 
-Fecha: 22 de octubre de 2026. Windows 11, Python 3.12 y pygame-ce 2.5.7.
+24 de octubre de 2026. Windows 11, Python 3.12, pygame-ce 2.5.7.
 
 ## Pruebas automáticas
 
-**61 pruebas aprobadas**: 23 en `tests/test_game.py`, 19 en `tests/test_education.py` y 19 en `tests/test_teacher.py`.
+**76 pruebas**: 23 de juego, 19 educativas, 19 del editor y 15 de la expansión.
 
-- Simulación de saltos con la física real para comprobar los fragmentos y la salida de los 15 mapas, sin mejoras ni impulso obligatorios.
-- Progresión ordenada de los 15 mapas, cinco épocas y desenlace; bloqueo de portales por fragmentos y guardianes.
-- Salto variable, tolerancia al borde, memoria de salto, impulso, paredes, plataformas móviles, combate y reaparición.
-- Banco de 180 preguntas: dos variantes por archivo y perfil, selección por edad, no repetición inmediata y mezcla de posiciones correctas.
-- Respuesta errónea sin penalización, recompensa única, compras con requisitos y saldo, persistencia y prevención de recompensas duplicadas al cambiar de edad.
-- Segundo salto, escudo, energía mejorada, resistencia de enemigos acorazados y daño del pulso amplificado.
-- Seis comportamientos de enemigo y mezclas de al menos tres tipos en cada mapa.
-- Combates completos simulados de los cinco guardianes con equipo básico, sin muertes en las pruebas. Duraciones de los escenarios de combate: aproximadamente 12, 18, 18, 25 y 30 segundos.
-- Núcleos protegidos, vulnerabilidad ampliada por aprendizaje, entrada de arena y reinicio del jefe al morir.
-- Migración de partidas 0.2 con respaldo, conservación de fragmentos y anclas, tolerancia a guardados dañados.
-- Navegación por teclado desde un archivo hasta responder y volver a la partida; selector de edad mediante clic y persistencia.
-- Render de los 15 escenarios, pantallas educativas, 30 archivos en los tres perfiles y las cuatro fases de la pregunta; todas las páginas del cuaderno.
-- Consulta de las 180 preguntas sin desbloqueos; altas, duplicación y modificación de pregunta, respuestas, opción correcta, explicación, referencia, archivo, mapa y edad.
-- Uso inmediato del banco editado en el sorteo real, mezcla de respuestas conservando la correcta, persistencia al recargar, respaldos exactos y rechazo de datos inválidos sin escritura parcial.
-- Conservación del archivo dañado, advertencia y recuperación mediante guardado explícito con respaldo; protección del último contenido de cada archivo y edad.
-- Eventos de ratón y teclado en configuración y editor, entrada Unicode, atajos de texto, cambios sin guardar, selector de mapa y textos largos con desplazamiento.
-- Quince ambientes distintos y galería de escenarios sin modificar la partida.
+- Las 24 rutas tienen geometrías distintas, más de 12.000 píxeles, tres zonas, 48 ecos, anclas y fragmentos en ramales.
+- Saltos y descensos con controlador y colisiones reales para verificar conexiones obligatorias, tres fragmentos y archivos de cada mapa, sin mejoras ni plataformas móviles. Se comprueban conexiones; no se simula una partida humana continua.
+- Salto variable, tolerancia al borde, impulso, paredes, plataformas móviles, descenso de pasarelas, daño y reaparición.
+- Progresión de 21 mapas principales, final en actualidad y bloqueo por fragmentos/jefes. Argentina conserva su progreso y comparte mejoras y aprendizaje.
+- Ocho combates completos simulados en dificultad mínima sin mejoras ni muertes. Los perfiles mayores se comprueban por velocidad, salud, frecuencia, salvas, marcas de caída y ventanas de vulnerabilidad; no se afirma una campaña completa automatizada en alta.
+- Cambio de edad aplicado al mundo activo sin revivir derrotados. Ocho familias con siluetas distintas incluso al quitar el color.
+- 288 preguntas en 48 archivos y tres edades: sorteo, mezcla, no repetición inmediata, recompensa única y errores sin castigo.
+- Editor docente completo, validación, escritura atómica, respaldos, búsqueda, Unicode, selección, textos largos y protección de cambios.
+- Migración de bancos con preguntas propias desde ID 180: se conservan contenidos y se agregan nuevos temas con IDs independientes.
+- Migración de partidas con respaldo, inventario y aprendizaje; entrada segura por cambio de geometría; apertura de guerras si se había completado la beta 0.4.
+- Render de mapas, jefes, modelos, perfiles, planos y zona docente. V pausa en el plano y Esc vuelve al estado anterior.
 
-## Revisión visual y ejecutable
+## Visuales y distribución
 
-Capturas revisadas en `capturas/educativa-0.4/`: menú, preguntas, explicaciones, taller, cuaderno, configuración, banco docente, editor, selector de mapa del editor, galería, 15 paisajes y cinco guardianes. Se revisaron las respuestas señaladas y el escenario de extinción con terreno quemado, meteoros, humo, incendios y cenizas. Los efectos ambientales son visuales y no modifican las colisiones.
+Capturas en `capturas/educativa-0.5`: 24 escenarios, ocho guardianes, familias de enemigos, plano, menú, épocas, configuración y editor. Se revisan trincheras, refugios, reconstrucción, redes, renovables, observatorio, Cabildo, Tucumán y plaza cívica.
 
-Medición orientativa del render fuera de pantalla a 1280 × 720: aproximadamente 6,4 ms por cuadro, unos 157 cuadros por segundo en esta máquina. No es una garantía de rendimiento en otras computadoras.
+Medición orientativa fuera de pantalla a 1280 × 720: unos 6,4 ms por cuadro en esta máquina. No garantiza rendimiento en otros equipos.
 
-El ejecutable se construye con PyInstaller en formato portable, con sus bibliotecas en `_internal`. Se eligió este formato después de observar una demora de arranque en la variante de archivo único. La comprobación de distribución genera capturas del banco docente, del editor y del escenario de extinción desde el propio ejecutable, y comprueba que terminen sin errores.
-
-La partida existente permanece en formato 2, compatible con la beta 0.3. El banco docente usa su propio archivo, independiente del progreso del alumno. Los ensayos de edición usan archivos temporales y no modifican los contenidos del usuario.
+El ejecutable PyInstaller se distribuye con `_internal`. El empaquetado comprueba ocho escenas: configuración, banco, editor, galería argentina, pregunta argentina, jefe actual, plano de guerras y mapa de Tucumán. También comprueba la integridad del ZIP y que no contenga partidas ni bancos docentes personalizados.
 
 ## Límites
 
-No hubo una sesión completa de juego humano de toda la campaña, pruebas con alumnos ni validación docente. Tampoco se verificó hardware físico de mando. La simulación comprueba rutas y reglas; el equilibrio y la adecuación pedagógica necesitan pruebas con personas.
+No se realizó una partida humana completa de los 24 mapas ni sesiones con alumnos o docentes. El equilibrio de media y alta requiere esas pruebas. Tampoco se verificó un mando físico. Referencias en `FUENTES.md`; escenarios y adversarios son ficción.

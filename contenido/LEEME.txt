@@ -1,6 +1,6 @@
 BANCO DE PREGUNTAS DE LA ESCUELA
 
-El juego incluye 180 preguntas iniciales. Para consultarlas y editarlas:
+El juego incluye 288 preguntas iniciales. Para consultarlas y editarlas:
 Configuración > Ver y editar preguntas.
 
 Al guardar por primera vez se crea preguntas.json en esta carpeta.
@@ -18,3 +18,6 @@ preguntas.json en la carpeta contenido del otro juego. Conserva antes una
 copia de su banco anterior. No edites el archivo mientras el juego esté abierto.
 
 La distribución original no incluye partidas de alumnos ni bancos personalizados.
+
+La beta 0.5 incorpora los nuevos temas sin borrar las preguntas personalizadas
+de la beta 0.4. El guardado posterior conserva una copia del banco anterior.

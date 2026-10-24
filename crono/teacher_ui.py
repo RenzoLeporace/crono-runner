@@ -6,6 +6,7 @@ from .education import STAGES,LESSONS,AGE_BANDS
 from .learning_ui import wrapped
 from .question_bank import QuestionBank,builtin_records
 from .text_field import TextField
+from .campaign import ERA_LABELS,TOTAL_ERAS,TOTAL_LEVELS,DIFFICULTIES
 
 
 def shortened(value,width,size=16):
@@ -58,17 +59,17 @@ class TeacherUI:
         self.settings_background()
         tracked(s,'PERSONALIZA EL VIAJE',(65,38),12,CYAN,3)
         text(s,'Configuración',(62,73),45,PAPER,True,serif=True)
-        rect(s,(19,35,45),(65,160,537,409),8)
+        rect(s,(19,35,45),(65,160,537,445),8)
         text(s,'Partida y presentación',(88,184),24,PAPER,True)
         self.button('Sonido: '+('activado' if self.audio.enabled else 'desactivado'),(88,241,491,50),self.toggle_sound,small=True)
         self.button('Pantalla: '+('completa' if self.fullscreen else 'ventana'),(88,307,491,50),self.toggle_fullscreen,small=True)
         self.age_switch(88,423,491)
-        wrapped(s,'El perfil cambia el nivel de las preguntas. El aprendizaje y las mejoras se conservan.',(88,487),481,16,MUTED)
-        rect(s,(19,35,45),(627,160,588,409),8)
+        wrapped(s,'La edad cambia preguntas y combate: 6–9 mínima, 10–14 media y 15+ alta. Los jefes ganan patrones y los enemigos reaccionan más rápido.',(88,487),481,15,MUTED,leading=23)
+        rect(s,(19,35,45),(627,160,588,445),8)
         text(s,'Zona docente',(650,184),26,PAPER,True)
         wrapped(s,f'{len(self.bank.records)} preguntas con sus respuestas. Puedes consultar todo el banco, editar contenidos y agregar preguntas para cada mapa y edad.',(650,239),532,19,PAPER,leading=30)
         self.button('Ver y editar preguntas',(650,371,542,58),lambda:self.set_state('teacher'),True)
-        self.button('Ver los 15 escenarios',(650,448,542,49),self.open_scenarios,small=True)
+        self.button('Ver los 24 escenarios',(650,448,542,49),self.open_scenarios,small=True)
         text(s,'Las respuestas son visibles en la zona docente.',(650,524),14,GOLD)
         self.button('Volver',(65,628,249,49),self.close_settings,True,small=True)
         if self.bank.warning:
@@ -92,9 +93,9 @@ class TeacherUI:
         tracked(s,'ZONA DOCENTE · RESPUESTAS VISIBLES',(65,28),11,CYAN,2)
         text(s,'Banco de preguntas',(62,58),38,PAPER,True,serif=True)
         self.button('+ Nueva pregunta',(946,56,269,48),lambda:self.edit_question(None),True,small=True)
-        eras=('Primigenio','Deshielo','Grecia','Medievo','Industria')
+        eras=ERA_LABELS
         self.button('Época: '+('todas' if self.teacher_era<0 else eras[self.teacher_era]),(65,126,222,41),
-                    lambda:self.cycle_teacher_filter('teacher_era',5),small=True,arrow=False)
+                    lambda:self.cycle_teacher_filter('teacher_era',TOTAL_ERAS),small=True,arrow=False)
         self.button('Mapa: '+('todos' if self.teacher_stage<0 else str(self.teacher_stage+1)),(301,126,192,41),
                     lambda:self.cycle_teacher_filter('teacher_stage',3),small=True,arrow=False)
         self.button('Edad: '+('todas' if self.teacher_band<0 else ('6–9','10–14','15+')[self.teacher_band]),(507,126,251,41),
@@ -218,7 +219,7 @@ class TeacherUI:
         self.set_state('teacher')
 
     def restore_original_question(self):
-        original=builtin_records()[self.teacher_draft['id']]
+        original=next(q for q in builtin_records() if q['id']==self.teacher_draft['id'])
         self.teacher_draft=deepcopy(original)
         values=[original['prompt'],*original['options'],original['explanation'],original['source']]
         for field,value in zip(self.teacher_fields,values):
@@ -255,7 +256,7 @@ class TeacherUI:
             wrapped(s,self.teacher_message,(65,584),1147,14,GOLD,leading=19)
         self.button('Guardar pregunta',(65,632,293,49),self.save_question,True,small=True)
         self.button('Cancelar',(374,632,185,49),self.leave_editor,small=True)
-        if not new and self.teacher_draft['id']<180:
+        if not new and any(q['id']==self.teacher_draft['id'] for q in builtin_records()):
             self.button('Cargar original',(575,632,245,49),self.restore_original_question,small=True)
         text(s,'Tab cambia de campo · Ctrl+Enter guarda · Ctrl+C/V copia y pega',(1210,701),12,MUTED,False,'bottomright')
         if self.teacher_picker:
@@ -265,8 +266,8 @@ class TeacherUI:
             text(s,'Elegir mapa para esta pregunta',(66,77),30,PAPER,True,serif=True)
             for n,meta in enumerate(STAGES):
                 x=66+n%3*391
-                y=139+n//3*91
-                self.button(f'{n//3+1}.{n%3+1} · {meta.name}',(x,y,368,74),lambda value=n:self.pick_teacher_map(value),
+                y=139+n//3*56
+                self.button(f'{n//3+1}.{n%3+1} · {meta.name}',(x,y,368,50),lambda value=n:self.pick_teacher_map(value),
                             primary=n==level_id,small=True,arrow=False,wrap=True)
             self.button('Volver',(66,602,218,42),lambda:setattr(self,'teacher_picker',False),small=True)
         if self.teacher_discard:
@@ -359,9 +360,11 @@ class TeacherUI:
 
     def change_scenario(self,delta):
         from .physics import World
-        self.preview_level=(self.preview_level+delta)%15
+        self.preview_level=(self.preview_level+delta)%TOTAL_LEVELS
         self.preview_world=World(*divmod(self.preview_level,3))
-        self.preview_world.player.rect.midbottom=(1080,584)
+        p=self.preview_world.platforms[1].rect
+        self.preview_world.player.rect.midbottom=(p.left+150,p.top)
+        self.preview_camera=max(0,p.left+150-480)
         self.preview_world.player.grounded=True
         self.preview_world.time=30
 
@@ -370,7 +373,7 @@ class TeacherUI:
         if self.preview_world is None:
             self.change_scenario(0)
         s=self.canvas
-        self.artist.scene(s,self.preview_world,600,self.time)
+        self.artist.scene(s,self.preview_world,self.preview_camera,self.time)
         rect(s,(12,25,35),(0,0,W,107))
         meta=STAGES[self.preview_level]
         tracked(s,f'GALERÍA · {self.preview_level//3+1}.{self.preview_level%3+1}',(35,17),11,CYAN,3)
@@ -379,4 +382,4 @@ class TeacherUI:
         self.button('Configuración',(35,649,235,43),lambda:self.set_state('settings'),small=True)
         self.button('Anterior',(287,649,174,43),lambda:self.change_scenario(-1),small=True)
         self.button('Siguiente',(477,649,174,43),lambda:self.change_scenario(1),True,small=True)
-        text(s,MOODS[self.preview_level].description,(W-35,671),16,GOLD,False,'midright')
+        text(s,MOODS[self.preview_level].description,(W-35,616),13,GOLD,False,'midright')

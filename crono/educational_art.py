@@ -11,8 +11,12 @@ def map_features(s,world,camera,time):
     kind=world.data['meta'].landmark
     dark=mix(era.near,era.far,.35)
     lit=mix(era.far,era.accent,.16)
-    x=1000-camera*.27
+    x=(1000-camera*.27)%2200-300
     y=505
+    if world.index>=5:
+        from .expansion_art import landmark
+        landmark(s,world,camera,time)
+        return
     if kind=='coast':
         for j in range(9):
             yy=465+j*9
@@ -250,7 +254,7 @@ def boss_art(s,boss,camera,time):
         circle(s,core,(x+21,y-133),6)
         for dx in (-20,20):
             line(s,era.accent,(x+dx,y-27),(x+dx-5,y-3),6)
-    else:
+    elif boss.era==4:
         for dx in (-42,42):
             circle(s,dark,(x+dx,y-22),24)
             circle(s,era.accent,(x+dx,y-22),15,4)
@@ -265,6 +269,9 @@ def boss_art(s,boss,camera,time):
         for dx in (-1,1):
             line(s,dark,(x+dx*65,y-96),(x+dx*103,y-55),17)
             circle(s,era.accent,(x+dx*103,y-55),14,5)
+    else:
+        from .expansion_art import new_boss
+        new_boss(s,boss,x,y,time,color,dark,core)
     cx,cy=x,y-78
     glow(s,(cx,cy),65,core)
     circle(s,dark,(cx,cy),23)
@@ -274,6 +281,11 @@ def boss_art(s,boss,camera,time):
         circle(s,core,(x,y-190),11,2)
         text(s,'!',(x,y-192),17,core,True,'center')
         line(s,core,(x-90,y+3),(x+90,y+3),3)
+    for wx,remaining in boss.telegraphs:
+        xx=wx-camera
+        line(s,(238,151,111),(xx,214),(xx,580),1)
+        circle(s,(238,151,111),(xx,579),22,3)
+        text(s,'!',(xx,548),18,GOLD,True,'center')
 
 
 def projectiles(s,world,camera):

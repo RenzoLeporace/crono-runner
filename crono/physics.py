@@ -22,6 +22,7 @@ class Controls:
     held: bool = False
     dash: bool = False
     attack: bool = False
+    drop: bool = False
 
 
 class Platform:
@@ -29,6 +30,7 @@ class Platform:
         self.rect = pg.FRect(spec['x'], spec['y'], spec['w'], spec['h'])
         self.origin = self.rect.x
         self.moving = spec['moving']
+        self.oneway = spec.get('oneway',self.moving)
         self.amplitude = spec.get('amplitude', 0)
         self.speed = spec.get('speed', 0)
         self.dx = 0
@@ -60,6 +62,7 @@ class Player:
         self.shot_cooldown=0.
         self.anim = 0.
         self.trail = []
+        self.drop_time=0.
 
     def configure(self,upgrades,heal=False):
         self.upgrades=set(upgrades)
@@ -70,12 +73,19 @@ class Player:
 
     def update(self, dt, controls, world):
         events = []
+        self.drop_time=max(0,self.drop_time-dt)
+        if controls.drop and self.grounded and self.support and self.support.oneway:
+            self.drop_time=.22
+            self.rect.y+=3
+            self.grounded=False
+            self.coyote=self.buffer=0
+            self.vy=max(45,self.vy)
         self.invincible = max(0, self.invincible - dt)
         self.hurt_time = max(0, self.hurt_time - dt)
         self.cooldown = max(0, self.cooldown - dt)
         self.shot_cooldown=max(0,self.shot_cooldown-dt)
         self.coyote = .115 if self.grounded else max(0, self.coyote - dt)
-        self.buffer = .14 if controls.jump else max(0, self.buffer - dt)
+        self.buffer = .14 if controls.jump and not self.drop_time else max(0, self.buffer - dt)
         if self.support and self.grounded:
             self.rect.x += self.support.dx
         if abs(controls.axis) > .1:
@@ -113,7 +123,7 @@ class Player:
         # Axis-separated collisions; float positions avoid low-speed quantisation.
         self.rect.x += self.vx * dt
         for p in world.platforms:
-            if p.moving:  # Ferries are one-way platforms.
+            if p.oneway:  # Branch galleries and ferries can be entered from below.
                 continue
             if self.rect.colliderect(p.rect):
                 if self.vx > 0:
@@ -128,6 +138,8 @@ class Player:
         self.grounded = False
         self.support = None
         for p in world.platforms:
+            if p.oneway and self.drop_time>0:
+                continue
             if self.rect.colliderect(p.rect):
                 if self.vy >= 0 and old_bottom <= p.rect.top + 1:
                     self.rect.bottom = p.rect.top
@@ -136,7 +148,7 @@ class Player:
                     self.support = p
                     self.dash_ready = True
                     self.air_jump=True
-                elif self.vy < 0 and not p.moving:
+                elif self.vy < 0 and not p.oneway:
                     self.rect.top = p.rect.bottom
                     self.vy = 0
         self.anim += dt * (abs(self.vx) / 65 if self.grounded else 1)
@@ -144,9 +156,10 @@ class Player:
 
 
 class World:
-    def __init__(self, index,stage=0,upgrades=None,answered=None):
+    def __init__(self, index,stage=0,upgrades=None,answered=None,difficulty=0):
         self.index = index
         self.stage=stage
+        self.difficulty=max(0,min(2,difficulty))
         self.level_id=index*3+stage
         self.upgrades=set(upgrades or ())
         self.answered=set(answered or ())
@@ -155,7 +168,7 @@ class World:
         self.platforms = [Platform(p) for p in self.data['platforms']]
         self.player = Player(self.data['spawn'])
         self.player.configure(self.upgrades,True)
-        self.enemies = [Enemy(s, index) for s in self.data['enemies']]
+        self.enemies = [Enemy(s, index,self.difficulty) for s in self.data['enemies']]
         self.hazards = [pg.FRect(s) for s in self.data['hazards']]
         self.shards = set()
         self.echoes = set()
@@ -168,7 +181,16 @@ class World:
         self.message_time = 0.
         self.portal_lock = 0.
         self.projectiles=[]
-        self.boss=Boss(index) if self.data['boss'] else None
+        self.boss=Boss(index,self.difficulty,self.data['arena_left'],self.data['arena_right']) if self.data['boss'] else None
+
+    def set_difficulty(self,band):
+        """Apply a profile immediately without resurrecting defeated opponents."""
+        band=max(0,min(2,band))
+        self.difficulty=band
+        for enemy in self.enemies:
+            enemy.set_difficulty(band)
+        if self.boss:
+            self.boss.set_difficulty(band)
 
     def near_station(self):
         p=self.player.rect
@@ -185,7 +207,7 @@ class World:
         self.deaths += 1
         self.projectiles=[]
         if self.boss and self.boss.alive:
-            self.boss=Boss(self.index)
+            self.boss=Boss(self.index,self.difficulty,self.data['arena_left'],self.data['arena_right'])
         self.say('Otra oportunidad. El tiempo está de tu lado.')
 
     def damage(self, source):
@@ -197,7 +219,7 @@ class World:
             p.invincible=1.2
             return ['shield']
         p.hp -= 1
-        p.invincible = 1.5
+        p.invincible = (1.5,1.1,.8)[self.difficulty]
         p.hurt_time = .16
         p.vy = -330
         p.vx = -260 if p.rect.centerx < source else 260
@@ -261,7 +283,7 @@ class World:
         if self.boss and self.boss.alive:
             self.boss.update(dt,self)
             if self.boss.active:
-                p.rect.left=max(self.width-1280+6,p.rect.left)
+                p.rect.left=max(self.data['arena_left']+6,p.rect.left)
                 if p.rect.colliderect(self.boss.rect):
                     if self.boss.phase=='exposed' and (p.dash_time>0 or (p.vy>0 and old_bottom<=self.boss.rect.top+12)):
                         defeated=self.boss.hit(2)

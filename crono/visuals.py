@@ -31,10 +31,19 @@ MOODS=(
  Mood('Hollín y nubes de vapor entre pistones','steam',(35,30,37),(153,103,78),'factory'),
  Mood('Una locomotora atraviesa el paisaje','railway',(66,59,70),(213,166,119),'factory'),
  Mood('Noche eléctrica, faroles y cables encendidos','electric',(10,22,47),(48,77,104),'factory'),
+ Mood('Correspondencia, trincheras vacías y niebla','trenches',(36,45,52),(157,162,141),'war'),
+ Mood('Refugios, ruinas y haces de búsqueda','shelter',(23,29,45),(125,129,143),'war'),
+ Mood('Ciudad en reconstrucción y asamblea de la paz','peace',(58,89,107),(222,197,148),'war'),
+ Mood('Circuitos urbanos y antenas enlazadas','network',(10,21,46),(66,124,159),'modern'),
+ Mood('Paneles solares, agua y turbinas al viento','renewables',(35,92,116),(168,220,192),'modern'),
+ Mood('Observatorio, laboratorios y portal al presente','science',(13,19,53),(65,79,131),'modern'),
+ Mood('Recova y Cabildo en el Buenos Aires de 1810','cabildo',(69,92,107),(229,201,157),'argentina'),
+ Mood('Patios, cerros y Casa de Tucumán en 1816','tucuman',(66,88,111),(228,190,147),'argentina'),
+ Mood('Plaza cívica y recuperación democrática de 1983','democracy',(24,48,79),(137,181,206),'argentina'),
 )
 
 
-@lru_cache(maxsize=15)
+@lru_cache(maxsize=24)
 def palette_for(era,stage=0):
     base=ERAS[era]
     mood=MOODS[era*3+stage]

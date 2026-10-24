@@ -1,90 +1,106 @@
 # CRONO · Ecos del tiempo
 
-Beta educativa 0.4 para Windows. Crono debe atravesar cinco épocas, aprender de sus hallazgos y reparar su reloj para volver al presente.
+**Beta educativa 0.5 para Windows.** Plataformas de exploración: Crono atraviesa épocas, recupera su reloj y aprende para volver al presente.
 
-![La extinción en plena destrucción](docs/imagenes/extincion.png)
-
-## Descargar la beta
-
-El ejecutable de Windows se distribuye en [Releases · Beta educativa 0.4](https://github.com/RenzoLeporace/crono-runner/releases/tag/v0.4.0). Descarga `CRONO-Beta-Educativa-0.4-Windows.zip` y extrae toda la carpeta. Este repositorio contiene el código fuente; los binarios, las partidas y las preguntas docentes personalizadas no se incluyen en el historial de Git.
+[Descargar beta 0.5](https://github.com/RenzoLeporace/crono-runner/releases/tag/v0.5.0) · [Fuentes educativas](FUENTES.md) · [Verificación](VERIFICACION.md)
 
 ## Jugar
 
-Abre **CRONO - Ecos del tiempo.exe** o **Jugar.bat**. No necesita instalar Python ni conexión. Mantén la carpeta **_internal** junto al ejecutable: contiene sus bibliotecas. Para compartir o mover el juego, extrae el ZIP completo. Las fuentes externas del cuaderno se abren únicamente si pulsas su botón.
+Extrae todo `CRONO-Beta-Educativa-0.5-Windows.zip` y abre **CRONO - Ecos del tiempo.exe** o **Jugar.bat**. Conserva **_internal** junto al ejecutable. No necesita Python ni conexión. Los enlaces educativos se abren solo al pulsar su botón.
 
-En el menú puedes elegir **6–9 años**, **10–14 años** o **15 años en adelante**. El perfil se guarda y se puede cambiar sin reiniciar el viaje. Cambian la dificultad de las preguntas y, en el perfil menor, las explicaciones usan un lenguaje más sencillo.
+## Rutas nuevas
+
+Se reemplazaron las plantillas y mapas reflejados por **24 itinerarios propios** de aproximadamente 12.000–15.500 píxeles, frente a 4.550–5.700 anteriores. Hay terrazas a distintas alturas, balcones, galerías inferiores, bifurcaciones y retornos.
+
+Cada mapa tiene tres zonas, tres fragmentos en ramales, **48 ecos**, dos archivos educativos y al menos seis anclas. Las rutas obligatorias no requieren mejoras ni impulso. **V** abre el plano real de superficies, Crono, archivos, anclas, fragmentos y salida. **S / abajo** baja por las pasarelas delgadas.
+
+![Plano de rutas](docs/imagenes/plano-rutas.png)
+
+## Edad y dificultad
+
+El perfil se elige en el menú o en Configuración y cambia preguntas y combate, incluida la partida activa:
+
+| Perfil | Combate |
+| --- | --- |
+| 6–9 · Explorador | Mínimo: velocidades, resistencia y ventanas amplias de la beta anterior. |
+| 10–14 · Aventurero | Más velocidad y resistencia, cargas frecuentes, ataques combinados y marcas de caída en jefes. |
+| 15+ · Experto | Salvas de centinelas, alados con disparos apuntados, núcleos abiertos menos tiempo y segunda fase más intensa. |
+
+Las marcas del suelo anticipan proyectiles de caída. Los enemigos que disparan brillan antes de hacerlo; las cargas muestran **!**. Los jefes solo reciben daño con el núcleo dorado. Resolver un archivo de su mapa prolonga la exposición. Cambiar la edad no revive adversarios derrotados.
+
+## Campaña y Argentina
+
+La campaña tiene **21 mapas en siete épocas**. Argentina es una **expansión incluida de tres mapas**, disponible desde el menú, con progreso independiente. Hay ocho jefes finales.
+
+| Época | Mapa 1 | Mapa 2 | Mapa 3 y jefe |
+| --- | --- | --- | --- |
+| Primigenio | Costa de los gigantes | Valle de los fósiles | Extinción · Guardián del impacto |
+| Deshielo | Estepa del mamut | Refugio del fuego | Cueva de las manos · Matriarca de escarcha |
+| Grecia | Ágora de Atenas | Rutas del Mediterráneo | Olimpia · Coloso de bronce |
+| Medievo | Campos de la abadía | Ciudad de mercaderes | Torres de luz · Vigía de las campanas |
+| Industria | Fuerza del vapor | Camino de hierro | Ciudad eléctrica · Titán de vapor |
+| Guerras mundiales | Cartas desde 1914 | Refugios de 1939 | Reconstruir la paz · Blindado del olvido |
+| Actualidad | Ciudad de las redes | Energía del mañana | Observatorio del presente · Núcleo de la red |
+| Argentina · DLC | Buenos Aires, 1810 | Tucumán, 1816 | Democracia, 1983 · Custodio de la memoria |
+
+Las dos guerras mundiales comparten una época: contextos, vida civil y reconstrucción. No se combate contra personas ni poblaciones reales. Los adversarios son anomalías ficticias del reloj; los escenarios son interpretaciones educativas, no reconstrucciones exactas ni una historia universal. Argentina trata tres momentos concretos, no toda su historia.
+
+Las ocho épocas tienen **siluetas propias**, además de seis comportamientos mezclados: patrulla, salto, vuelo, disparo, carga y armadura. Hay reptiles, fauna de estepa, autómatas de bronce, armaduras y ballestas, calderas con ruedas, blindajes con orugas, robots de red y fauna o cerámica rioplatense. Las púas identifican acorazados: evita pisarlos.
+
+![Familias de enemigos](docs/imagenes/enemigos-por-epoca.png)
+
+Los ambientes incluyen meteoros y cenizas, nieve, cuevas, puertos, lluvia, trenes, trincheras vacías, refugios, redes, renovables, observatorio y arquitectura argentina. Los efectos de fondo no causan daño.
+
+![24 escenarios](docs/imagenes/24-mapas.png)
 
 ## Aprender y mejorar
 
-El banco inicial tiene **180 preguntas escritas**, 60 por perfil: dos variantes para cada uno de los 30 archivos de campo. Los docentes pueden ampliarlo. Al abrir un archivo se elige una pregunta al azar y se mezclan las respuestas. Si hay más de una pregunta, no se repite inmediatamente la última de ese archivo y perfil.
+Hay **288 preguntas originales**, 96 por perfil, para **48 archivos educativos**. Cada visita sortea una pregunta por edad y mezcla las respuestas; si hay varias, evita repetir inmediatamente la anterior.
 
-Acércate a un archivo luminoso y pulsa **E**. Primero lees una explicación, después puedes responder. Resolverlo por primera vez da **2 puntos de conocimiento**. Equivocarse muestra la respuesta con una explicación, permite reintentar y no quita energía ni puntos. Repasar o cambiar de perfil no repite la recompensa de un archivo ya resuelto.
+Pulsa **E** junto a un archivo para leer y responder. La primera respuesta correcta da dos puntos de conocimiento. Equivocarse explica la respuesta sin restar energía ni puntos. Repasar, cambiar de edad o añadir preguntas al mismo archivo no repite la recompensa.
 
-Con **U** abres el taller. Las ocho mejoras permanentes son energía adicional, segundo salto, imán de coleccionables, impulso mejorado, escudo, disparos más potentes, botas rápidas y un segundo aumento de energía. Las dos mejoras de energía permiten llegar a cinco unidades. Hay puntos suficientes para comprar todo mediante el aprendizaje de la campaña.
+**U** abre ocho mejoras permanentes: dos aumentos de energía, segundo salto, imán, impulso mejorado, escudo, pulso amplificado y botas. **C** abre el cuaderno con repasos, fuentes y guía de adversarios. Los archivos no son obligatorios para superar rutas ni jefes.
 
-Con **C** abres el cuaderno: conserva los archivos descubiertos, permite repasar y enlaza las fuentes. Incluye una guía de enemigos y guardianes. Consulta **FUENTES.md** para ver los contenidos y referencias de cada mapa.
+## Docentes
 
-## Configuración y zona docente
+En **Configuración → Ver y editar preguntas** se ven todas las preguntas y respuestas correctas, sin desbloqueos. Hay búsqueda y filtros por época, mapa y edad, incluidos los contenidos nuevos.
 
-Entra en **Configuración → Ver y editar preguntas**, desde el menú o desde la pausa. Se pueden consultar todas las preguntas y sus tres respuestas, con la correcta señalada, sin desbloquear mapas. Hay búsqueda por texto y filtros de época, mapa y edad.
+**Nueva pregunta**, **Editar** y **Duplicar** permiten elegir mapa, archivo y edad; escribir pregunta, tres opciones, respuesta correcta, explicación y referencia opcional. Guardar aplica el contenido inmediatamente al sorteo. La explicación sirve de pista y devolución.
 
-Usa **Nueva pregunta**, **Editar** o **Duplicar**. El formulario permite elegir el mapa, uno de sus dos archivos educativos y el perfil de edad; escribir la pregunta, tres opciones, la respuesta correcta, una explicación y una referencia opcional. **Guardar pregunta** aplica el cambio inmediatamente al sorteo de preguntas de ese archivo y edad. La explicación se muestra como pista y al revisar la respuesta. No da una recompensa adicional si el alumno ya resolvió ese archivo.
+Los campos admiten tildes, selección, Ctrl+A y Ctrl+C/V. Tab cambia de campo; Ctrl+Enter o Ctrl+S guarda. Las lecturas largas se desplazan con la rueda. Se validan vacíos, opciones repetidas y que cada archivo y edad conserve preguntas. Cancelar o cerrar protege cambios sin guardar.
 
-Los campos admiten tildes, selección, Ctrl+A, Ctrl+C/V y desplazamiento. Tab cambia de campo; Ctrl+Enter o Ctrl+S guarda. Los textos largos se desplazan con la rueda en las preguntas y respuestas. Se validan campos vacíos, opciones repetidas y que cada archivo y edad conserve preguntas. Cancelar o cerrar con cambios ofrece seguir editando o descartarlos.
-
-El banco personalizado se crea al guardar por primera vez en **contenido/preguntas.json**, separado de la partida. Cada modificación de un banco ya guardado crea una copia previa en **contenido/respaldos**; también existe el botón **Crear respaldo**. Un viaje nuevo no borra el banco. Para compartir las preguntas de una escuela, copia `contenido/preguntas.json` junto con el juego. No edites ese archivo mientras el juego esté abierto. La zona docente es de acceso libre y no tiene contraseña.
-
-En **Configuración → Ver los 15 escenarios** puedes recorrer una galería de los ambientes sin alterar el progreso.
-
-![Banco editable de preguntas y respuestas](docs/imagenes/zona-docente.png)
-
-## Quince mapas y cinco jefes
-
-| Época | Mapa 1 | Mapa 2 | Mapa 3 y guardián |
-| --- | --- | --- | --- |
-| Mundo primigenio | Costa: reptiles y aves | Valle de fósiles | Impacto y extinción: guardián del impacto |
-| Deshielo | Estepa del mamut | Refugio del fuego | Arte rupestre: matriarca de escarcha |
-| Grecia clásica | Ágora de Atenas | Rutas del Mediterráneo | Olimpia: coloso de bronce |
-| Medievo europeo | Campos de la abadía | Ciudad de mercaderes | Arquitectura gótica: vigía de las campanas |
-| Industria | Fuerza del vapor | Camino de hierro | Electricidad: titán de vapor |
-
-Cada mapa tiene tres fragmentos obligatorios, 17 ecos opcionales, dos archivos educativos y puntos de control. Las rutas y los elementos visuales cambian. En el tercer mapa hay un ancla adicional y una arena de jefe. Para pasar de época debes reunir sus fragmentos y vencer al guardián.
-
-Los 15 mapas tienen ambientes propios: costa con oleaje, cañón polvoriento, extinción con meteoros, incendios, humo y ceniza; estepa nevada, refugio cálido y cueva rupestre; ágora, puerto y Olimpia al atardecer; campos con viento, mercado lluvioso y catedral nocturna; vapor industrial, tren en movimiento y ciudad eléctrica. Son efectos de fondo y no añaden obstáculos invisibles.
-
-![Los quince mapas de la campaña](docs/imagenes/15-mapas.png)
-
-Cada jefe tiene un patrón diferente: onda de choque, embestida, ráfaga de proyectiles, picado o descargas de vapor. **Ataca cuando el núcleo se vuelve dorado**. Resolver un archivo del mapa del jefe prolonga su vulnerabilidad. Se pueden superar todos con el equipo básico.
-
-Los enemigos combinan seis comportamientos: rondadores que patrullan, saltadores, alados que oscilan, centinelas que disparan, embistentes que avisan antes de cargar y acorazados resistentes a tres impactos. Los acorazados tienen púas: evita saltar sobre ellos. El disparo temporal sirve contra todos; el impulso también causa daño.
-
-Los enemigos y los jefes son ficción del reloj roto. Los contenidos históricos y científicos se presentan en los archivos con sus fuentes. Los escenarios y sus fechas son orientativos, y cada tema tiene un alcance geográfico concreto.
+El banco se guarda en **contenido/preguntas.json**, separado del alumno. Cada modificación de un banco existente crea respaldo en **contenido/respaldos**; también hay **Crear respaldo**. Un viaje nuevo no borra preguntas. Los bancos 0.4 se amplían sin perder modificaciones ni preguntas propias. Para compartirlos copia `contenido` con el juego cerrado. La zona docente no tiene contraseña.
 
 ## Controles
 
 | Acción | Teclado | Mando SDL habitual |
 | --- | --- | --- |
-| Mover | A/D o flechas | Palanca o cruceta |
-| Saltar | Espacio, W o arriba | A |
-| Impulso temporal | Shift o X | X o RB |
-| Disparo temporal | F; mantener para repetir | B |
-| Leer archivo cercano | E | Y |
+| Mover | A/D o flechas | Palanca / cruceta |
+| Saltar | Espacio / W / arriba | A |
+| Bajar por pasarela | S / abajo | Teclado |
+| Impulso | Shift / X | X / RB |
+| Disparar | F, mantener para repetir | B |
+| Archivo educativo | E | Y |
+| Plano | V | Desde pausa |
 | Taller / cuaderno | U / C | Desde pausa |
-| Pausa | Esc o P | Start |
+| Pausa | Esc / P | Start |
 | Volver al ancla | R | Desde pausa |
 | Pantalla completa | F11 | — |
-| Sonido | M | Desde pausa |
-| Captura | F12 | — |
+| Sonido / captura | M / F12 | — |
 
-Los menús admiten ratón, flechas y Enter. Puedes responder con 1, 2 o 3. Los botones de mando pueden variar por controlador; no se verificó hardware físico.
+Menús con ratón, flechas y Enter; respuestas con 1, 2 y 3. Los botones de mando pueden variar; no se verificó hardware físico.
 
-## Guardado y actualización
+## Guardado y migración
 
-El progreso, el perfil, el conocimiento y las mejoras se guardan en `saves/progreso.json`. Al continuar reapareces en el último ancla. Se conservan los coleccionables y enemigos derrotados. Morir conserva el aprendizaje y las mejoras; un jefe vivo recupera su energía para permitir otro intento.
+**saves/progreso.json** usa formato 3. Campaña y Argentina tienen mapa, desbloqueos y ancla independientes; comparten conocimiento, mejoras y cuaderno. Morir conserva aprendizaje y mejoras; un jefe vivo reinicia el combate.
 
-La beta 0.4 conserva el formato de partida de la 0.3. También importa las partidas de la 0.2 a su primer mapa de la época correspondiente y conserva fragmentos, ecos y anclas. Antes de escribir el formato nuevo guarda una copia en `saves/progreso-v1-respaldo.json`. Para trasladar la partida a otra carpeta, lleva junto al ejecutable la carpeta `saves`; para trasladar las preguntas personalizadas, lleva `contenido`.
+Se importan partidas antiguas con respaldo previo. Al cambiar toda la geometría, una partida 0.4 retoma su mapa desde una entrada segura: conserva fragmentos, ecos, aprendizaje y mejoras, pero no coordenadas de anclas ni enemigos del mapa anterior. Una campaña 0.4 terminada abre las guerras para continuar hasta el nuevo final.
+
+Para trasladar alumnos copia `saves`; para preguntas copia `contenido`. El ZIP no incluye partidas ni bancos personalizados. Nuevo viaje reinicia el progreso de ambas campañas y las mejoras compartidas, pero conserva el banco docente.
 
 ## Desarrollo
+
+Python 3.12 en Windows:
 
 ```powershell
 python -m pip install -r requirements.txt
@@ -92,11 +108,10 @@ python Main.py
 python tests/test_game.py
 python tests/test_education.py
 python tests/test_teacher.py
+python tests/test_expansion.py
 ```
 
-La simulación usa pasos fijos a 120 Hz y el render mantiene proporciones al redimensionar. El arte y el audio se generan por código. El contenido inicial y las mejoras están en `crono/education.py`; el banco editable, en `question_bank.py`; el editor, en `teacher_ui.py`; los ambientes, en `visuals.py`; los mapas, en `levels.py`; el combate, en `combat.py`; los paneles educativos, en `learning_ui.py`.
-
-Para construir la beta en Windows con Python 3.12:
+Para compilar y empaquetar:
 
 ```powershell
 python -m pip install -r requirements-build.txt
@@ -104,8 +119,8 @@ python tools/build_beta.py
 python tools/package_beta.py
 ```
 
-El último comando comprueba seis pantallas desde el ejecutable y crea el ZIP sin partidas ni bancos personalizados. Los avisos de componentes de terceros están en `LICENCIAS.txt` y `licencias/`.
+El empaquetado comprueba ocho pantallas del ejecutable. `python tools/capture_education.py` genera la revisión visual. Ejemplo: `python Main.py --headless --era 8 --map 1 --scene play --camera 600 --capture capturas/argentina.png`. Época 6: guerras; 7: actualidad; 8: Argentina. También hay escenas `atlas`, `boss`, `quiz`, `settings`, `teacher` y `question_edit`.
 
-Para capturas: `python Main.py --headless --era 3 --map 2 --scene play --camera 600 --capture capturas/puerto.png`. También se pueden capturar `quiz`, `workshop`, `notebook`, `bestiary`, `boss`, `settings`, `teacher`, `question_edit` y `scenarios`. `python tools/capture_education.py` genera la galería de comprobación visual.
+La simulación usa 120 Hz. Arte y audio se generan por código. `routes.py`: itinerarios; `combat.py`: dificultad; `enemy_art.py`: modelos; `expansion_content.py`: lecciones; `campaign.py`: campañas; `question_bank.py` y `teacher_ui.py`: docentes. El original y la beta 0.2 están en `legacy`. Licencias de terceros en `LICENCIAS.txt` y `licencias`.
 
-El prototipo original permanece en `legacy/Main_original.py`, y el código de la beta 0.2 en `legacy/beta-0.2`. Los sprites iniciales permanecen como referencia. Esta es una beta jugable: el equilibrio y la adecuación pedagógica aún requieren sesiones con jugadores y revisión docente. No incluye voces ni evaluación escolar certificada.
+Esta beta requiere sesiones humanas de equilibrio y revisión docente; las comprobaciones automáticas no las sustituyen.
