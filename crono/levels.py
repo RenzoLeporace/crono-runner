@@ -38,7 +38,7 @@ ERAS = [
 
 ERAS.extend([
     Era('EL SIGLO DE LAS GUERRAS','1914–1948','Memoria y reconstrucción',
-        'Cruza archivos, refugios y ciudades en reconstrucción.\nLas personas no son tus enemigos: combate las anomalías del reloj.',
+        'Cruza archivos, refugios y ciudades en reconstrucción.\nRecupera la memoria y supera los ecos del conflicto.',
         (28,36,47),(142,148,137),(76,89,89),(43,56,64),(42,46,47),(146,151,133),(238,186,109),'war'),
     Era('EL MUNDO CONECTADO','Era actual','Un presente por construir',
         'Redes, ciencia y energía conectan tu señal con casa.\nRepara el último umbral y piensa qué futuro queremos construir.',
@@ -47,6 +47,10 @@ ERAS.extend([
         'Recorre tres momentos de la historia argentina.\nConserva sus archivos y libera al guardián de la memoria.',
         (39,61,82),(207,194,161),(126,137,139),(68,94,109),(67,70,70),(211,198,165),(135,216,245),'argentina'),
 ])
+
+ERAS.append(Era('EL REINO DEL NILO','Antiguo Egipto','Entre el río y la memoria',
+    'El reloj despierta entre canales, piedra y papiros.\nExplora siglos distintos de Egipto y distingue las evidencias de las tradiciones.',
+    (44,77,102),(242,192,117),(180,134,86),(105,83,66),(94,72,51),(223,181,109),(96,221,206),'egypt'))
 
 
 def level_data(index,stage=0):

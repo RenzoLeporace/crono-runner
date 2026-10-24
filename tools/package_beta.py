@@ -6,11 +6,12 @@ import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 exe=ROOT/'CRONO - Ecos del tiempo.exe'
-out=ROOT/'capturas'/'educativa-0.5'/'ejecutable'
+out=ROOT/'capturas'/'educativa-0.6'/'ejecutable'
 out.mkdir(parents=True,exist_ok=True)
-for scene,era,stage in (('settings',1,1),('teacher',1,1),('question_edit',1,1),
-                        ('scenarios',8,1),('quiz',8,3),('boss',7,3),('atlas',6,2),('play',8,2)):
-    path=out/f'{scene}.png'
+for scene,era,stage in (('menu',1,1),('chapters',9,1),('settings',1,1),('teacher',9,1),('question_edit',9,1),
+                        ('scenarios',8,1),('quiz',9,3),('boss',7,3),('atlas',6,2),('play',8,2),
+                        ('boss',9,3),('play',9,1),('play',9,2),('heritage',8,1),('heritage',8,2),('heritage',9,3)):
+    path=out/f'{scene}-{era}-{stage}.png'
     if path.exists():
         path.unlink()
     start=time.perf_counter()
@@ -20,11 +21,11 @@ for scene,era,stage in (('settings',1,1),('teacher',1,1),('question_edit',1,1),
         raise RuntimeError(f'Executable smoke failed: {scene}, exit {result.returncode}')
     print(f'{scene}: exit 0, PNG {path.stat().st_size} bytes, {time.perf_counter()-start:.2f}s',flush=True)
 
-files=[exe,*[ROOT/name for name in ('Jugar.bat','README.md','FUENTES.md','VERIFICACION.md','LICENCIAS.txt')],
+files=[exe,*[ROOT/name for name in ('Jugar.bat','README.md','FUENTES.md','VERIFICACION.md','LICENCIAS.txt','docs/AUDITORIA-0.6.md')],
        ROOT/'contenido'/'LEEME.txt']
 for folder in ('_internal','licencias','docs/imagenes'):
     files.extend(p for p in (ROOT/folder).rglob('*') if p.is_file())
-target=ROOT/'CRONO-Beta-Educativa-0.5-Windows.zip'
+target=ROOT/'CRONO-Beta-Educativa-0.6-Windows.zip'
 with zipfile.ZipFile(target,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
     for path in files:
         archive.write(path,path.relative_to(ROOT).as_posix())

@@ -4,14 +4,24 @@ import pygame as pg
 from .art import rect,line,circle,polygon,glow,text,mix,PAPER,INK,GOLD,W
 from .visuals import palette_for
 
-FAMILY_NAMES=('Reptiles del Cretácico','Fauna de la estepa','Autómatas de bronce','Bestiario y armaduras',
-              'Máquinas de vapor','Anomalías de blindaje','Robótica de red','Fauna y cerámica rioplatense')
+FAMILY_NAMES=('Reptiles del Cretácico','Fauna de la estepa','Hoplitas y bronce','Caballeros y ballesteros',
+              'Autómatas y máquinas de vapor','Infantería y blindajes','Robots bípedos y drones','Argentina · figuras históricas',
+              'Guardias del Nilo y criaturas de ficción')
 
 def draw_enemy(s,e,camera,t,era,stage=0):
     if not e.alive:
         return
     x,y=e.rect.centerx-camera,e.rect.bottom
     if not -90<x<W+90:
+        return
+    from .humanoid_roster import humanoid
+    if humanoid(era,e.kind):
+        from .humanoid_art import draw_humanoid
+        draw_humanoid(s,e,camera,t,stage)
+        return
+    if era==8:
+        from .humanoid_art import draw_egypt_creature
+        draw_egypt_creature(s,e,camera,t)
         return
     pal=palette_for(era,stage);d=e.direction
     accent=pal.accent;dark=pal.rock
@@ -140,26 +150,9 @@ def draw_enemy(s,e,camera,t,era,stage=0):
                     line(s,dark,(x+side*(25+j*7),y-8),(x+side*(19+j*9)+gait,y),4)
         if e.kind=='armored':circle(s,accent,(x,y-32),29,3)
     else:
-        # Puma, ñandú, condor and baked-clay sentry silhouettes.
-        clay=(184,142,105)
-        if e.kind=='flyer':
-            for side in (-1,1):
-                polygon(s,dark,[(x,y-15),(x+side*53,y-47+gait),(x+side*41,y-13),(x+side*17,y-4)])
-            circle(s,PAPER,(x,y-28),9)
-        elif e.kind=='hopper':
-            ellipse(clay,(x-22,y-42,37,26))
-            line(s,clay,(x+8,y-34),(x+17,y-62),6);circle(s,clay,(x+19,y-66),8)
-            for side in (-1,1):line(s,dark,(x+side*8,y-20),(x+side*18+gait,y),4)
-        elif e.kind=='sentry':
-            ellipse(clay,(x-29,y-49,57,48));circle(s,dark,(x+12,y-27),11)
-            rect(s,clay,(x-31,y-7,62,8))
-        else:
-            ellipse(clay,(x-29,y-35,56,24));circle(s,clay,(x+d*25,y-34),12)
-            pg.draw.arc(s,clay,(int(x-d*48),int(y-43),38,32),0,math.pi,5)
-            for dx in (-19,19):line(s,dark,(x+dx,y-15),(x+dx+gait,y),6)
-            if e.kind=='armored':
-                ellipse(clay,(x-34,y-37,65,31))
-                for dx in range(-22,24,11):line(s,dark,(x+dx,y-34),(x+dx,y-15),2)
+        from .argentina_enemies import draw_human
+        draw_human(s,e,camera,t)
+        return
     # Shared combat language leaves the silhouettes intact.
     if e.kind=='armored':
         for dx in (-16,0,16):polygon(s,accent,[(x+dx-4,y-60),(x+dx,y-69),(x+dx+4,y-60)])

@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 import sys
 from .education import UPGRADES,LESSONS
-from .campaign import MAIN_LEVELS,TOTAL_LEVELS,DLC_START
+from .campaign import MAIN_LEVELS,TOTAL_LEVELS,DLC_START,MAIN_LEVEL_IDS,DLC_LEVEL_IDS,is_dlc,rank,successor,final_level
 
 
 def save_path():
@@ -14,7 +14,7 @@ def save_path():
 
 
 def defaults():
-    return dict(version=3,unlocked=0,current=0,started=False,finished=False,
+    return dict(version=4,unlocked=0,current=0,started=False,finished=False,
                 dlc_unlocked=DLC_START,dlc_current=DLC_START,dlc_started=False,dlc_finished=False,dlc_progress=None,
                 sound=True,fullscreen=False,progress=None,records={},age_band=1,
                 knowledge=0,upgrades=[],solved=[],discovered=[])
@@ -33,17 +33,18 @@ class Save:
         try:
             raw_bytes=self.path.read_bytes()
             raw=json.loads(raw_bytes.decode('utf-8-sig'))
-            if not isinstance(raw,dict) or raw.get('version') not in (1,2,3):
+            if not isinstance(raw,dict) or raw.get('version') not in (1,2,3,4):
                 raise ValueError('Formato de guardado desconocido')
             legacy=raw.get('version')==1
-            if raw.get('version') in (1,2):
+            if raw.get('version') in (1,2,3):
                 self.legacy_bytes=raw_bytes
             for key in ('unlocked','current'):
                 value=raw.get(key,0)
-                self.data[key]=max(0,min(MAIN_LEVELS-1,value*(3 if legacy else 1))) if type(value) is int else 0
+                candidate=value*(3 if legacy else 1) if type(value) is int else 0
+                self.data[key]=candidate if candidate in MAIN_LEVEL_IDS else 0
             for key in ('dlc_unlocked','dlc_current'):
                 value=raw.get(key,DLC_START)
-                self.data[key]=max(DLC_START,min(TOTAL_LEVELS-1,value)) if type(value) is int else DLC_START
+                self.data[key]=max(DLC_START,min(DLC_LEVEL_IDS[-1],value)) if type(value) is int else DLC_START
             for key in ('started','finished','sound','fullscreen','dlc_started','dlc_finished'):
                 if type(raw.get(key)) is bool:
                     self.data[key]=raw[key]
@@ -67,7 +68,7 @@ class Save:
                 self.data['records']={str(int(k)*3 if legacy else int(k)):v for k,v in records.items()
                                       if str(k).isdigit() and 0<=int(k)<(5 if legacy else TOTAL_LEVELS) and isinstance(v,dict)}
             p=raw.get('progress')
-            if isinstance(p,dict) and type(p.get('index')) is int and 0<=p['index']<7:
+            if isinstance(p,dict) and type(p.get('index')) is int and p['index'] in (0,1,2,3,4,5,6,8):
                 self.data['progress']=dict(p)
                 stage=p.get('stage',0)
                 self.data['progress']['stage']=stage if type(stage) is int and 0<=stage<3 else 0
@@ -122,7 +123,7 @@ class Save:
         return True
 
     def capture(self,world):
-        dlc=world.level_id>=DLC_START
+        dlc=is_dlc(world.level_id)
         self.data.update(**({'dlc_started':True,'dlc_current':world.level_id} if dlc else {'started':True,'current':world.level_id}))
         self.data['upgrades']=sorted(world.upgrades)
         self.data['solved']=sorted(world.answered|set(self.data['solved']))
@@ -136,7 +137,7 @@ class Save:
         world.upgrades=set(self.data['upgrades'])
         world.answered=set(self.data['solved'])
         world.player.configure(world.upgrades,True)
-        p=self.data.get('dlc_progress' if world.level_id>=DLC_START else 'progress')
+        p=self.data.get('dlc_progress' if is_dlc(world.level_id) else 'progress')
         if not p or p.get('index')!=world.index or p.get('stage',0)!=world.stage:
             return
         if p.get('layout_version')!=world.data['layout_version']:
@@ -150,9 +151,7 @@ class Save:
             setattr(world,key,set(valid_ids(p.get(key,[]),total)))
         checkpoint=p.get('checkpoint',-1)
         if type(checkpoint) is int and 0<=checkpoint<len(world.data['checkpoints']):
-            world.checkpoint=checkpoint
-            x,y=world.data['checkpoints'][checkpoint]
-            world.spawn=(x-14,y-64)
+            world.select_checkpoint(checkpoint)
             world.player.rect.topleft=world.spawn
         for key in ('time','deaths'):
             value=p.get(key,0)
@@ -172,13 +171,14 @@ class Save:
             world.boss.alive=world.boss.hp>0
 
     def completed(self,world):
-        prefix='dlc_' if world.level_id>=DLC_START else ''
-        end=TOTAL_LEVELS-1 if prefix else MAIN_LEVELS-1
-        self.data[prefix+'unlocked']=max(self.data[prefix+'unlocked'],min(end,world.level_id+1))
-        self.data[prefix+'current']=min(end,world.level_id+1)
+        prefix='dlc_' if is_dlc(world.level_id) else ''
+        following=successor(world.level_id)
+        frontier=self.data[prefix+'unlocked']
+        self.data[prefix+'unlocked']=max((frontier,following),key=rank)
+        self.data[prefix+'current']=following
         self.data[prefix+'started']=True
         self.data[prefix+'progress']=None
-        self.data[prefix+'finished']=world.level_id==end or self.data[prefix+'finished']
+        self.data[prefix+'finished']=final_level(world.level_id) or self.data[prefix+'finished']
         old=self.data['records'].get(str(world.level_id),{})
         previous=old.get('echoes',0)
         previous=previous if type(previous) is int else 0

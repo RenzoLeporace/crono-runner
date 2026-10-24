@@ -164,6 +164,7 @@ class World:
         self.upgrades=set(upgrades or ())
         self.answered=set(answered or ())
         self.data = level_data(index,stage)
+        self.checkpoint_ids=self.selected_checkpoints(self.difficulty)
         self.width = self.data['width']
         self.platforms = [Platform(p) for p in self.data['platforms']]
         self.player = Player(self.data['spawn'])
@@ -187,6 +188,8 @@ class World:
         """Apply a profile immediately without resurrecting defeated opponents."""
         band=max(0,min(2,band))
         self.difficulty=band
+        self.checkpoint_ids=self.selected_checkpoints(band)
+        self.select_checkpoint(self.checkpoint)
         for enemy in self.enemies:
             enemy.set_difficulty(band)
         if self.boss:
@@ -196,6 +199,21 @@ class World:
         p=self.player.rect
         candidates=[s for s in self.data['stations'] if abs(p.centerx-s[0])<85 and abs(p.bottom-s[1])<100]
         return min(candidates,key=lambda s:abs(p.centerx-s[0])) if candidates else None
+
+    def selected_checkpoints(self,band):
+        total=len(self.data['checkpoints'])
+        if band==0 or total<=2:return tuple(range(total))
+        if band==2:return (round((total-1)*.4),total-1)
+        return tuple(sorted({round(n*(total-1)/3) for n in range(4)}))
+
+    def select_checkpoint(self,index):
+        """Keep stable save IDs; removed anchors fall back to a previous valid one."""
+        self.checkpoint=max((i for i in self.checkpoint_ids if i<=index),default=-1)
+        if self.checkpoint<0:
+            self.spawn=self.data['spawn']
+        else:
+            x,y=self.data['checkpoints'][self.checkpoint]
+            self.spawn=(x-14,y-64)
 
     def say(self, text):
         self.message, self.message_time = text, 3.5
@@ -256,6 +274,8 @@ class World:
                 self.echoes.add(i)
                 events.append('echo')
         for i, (x, y) in enumerate(self.data['checkpoints']):
+            if i not in self.checkpoint_ids:
+                continue
             if i > self.checkpoint and abs(p.rect.centerx - x) < 40 and abs(p.rect.bottom - y) < 70:
                 self.checkpoint = i
                 self.spawn = (x - 14, y - 64)

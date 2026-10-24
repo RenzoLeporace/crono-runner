@@ -16,6 +16,7 @@ ITINERARIES=(
  '00101001212100010', '012321000123210010', '00123210100121000',
  '01234321212343210', '00012123212100010', '01212343212321000',
  '00012101232100010', '01232123210123210', '00123210123210000',
+ '000101221232100101', '01234323210101210', '00123234321012100',
 )
 ROUTE_NAMES=(
  ('Manglar','Copas enlazadas','Arrecife'),('Estratos','Garganta','Archivo fósil'),('Bosque caído','Cráter','Último refugio'),
@@ -26,6 +27,7 @@ ROUTE_NAMES=(
  ('Correspondencia','Trincheras vacías','Puesto de socorro'),('Refugios','Ciudad dañada','Evacuación'),('Reconstrucción','Asamblea','Memoria'),
  ('Red local','Servidores','Antenas'),('Agua','Energía solar','Aerogeneradores'),('Laboratorio','Observatorio','Portal a casa'),
  ('Plaza de Mayo','Recova','Cabildo'),('Camino del norte','Patios','Casa de Tucumán'),('Calles','Plaza cívica','Congreso'),
+ ('Cultivos','Canales','Puerto del Nilo'),('Canteras','Calzada','Meseta de Guiza'),('Avenida de esfinges','Sala de escribas','Santuario'),
 )
 
 def build_route(index,stage,meta):
@@ -91,11 +93,14 @@ def build_route(index,stage,meta):
                 kind=roster[(n+stage*2+index+j*3)%6]
                 ex=xx+ww*(.45+j*.24)
                 if all(abs(ex-sx)>145 or abs(yy-sy)>80 for sx,sy in safe):
-                    enemies.append(dict(x=ex,y=yy-34,left=xx+165,right=xx+ww-24,kind=kind))
+                    enemies.append(dict(x=ex,y=yy-34,left=xx+165,right=xx+ww-24,kind=kind,stage=stage))
         if n%3==2:
             hx=xx+ww-155
             if all(abs(hx-sx)>155 for sx,sy in safe):
                 hazards.append((hx,yy-14,48+stage*8,14))
+    if index==7:
+        from .argentina_history import annotate_roster
+        enemies=annotate_roster(enemies,stage)
     # Exactly 48 echoes: each upper route contributes, the remainder marks travel.
     echoes=[(platforms[b]['x']+78,platforms[b]['y']-36) for _,a,b,c in branches]
     for xx,yy,ww,k in main:
@@ -120,10 +125,16 @@ def build_route(index,stage,meta):
         checkpoints.append((tail_x+70,584))
         add(tail_x+230,488,150,24,oneway=True)
         add(tail_x+1030,488,150,24,oneway=True)
+    cultural_sites=[]
+    if index in (7,8):
+        keys=('lujan','itati') if index==7 else (('moses',) if stage==2 else ())
+        for fraction,key in zip((.18,.64),keys):
+            xx,yy,ww,k=main[int(len(main)*fraction)]
+            cultural_sites.append((xx+ww*.28,yy,key))
     zones=[(main[int(len(main)*f)][0],name) for f,name in zip((0,.35,.68),ROUTE_NAMES[level])]
     return dict(width=width,platforms=platforms,shards=targets,echoes=echoes,
         checkpoints=checkpoints,stations=stations,enemies=enemies,hazards=hazards,
         spawn=(100,520),portal=(width-160,584),meta=meta,boss=stage==2,
         arena_left=arena_left,arena_right=width-30,route_links=links,
-        main_nodes=[m[3] for m in main]+[end],zones=zones,route_name=' / '.join(ROUTE_NAMES[level]),
+        cultural_sites=cultural_sites,main_nodes=[m[3] for m in main]+[end],zones=zones,route_name=' / '.join(ROUTE_NAMES[level]),
         layout_version=3)

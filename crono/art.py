@@ -89,6 +89,13 @@ def clock_icon(surface, x, y, radius=16, color=CYAN, time=0):
              (x+math.cos(a)*(radius-6), y+math.sin(a)*(radius-6)), 1)
 
 
+def armor_marker(surface,x,y):
+    polygon(surface,(20,35,44),[(x-8,y-8),(x+8,y-8),(x+8,y+2),(x,y+10),(x-8,y+2)])
+    polygon(surface,GOLD,[(x-8,y-8),(x+8,y-8),(x+8,y+2),(x,y+10),(x-8,y+2)],2)
+    line(surface,GOLD,(x-3,y-2),(x+3,y+4),2)
+    line(surface,GOLD,(x+3,y-2),(x-3,y+4),2)
+
+
 def fern(surface, x, y, scale, color, flip=1):
     # Curved stem with alternating cut-paper leaflets.
     tip = (x + 28*scale*flip, y - 87*scale)
@@ -122,8 +129,6 @@ def tree(surface, x, base, height, color, kind='jungle'):
 
 class Artist:
     def __init__(self):
-        self.backgrounds = {}
-        self.tiles = {}
         self.vignette = pg.Surface((W, H), pg.SRCALPHA)
         # Soft edges, without dimming the playable centre.
         for n in range(110):
@@ -137,161 +142,27 @@ class Artist:
             alpha = int(230 * max(0, 1-x/W) ** .55)
             line(self.menu_shade, (8, 17, 25, alpha), (x, 0), (x, H))
 
-    def background(self, surface, index, camera, time,stage=0):
-        era = palette_for(index,stage)
-        background_key=(index,stage)
-        if background_key not in self.backgrounds:
-            sky = pg.Surface((W, H))
-            for y in range(H):
-                line(sky, mix(era.sky, era.horizon, min(1, y/640)), (0, y), (W, y))
-            rng = random.Random(106+index)
-            for _ in range(0 if era.kind=='cave' else 90):
-                x, y = rng.randrange(W), rng.randrange(30, 370)
-                circle(sky, mix(era.sky, PAPER, rng.uniform(.12, .38)), (x, y), 1)
-            self.backgrounds[background_key] = sky
-        surface.blit(self.backgrounds[background_key], (0, 0))
-        sunx = 930 - camera*.035
-        suny = 190 if index != 3 else 156
-        if era.kind!='cave':
-            glow(surface, (sunx, suny), 160, era.accent)
-            circle(surface, mix(era.accent, era.horizon, .35), (sunx, suny), 59 if index != 1 else 48)
-        if index == 3:
-            circle(surface, mix(era.sky, era.horizon, .13), (sunx+20, suny-13), 52)
-        # Clouds are thin, long torn shapes instead of repeating image rectangles.
-        for j in range(0 if era.kind=='cave' else 6):
-            x = ((j*311-camera*.06+time*(2+j%3)) % 1650)-200
-            y = 135+j%3*55
-            color = mix(era.horizon, era.sky, .5)
-            polygon(surface, color, [(x,y+8), (x+45,y), (x+103,y+4), (x+155,y-5), (x+240,y+8)])
-        if era.kind=='ice':
-            aurora=pg.Surface((W,300),pg.SRCALPHA)
-            for band in range(3):
-                points=[(x,130+band*29+math.sin(x*.005+time*.12+band)*38) for x in range(-20,W+40,25)]
-                points += [(x,y+12+band*7) for x,y in reversed(points)]
-                polygon(aurora,(115,222,206,16-band*3),points)
-            surface.blit(aurora,(0,25))
-        landmark_x=1040-camera*.17
-        landmark_color=mix(era.far,era.horizon,.12)
-        if era.kind=='jungle':
-            # A distant sauropod makes the first world's scale immediately clear.
-            x,y=landmark_x,437
-            pg.draw.ellipse(surface,landmark_color,(int(x-72),int(y-43),137,61))
-            for dx in (-43,-21,31,48):
-                line(surface,landmark_color,(x+dx,y),(x+dx-8,y+62),10)
-            line(surface,landmark_color,(x+45,y-19),(x+72,y-110),22)
-            line(surface,landmark_color,(x+72,y-110),(x+65,y-151),17)
-            pg.draw.ellipse(surface,landmark_color,(int(x+55),int(y-163),41,19))
-            polygon(surface,landmark_color,[(x-60,y-30),(x-157,y-10),(x-62,y-8)])
-        elif era.kind=='ruins':
-            x,y=landmark_x,443
-            rect(surface,landmark_color,(x-132,y-113,264,150))
-            polygon(surface,landmark_color,[(x-156,y-113),(x,y-208),(x+156,y-113)])
-            polygon(surface,mix(landmark_color,era.horizon,.12),[(x-115,y-132),(x,y-193),(x+115,y-132)])
-            for n in range(6):
-                rect(surface,era.far,(x-108+n*40,y-98,15,125))
-        elif era.kind=='factory':
-            x,y=landmark_x,387
-            for n in range(12):
-                a=n*math.tau/12+time*.025
-                points=[]
-                for rr,aa in ((63,a-.1),(87,a-.1),(87,a+.1),(63,a+.1)):
-                    points.append((x+math.cos(aa)*rr,y+math.sin(aa)*rr))
-                polygon(surface,landmark_color,points)
-            circle(surface,landmark_color,(x,y),68,18)
-            circle(surface,landmark_color,(x,y),17)
-            for n in range(6):
-                a=n*math.tau/6+time*.025
-                line(surface,landmark_color,(x,y),(x+math.cos(a)*62,y+math.sin(a)*62),7)
-        for layer, (factor, base, color) in enumerate(((.12,480,era.far), (.27,555,era.near))):
-            offset = camera*factor
-            first = int(offset//320)-1
-            for n in range(first, first+7):
-                rng = random.Random(n*177+layer*47+index*2301)
-                x = n*320-offset
-                peak = base-rng.randint(110,245)
-                polygon(surface, color, [(x-80, H), (x-60,base-20), (x+60,peak+44),
-                                         (x+140,peak), (x+200,peak+55), (x+350,base-20), (x+410,H)])
-                if era.kind == 'ice':
-                    polygon(surface, mix(color, era.top, .35), [(x+60,peak+44), (x+140,peak),
-                        (x+205,peak+58), (x+148,peak+37), (x+118,peak+64), (x+99,peak+47)])
-                if era.kind in ('jungle', 'ice', 'castle'):
-                    for j in range(3):
-                        tree(surface, x+j*110, base+30, rng.randint(100,210), color,
-                             'jungle' if era.kind == 'jungle' else 'pine')
-                elif era.kind == 'ruins':
-                    for j in range(3):
-                        xx = x+j*90
-                        height = rng.randint(110,200)
-                        rect(surface, color, (xx, base-height, 20, height+150))
-                        rect(surface, color, (xx-7, base-height, 34, 13))
-                    rect(surface, color, (x-15, base-190, 230, 18))
-                elif era.kind == 'factory':
-                    for j in range(3):
-                        xx, yy = x+j*93, base-rng.randint(90,170)
-                        rect(surface, color, (xx, yy, 85, 300))
-                        rect(surface, color, (xx+20, yy-75, 16, 90))
-                        for wy in range(int(yy+18), int(base), 30):
-                            rect(surface, mix(color, era.accent, .2), (xx+14, wy, 9, 14))
-                            rect(surface, mix(color, era.accent, .15), (xx+50, wy, 9, 14))
-            if era.kind == 'castle':
-                for n in range(first, first+6):
-                    x = n*430-offset
-                    by = 460+layer*45
-                    rect(surface, color, (x,by-180,64,300))
-                    polygon(surface, color, [(x-12,by-180), (x+32,by-246), (x+76,by-180)])
-                    rect(surface, color, (x+64,by-100,150,200))
-                    for j in range(6):
-                        rect(surface, color, (x+60+j*29,by-116,17,25))
-                    rect(surface, mix(color, era.accent, .3), (x+27,by-151,10,26), 5)
-        # Slowly drifting mote field gives each era a different atmosphere.
-        for i in range(26):
-            x = (i*137.31 - camera*.4 + math.sin(time*.2+i)*22) % W
-            y = (i*89.4 + time*(13 if index == 1 else -5)) % 650
-            brightness = .3+.22*math.sin(time+i)
-            circle(surface, mix(era.near, era.accent, brightness), (x,y), 2 if i%4==0 else 1)
-
-    def platform_image(self, p, index,stage=0):
-        era = palette_for(index,stage)
-        key = (index,stage, int(p.rect.w), int(p.rect.h), int(p.origin), p.moving)
-        if key in self.tiles:
-            return self.tiles[key]
-        width, height = int(p.rect.w), int(p.rect.h)
-        s = pg.Surface((width, height+18), pg.SRCALPHA)
-        rng = random.Random(int(p.origin)+index*31)
-        if p.moving:
-            polygon(s, era.rock, [(0,0),(width,0),(width-14,20),(14,20)])
-            rect(s, era.accent, (0,0,width,3))
-            rect(s, era.near, (12,7,width-24,6))
-            for x in range(20,width-10,20):
-                diamond(s,(x,11),3,CYAN)
+    def background(self,surface,index,camera,time,stage=0):
+        if index<7:
+            from .period_art import background
+            background(surface,index,stage,camera,time)
+        elif index==7:
+            from .argentina_art import background
+            background(surface,stage,camera,time)
         else:
-            polygon(s, era.rock, [(0,0),(width,0),(width,height-9),(width-12,height),
-                                  (17,height),(0,height-12)])
-            # Wide facets, stratified seams and sparse mineral flecks.
-            for _ in range(max(3, width//55)):
-                x = rng.randrange(width)
-                y = rng.randrange(9,max(10,height))
-                col = mix(era.rock, era.near, rng.uniform(.15,.7))
-                polygon(s,col,[(x,y),(min(width,x+60),y-5),(min(width,x+34),min(height,y+40))])
-            for y in range(37,height,38):
-                line(s, mix(era.rock, INK,.2), (0,y),(width,y+9),2)
-            rect(s, mix(era.top, era.rock,.5),(0,5,width,9))
-            rect(s, era.top,(0,0,width,5))
-            for x in range(4,width-4,12):
-                if era.kind == 'jungle':
-                    line(s, era.top,(x,3),(x+rng.randint(-5,5),-rng.randint(0,6)),2)
-                    if rng.random()<.22:
-                        line(s,mix(era.top,era.rock,.45),(x,7),(x-2,20),2)
-                elif era.kind == 'ice':
-                    if rng.random()<.35:
-                        polygon(s,era.top,[(x,6),(x+8,6),(x+3,rng.randint(13,24))])
-                elif era.kind in ('ruins','castle'):
-                    line(s,mix(era.rock,INK,.35),(x+6,6),(x+6,14))
-            for _ in range(width//28):
-                x,y = rng.randrange(width), rng.randrange(12,max(13,height))
-                line(s, mix(era.rock,era.top,.2),(x,y),(x+4,y))
-        self.tiles[key] = s
-        return s
+            from .egypt_art import background
+            background(surface,stage,camera,time)
+
+    def platform_image(self,p,index,stage=0):
+        args=(stage,int(p.rect.w),int(p.rect.h),int(p.origin),p.moving)
+        if index<7:
+            from .period_art import tile
+            return tile(index,*args)
+        if index==7:
+            from .argentina_art import platform_tile
+            return platform_tile(*args)
+        from .egypt_art import tile
+        return tile(*args)
 
     def scenery(self, surface, world, camera, time):
         era = palette_for(world.index,world.stage)
@@ -300,36 +171,6 @@ class Artist:
                 if abs(world.player.rect.centerx-wx)<280:
                     text(surface,label,(wx-camera,351),11,mix(era.accent,PAPER,.3),True,'center')
         # Landmarks live in world space, and never obscure hazards or pickups.
-        for n, wx in enumerate(range(190,int(world.width),740)):
-            x = wx-camera
-            if x < -250 or x > W+250:
-                continue
-            if era.kind == 'jungle':
-                tree(surface,x,584,230+n%2*60,mix(era.near,era.rock,.5))
-                fern(surface,x+40,584,.8,era.near,-1)
-            elif era.kind == 'ice':
-                polygon(surface,mix(era.near,era.top,.19),[(x-30,584),(x-10,438),(x+35,399),(x+61,584)])
-                polygon(surface,mix(era.near,era.top,.28),[(x-10,438),(x+35,399),(x+15,584)])
-            elif era.kind == 'ruins':
-                rect(surface,mix(era.rock,era.top,.15),(x,386,30,198))
-                rect(surface,mix(era.rock,era.top,.25),(x-12,380,54,20))
-                rect(surface,mix(era.rock,era.top,.2),(x-8,565,46,19))
-                for j in range(3):
-                    line(surface,era.rock,(x+7+j*7,410),(x+7+j*7,555),2)
-            elif era.kind == 'castle':
-                rect(surface,era.near,(x,405,12,179))
-                polygon(surface,mix(era.accent,era.near,.45),[(x+12,407),(x+73,413),(x+54,447),(x+12,442)])
-                circle(surface,era.accent,(x+38,427),5,1)
-            elif era.kind=='ash':
-                burnt_tree(surface,x,584,185+n%2*45,era.near)
-                line(surface,(145,68,44),(x-5,560),(x+2,492),2)
-            elif era.kind in ('desert','cave','fields'):
-                polygon(surface,era.near,[(x-24,584),(x-14,552),(x+16,542),(x+33,584)])
-            else:
-                rect(surface,era.near,(x,429,15,155))
-                line(surface,era.near,(x+7,429),(x+42,429),6)
-                rect(surface,era.accent,(x+29,434,24,28),5)
-                glow(surface,(x+41,447),55,era.accent)
         for p in world.platforms:
             r=p.rect
             if r.right < camera-20 or r.left > camera+W+20:
@@ -343,6 +184,8 @@ class Artist:
             midpoint=(a.right+b.left)/2-camera
             glow(surface,(midpoint,735),95,era.near)
         for n, (wx, wy) in enumerate(world.data['checkpoints']):
+            if n not in world.checkpoint_ids:
+                continue
             x=wx-camera
             active = n <= world.checkpoint
             color=CYAN if active else era.accent
@@ -482,20 +325,6 @@ class Artist:
         draw_enemy(surface,enemy,camera,time,index,stage)
 
     def foreground(self,surface,world,camera):
-        era=palette_for(world.index,world.stage)
-        for n,wx in enumerate(range(65,int(world.width),430)):
-            x=wx-camera
-            if -80<x<W+80:
-                if era.kind=='jungle':
-                    fern(surface,x,599,.65, mix(era.rock,era.top,.32),-1 if n%2 else 1)
-                elif era.kind=='ice':
-                    for dx in (-6,6):
-                        polygon(surface,era.top,[(x+dx,588),(x+dx+4,566-abs(dx)),(x+dx+10,588)])
-                elif era.kind=='ash':
-                    line(surface,(172,77,45),(x-12,588),(x+15,593),2)
-                else:
-                    for j in range(4):
-                        line(surface,mix(era.rock,era.top,.45),(x+j*5,588),(x+j*7,572+j%3*4),2)
         surface.blit(self.vignette,(0,0))
 
     def scene(self,surface,world,camera,time):
@@ -506,8 +335,18 @@ class Artist:
         map_features(surface,world,camera,time)
         ambient_front(surface,world,camera,time)
         self.scenery(surface,world,camera,time)
+        if world.index==7:
+            from .argentina_art import props
+            props(surface,world,camera,time)
+        elif world.index<7:
+            from .period_art import props
+            props(surface,world,camera,time)
         learning_objects(surface,world,camera,time)
+        from .heritage import draw_sites
+        draw_sites(surface,world,camera,time)
         for enemy in world.enemies:
+            if world.index==7:
+                enemy.show_label=abs(world.player.rect.centerx-enemy.rect.centerx)<240
             self.enemy(surface,enemy,camera,time,world.index,world.stage)
         p=world.player
         boss_art(surface,world.boss,camera,time)

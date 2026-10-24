@@ -6,7 +6,7 @@ from .education import STAGES,LESSONS,AGE_BANDS
 from .learning_ui import wrapped
 from .question_bank import QuestionBank,builtin_records
 from .text_field import TextField
-from .campaign import ERA_LABELS,TOTAL_ERAS,TOTAL_LEVELS,DIFFICULTIES
+from .campaign import ERA_LABELS,TOTAL_ERAS,TOTAL_LEVELS,DIFFICULTIES,level_label,CHAPTER_ORDER
 
 
 def shortened(value,width,size=16):
@@ -69,7 +69,7 @@ class TeacherUI:
         text(s,'Zona docente',(650,184),26,PAPER,True)
         wrapped(s,f'{len(self.bank.records)} preguntas con sus respuestas. Puedes consultar todo el banco, editar contenidos y agregar preguntas para cada mapa y edad.',(650,239),532,19,PAPER,leading=30)
         self.button('Ver y editar preguntas',(650,371,542,58),lambda:self.set_state('teacher'),True)
-        self.button('Ver los 24 escenarios',(650,448,542,49),self.open_scenarios,small=True)
+        self.button('Ver los 27 escenarios',(650,448,542,49),self.open_scenarios,small=True)
         text(s,'Las respuestas son visibles en la zona docente.',(650,524),14,GOLD)
         self.button('Volver',(65,628,249,49),self.close_settings,True,small=True)
         if self.bank.warning:
@@ -112,7 +112,7 @@ class TeacherUI:
             selected=q['id']==self.teacher_selected
             self.button('',(65,y,693,53),lambda key=q['id']:self.select_teacher_question(key),primary=selected,arrow=False)
             color=(16,36,44) if selected else PAPER
-            meta=f'#{q["id"]+1:03d}   ·   {q["topic"]//6+1}.{q["topic"]//2%3+1}   ·   {("6–9","10–14","15+")[q["band"]]} años'
+            meta=f'#{q["id"]+1:03d}   ·   {level_label(q["topic"]//2)}   ·   {("6–9","10–14","15+")[q["band"]]} años'
             text(s,meta,(78,y+4),11,color,True)
             text(s,shortened(q['prompt'],660,16),(78,y+23),16,color)
         if not results:
@@ -234,7 +234,7 @@ class TeacherUI:
         text(s,'Nueva pregunta' if new else f'Editar pregunta #{self.teacher_draft["id"]+1:03d}',(62,49),33,PAPER,True,serif=True)
         topic=self.teacher_draft['topic']
         level_id=topic//2
-        self.button(f'{level_id//3+1}.{level_id%3+1} · '+shortened(STAGES[level_id].name,280,14),(65,99,550,36),
+        self.button(f'{level_label(level_id)} · '+shortened(STAGES[level_id].name,280,14),(65,99,550,36),
                     lambda:setattr(self,'teacher_picker',True),small=True,arrow=False)
         self.button('Archivo '+str(topic%2+1),(630,99,225,36),lambda:self.teacher_draft.update(topic=topic//2*2+(1-topic%2)),small=True,arrow=False)
         self.button(('6–9 años','10–14 años','15+ años')[self.teacher_draft['band']],(870,99,345,36),
@@ -264,10 +264,11 @@ class TeacherUI:
             self.buttons=[]
             rect(s,(20,36,47),(42,57,1196,605),8)
             text(s,'Elegir mapa para esta pregunta',(66,77),30,PAPER,True,serif=True)
-            for n,meta in enumerate(STAGES):
-                x=66+n%3*391
-                y=139+n//3*56
-                self.button(f'{n//3+1}.{n%3+1} · {meta.name}',(x,y,368,50),lambda value=n:self.pick_teacher_map(value),
+            for row,n in enumerate(e*3+s for e in CHAPTER_ORDER for s in range(3)):
+                meta=STAGES[n]
+                x=66+row%3*391
+                y=128+row//3*50
+                self.button(f'{level_label(n)} · {meta.name}',(x,y,368,45),lambda value=n:self.pick_teacher_map(value),
                             primary=n==level_id,small=True,arrow=False,wrap=True)
             self.button('Volver',(66,602,218,42),lambda:setattr(self,'teacher_picker',False),small=True)
         if self.teacher_discard:
@@ -376,7 +377,7 @@ class TeacherUI:
         self.artist.scene(s,self.preview_world,self.preview_camera,self.time)
         rect(s,(12,25,35),(0,0,W,107))
         meta=STAGES[self.preview_level]
-        tracked(s,f'GALERÍA · {self.preview_level//3+1}.{self.preview_level%3+1}',(35,17),11,CYAN,3)
+        tracked(s,f'GALERÍA · {level_label(self.preview_level)}',(35,17),11,CYAN,3)
         text(s,meta.name,(33,45),33,PAPER,True,serif=True)
         rect(s,(12,25,35),(0,621,W,99))
         self.button('Configuración',(35,649,235,43),lambda:self.set_state('settings'),small=True)

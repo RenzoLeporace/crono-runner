@@ -26,7 +26,7 @@ class ExpansionTests(unittest.TestCase):
 
     def test_all_layouts_are_long_unique_and_have_required_branches(self):
         signatures=set()
-        for n in range(24):
+        for n in range(27):
             w=World(*divmod(n,3))
             self.assertGreater(w.width,12000-1)
             signatures.add(tuple((p.rect.x,p.rect.y,p.rect.w,p.oneway) for p in w.platforms))
@@ -38,7 +38,7 @@ class ExpansionTests(unittest.TestCase):
             for x,y in w.data['shards']:
                 holders=[p for p in w.platforms if p.rect.left<=x<=p.rect.right and 20<p.rect.top-y<50]
                 self.assertTrue(any(p.oneway for p in holders))
-        self.assertEqual(len(signatures),24)
+        self.assertEqual(len(signatures),27)
 
     def test_dlc_progress_does_not_advance_main_journey(self):
         s=Save(self.path);s.data.update(current=4,unlocked=5,started=True)
@@ -90,13 +90,13 @@ class ExpansionTests(unittest.TestCase):
         self.path.write_text(json.dumps(dict(version=1,questions=records)),encoding='utf-8')
         bank=QuestionBank(self.path)
         self.assertFalse(bank.warning)
-        self.assertEqual(len(bank.records),289)
+        self.assertEqual(len(bank.records),325)
         self.assertEqual(bank.get(180)['prompt'],custom['prompt'])
         self.assertEqual(bank.get(0)['prompt'],records[0]['prompt'])
         self.assertTrue(bank.choose(47,2,random.Random(4)))
         bank.upsert(bank.get(0))
         loaded=QuestionBank(self.path)
-        self.assertEqual(len(loaded.records),289)
+        self.assertEqual(len(loaded.records),325)
 
     def test_enemy_age_changes_speed_health_and_attack_pattern(self):
         counts=[]
@@ -138,12 +138,12 @@ class ExpansionTests(unittest.TestCase):
         self.assertGreater(p.rect.bottom,upper.rect.top)
         self.assertFalse(p.grounded)
 
-    def test_all_48_topics_give_one_reward_including_argentina(self):
+    def test_all_54_topics_give_one_reward_including_argentina(self):
         s=Save(self.path)
-        for topic in range(48):
+        for topic in range(54):
             self.assertTrue(s.answer(topic));self.assertFalse(s.answer(topic))
-        self.assertEqual(s.data['knowledge'],96)
-        self.assertEqual(len(Save(self.path).data['solved']),48)
+        self.assertEqual(s.data['knowledge'],108)
+        self.assertEqual(len(Save(self.path).data['solved']),54)
 
 class ExpansionUITests(unittest.TestCase):
     @classmethod
@@ -177,18 +177,18 @@ class ExpansionUITests(unittest.TestCase):
         from crono.enemy_art import draw_enemy
         for kind in ('walker','flyer','sentry','armored'):
             masks=[]
-            for era in range(8):
+            for era in range(9):
                 s=pg.Surface((190,170),pg.SRCALPHA)
                 e=Enemy(dict(x=75,y=100,left=0,right=500,kind=kind),era)
                 e.rect.bottom=140
                 draw_enemy(s,e,0,0,era)
                 mask=pg.mask.from_surface(s)
                 masks.append(bytes(mask.to_surface(setcolor=(255,255,255),unsetcolor=(0,0,0)).get_view('1')))
-            self.assertEqual(len(set(masks)),8,f'{kind} silhouettes repeat')
+            self.assertEqual(len(set(masks)),9,f'{kind} silhouettes repeat')
 
     def test_all_new_maps_bosses_profiles_and_teacher_assignment_render(self):
         g=self.game
-        for era in range(5,8):
+        for era in range(5,9):
             for band in range(3):
                 g.set_age(band)
                 for stage in range(3):
@@ -199,6 +199,6 @@ class ExpansionUITests(unittest.TestCase):
         for state in ('chapters','settings','notebook','bestiary'):
             g.state=state;g.render()
         g.edit_question(10000);g.teacher_picker=True;g.render()
-        self.assertEqual(len(g.buttons),25)
+        self.assertEqual(len(g.buttons),28)
 
 if __name__=='__main__':unittest.main(verbosity=2)

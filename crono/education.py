@@ -346,8 +346,8 @@ UPGRADES=[
 
 
 def next_level(era,stage):
-    from .campaign import MAIN_LEVELS,TOTAL_LEVELS
-    return min(TOTAL_LEVELS-1 if era==7 else MAIN_LEVELS-1,era*3+stage+1)
+    from .campaign import successor
+    return successor(era*3+stage)
 
 
 assert len(LESSONS)==30 and sum(len(x.questions) for x in LESSONS)==180
@@ -393,4 +393,7 @@ def fact_for(topic,band):
 from .expansion_content import extend_content
 extend_content(Stage,lesson,STAGES,LESSONS,SOURCES)
 
-assert len(STAGES)==24 and len(LESSONS)==48
+from .egypt_content import extend_egypt
+extend_egypt(Stage,lesson,STAGES,LESSONS,SOURCES)
+
+assert len(STAGES)==27 and len(LESSONS)==54

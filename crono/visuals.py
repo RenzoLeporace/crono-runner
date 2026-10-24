@@ -40,10 +40,13 @@ MOODS=(
  Mood('Recova y Cabildo en el Buenos Aires de 1810','cabildo',(69,92,107),(229,201,157),'argentina'),
  Mood('Patios, cerros y Casa de Tucumán en 1816','tucuman',(66,88,111),(228,190,147),'argentina'),
  Mood('Plaza cívica y recuperación democrática de 1983','democracy',(24,48,79),(137,181,206),'argentina'),
+ Mood('Campos, palmeras y barcos sobre el Nilo','nile',(35,97,123),(241,208,143),'egypt'),
+ Mood('Canteras y pirámides entre dunas al atardecer','giza',(106,79,86),(244,182,105),'egypt'),
+ Mood('Columnas pintadas, papiros y cielo estrellado','temple',(16,31,62),(91,101,129),'egypt'),
 )
 
 
-@lru_cache(maxsize=24)
+@lru_cache(maxsize=27)
 def palette_for(era,stage=0):
     base=ERAS[era]
     mood=MOODS[era*3+stage]

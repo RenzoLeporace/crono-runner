@@ -23,7 +23,8 @@ class AtlasUI:
         for n,(x,y) in enumerate(w.data['shards']):diamond(s,point(x,y-16),8,CYAN if n in w.shards else GOLD,n in w.shards)
         for x,y,topic in w.data['stations']:
             px,py=point(x,y-65);rect(s,CYAN,(px-4,py-4,8,8))
-        for x,y in w.data['checkpoints']:circle(s,(180,185,210),point(x,y-20),3)
+        for i in w.checkpoint_ids:
+            x,y=w.data['checkpoints'][i];circle(s,(180,185,210),point(x,y-20),3)
         for x,name in w.data['zones']:
             px,_=point(x,0)
             text(s,name,(px,231),13,GOLD,True)

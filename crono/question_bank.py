@@ -16,7 +16,7 @@ def content_path():
 
 
 def builtin_records():
-    return [dict(id=(topic*6 if topic<30 else 10000+(topic-30)*6)+variant,topic=topic,band=variant//2,prompt=q[0],
+    return [dict(id=(topic*6 if topic<30 else 10000+(topic-30)*6 if topic<48 else 2000000+(topic-48)*6)+variant,topic=topic,band=variant//2,prompt=q[0],
                  options=list(q[1:]),correct=0,explanation=fact_for(topic,variant//2),
                  source=SOURCES[lesson.source][1])
             for topic,lesson in enumerate(LESSONS) for variant,q in enumerate(lesson.questions)]
@@ -53,12 +53,18 @@ class QuestionBank:
         self.warning=''
         try:
             document=json.loads(self.path.read_text(encoding='utf-8-sig'))
-            if not isinstance(document,dict) or document.get('version') not in (1,2) or not isinstance(document.get('questions'),list):
+            if not isinstance(document,dict) or document.get('version') not in (1,2,3) or not isinstance(document.get('questions'),list):
                 raise ValueError('Formato de banco desconocido.')
             records=[validate_record(q) for q in document['questions']]
-            if document['version']==1:
-                # Old teacher IDs >=180 remain intact; new official IDs use 10000+.
-                records.extend(q for q in builtin_records() if q['topic']>=30)
+            if document['version']<3:
+                # Add new curriculum without replacing an existing teacher record.
+                first=30 if document['version']==1 else 48
+                used={q['id'] for q in records}
+                for q in builtin_records():
+                    if q['topic']>=first:
+                        if q['id'] in used:
+                            q['id']=max(used)+1
+                        used.add(q['id']);records.append(q)
             if len({r['id'] for r in records})!=len(records):
                 raise ValueError('Hay identificadores de pregunta repetidos.')
             self.validate_pools(records)
@@ -106,7 +112,7 @@ class QuestionBank:
 
     @staticmethod
     def serialise(records):
-        return json.dumps(dict(version=2,questions=records),ensure_ascii=False,indent=2)+'\n'
+        return json.dumps(dict(version=3,questions=records),ensure_ascii=False,indent=2)+'\n'
 
     def upsert(self,draft):
         candidate=deepcopy(draft)

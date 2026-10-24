@@ -26,10 +26,10 @@ class EducationTests(unittest.TestCase):
     def tearDown(self):
         self.folder.cleanup()
 
-    def test_288_authored_questions_cover_every_age_and_map(self):
-        self.assertEqual(len(STAGES),24)
-        self.assertEqual(len(LESSONS),48)
-        self.assertEqual(sum(len(l.questions) for l in LESSONS),288)
+    def test_324_authored_questions_cover_every_age_and_map(self):
+        self.assertEqual(len(STAGES),27)
+        self.assertEqual(len(LESSONS),54)
+        self.assertEqual(sum(len(l.questions) for l in LESSONS),324)
         positions=set()
         for topic,lesson in enumerate(LESSONS):
             for band in range(3):
@@ -89,7 +89,7 @@ class EducationTests(unittest.TestCase):
         self.assertEqual(w.checkpoint,-1)
         migrated.capture(w)
         self.assertTrue(self.save.path.with_name('progress-v1-respaldo.json').exists())
-        self.assertEqual(Save(self.save.path).data['version'],3)
+        self.assertEqual(Save(self.save.path).data['version'],4)
 
     def test_profile_and_upgrades_persist_on_save_restore(self):
         self.save.data.update(age_band=0,knowledge=10)
@@ -201,7 +201,7 @@ class GuardianTests(unittest.TestCase):
 
     def test_every_guardian_can_be_defeated_without_upgrades(self):
         """Combat-only fixtures run actual AI, projectiles, damage and collisions."""
-        for era in range(8):
+        for era in range(9):
             w=World(era,2)
             w.enemies=[]
             w.hazards=[]
@@ -305,7 +305,7 @@ class EducationalInterfaceTests(unittest.TestCase):
                     g.quiz_mode=mode
                     g.render()
                     self.assertTrue(g.buttons)
-        for page in range(8):
+        for page in range(9):
             g.notebook_page=page
             g.state='notebook'
             g.render()

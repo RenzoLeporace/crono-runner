@@ -14,6 +14,7 @@ sys.path.insert(0,str(ROOT/'.vendor'))
 os.environ.update(SDL_VIDEODRIVER='dummy',SDL_AUDIODRIVER='dummy',PYGAME_HIDE_SUPPORT_PROMPT='1')
 import pygame as pg
 from crono.physics import World, Player, Platform, Controls, STEP, RUN
+from crono.campaign import MAIN_LEVEL_IDS,successor
 from crono.save import Save, defaults
 
 
@@ -167,7 +168,7 @@ class PhysicsTests(unittest.TestCase):
 class CampaignTests(unittest.TestCase):
     def test_all_required_routes_reachable_with_real_jump_physics(self):
         from route_probe import probe_route
-        for level_id in range(24):
+        for level_id in range(27):
             world=World(*divmod(level_id,3))
             reachable,failed=probe_route(world)
             for x,y in world.data['shards']:
@@ -179,10 +180,10 @@ class CampaignTests(unittest.TestCase):
             self.assertEqual(len(world.data['echoes']),48)
             print(f'Map {level_id+1}: mandatory route and three branched fragments reachable',flush=True)
 
-    def test_campaign_unlocks_all_five_eras_and_ending(self):
+    def test_campaign_unlocks_all_eight_eras_and_ending(self):
         with tempfile.TemporaryDirectory(dir=TEMP_ROOT) as folder:
             save=Save(Path(folder)/'progress.json')
-            for level_id in range(21):
+            for level_id in MAIN_LEVEL_IDS:
                 era,stage=divmod(level_id,3)
                 w=World(era,stage)
                 w.shards={0,1,2}
@@ -193,7 +194,7 @@ class CampaignTests(unittest.TestCase):
                 w.update(STEP,Controls())
                 self.assertTrue(w.complete)
                 save.completed(w)
-                self.assertEqual(save.data['unlocked'],min(20,level_id+1))
+                self.assertEqual(save.data['unlocked'],successor(level_id))
             self.assertTrue(Save(save.path).data['finished'])
 
 

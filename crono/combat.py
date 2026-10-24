@@ -1,15 +1,17 @@
 """Enemy archetypes and five telegraphed guardians. All guardians are fictional."""
 import math
 import pygame as pg
+from .humanoid_roster import humanoid,HEIGHTS
 
 ENEMY_NAMES=dict(walker='Rondador',hopper='Saltador',flyer='Alado',sentry='Centinela',charger='Embistente',armored='Acorazado')
 ENEMY_HINTS=dict(walker='Patrulla el suelo.',hopper='Salta al acercarte.',flyer='Oscila en el aire.',
-                 sentry='Dispara a distancia.',charger='Avisa y embiste.',armored='Resiste tres impactos; evita sus púas.')
+                 sentry='Dispara a distancia.',charger='Avisa y embiste.',armored='Protegido: no lo pises. Dispara o usa impulso.')
 BOSS_NAMES=('El guardián del impacto','La matriarca de escarcha','El coloso de bronce','El vigía de las campanas','El titán de vapor',
-            'El blindado del olvido','El núcleo de la red','El custodio de la memoria')
+            'El blindado del olvido','El núcleo de la red','El cerrojo del silencio','El centinela de arenisca')
 BOSS_HINTS=('Salta la onda de choque.','Esquiva la carga y dispara después.','Muévete entre sus proyectiles.',
             'Evita el picado; ataca al aterrizar.','Salta las descargas de vapor.',
-            'Busca los huecos entre las salvas.','Esquiva los nodos marcados.','Alterna salto y desplazamiento.')
+            'Busca los huecos entre las salvas.','Esquiva los nodos marcados.','Alterna salto y desplazamiento.',
+            'Salta la arena y esquiva las piedras marcadas.')
 
 
 class Projectile:
@@ -35,9 +37,13 @@ class Enemy:
             spec=dict(x=x,y=y,left=left,right=right,kind='walker')
         self.kind=spec.get('kind','walker')
         self.era=era
+        self.stage=spec.get('stage',0)
+        self.faction=spec.get('faction','royalist' if self.stage<2 else 'state_force')
+        if era==7 and self.kind=='flyer':
+            self.kind='sentry'
         self.difficulty=0
         self.left,self.right=spec['left'],spec['right']
-        height=36 if self.kind=='flyer' else (49,48,62,64,48,56,48,48)[era]
+        height=HEIGHTS[era] if humanoid(era,self.kind) else (84 if self.stage<2 else 78) if era==7 else 36 if self.kind=='flyer' else (49,48,62,64,48,56,48,48,36)[era]
         self.rect=pg.FRect(spec['x'],spec['y']+34-height,44,height)
         self.base_y=self.rect.y
         if self.kind=='flyer':
@@ -144,7 +150,7 @@ class Boss:
         self.base_hp=18+min(era,4)*4
         self.max_hp=self.hp=self.base_hp
         self.difficulty=0
-        self.rect=pg.FRect(left+(right-left)*.54,464,122,120)
+        self.rect=pg.FRect(left+(right-left)*.54,456 if era==7 else 464,238 if era==7 else 122,128 if era==7 else 120)
         self.active=False
         self.alive=True
         self.phase='waiting'
@@ -176,15 +182,18 @@ class Boss:
     def begin_attack(self,world):
         self.phase='attack'
         self.attack_time=0
-        self.timer=(.5,.85,.5,1.15,.75,.95,1.1,.85)[self.era]
+        self.timer=(.5,.85,.5,1.15,.75,.95,1.1,.85,.9)[self.era]
         rate=(1,1.2,1.4)[self.difficulty]
         x=self.rect.centerx
         enraged=self.hp<self.max_hp*.5
-        if self.era in (0,4,7):
+        if self.era in (0,4,7,8):
             for direction in (-1,1):
                 world.projectiles.append(Projectile(x,570,direction*(285 if self.era==0 else 345)*rate,kind='wave'))
                 if self.era in (4,7):
                     world.projectiles.append(Projectile(x,470,direction*220*rate))
+            if self.era==8:
+                for dx in (-135,135):
+                    self.telegraphs.append([max(self.left+65,min(self.right-65,world.player.rect.centerx+dx)),1.05])
         elif self.era in (2,5):
             sign=1 if world.player.rect.centerx>x else -1
             angles=((-.38,-.18,0,.18,.38) if self.difficulty else (-.38,0,.38)) if self.era==5 else (-.23,0,.23)

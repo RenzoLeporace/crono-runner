@@ -51,6 +51,7 @@ class LearningUI:
         self.question_history={}
         self.quiz_reward=False
         self.notebook_page=0
+        self.heritage_key='lujan'
         self.chapter_era=0
         self.quiz_scroll=0
         self.quiz_feedback_scroll=0
@@ -63,13 +64,13 @@ class LearningUI:
         self.save.write()
 
     def age_switch(self,x,y,width=350):
-        tracked(self.canvas,'EDAD · PREGUNTAS Y COMBATE',(x,y-22),10,MUTED,2)
+        tracked(self.canvas,'EDAD · PREGUNTAS, COMBATE Y ANCLAS',(x,y-22),10,MUTED,2)
         for band,label in enumerate(('6–9 años','10–14 años','15+ años')):
             self.button(label,(x+band*(width+9)/3,y,(width-18)/3,34),lambda n=band:self.set_age(n),
                         primary=band==self.save.data['age_band'],small=True,arrow=False)
 
     def open_panel(self,name):
-        if self.state not in ('workshop','notebook','bestiary'):
+        if self.state not in ('workshop','notebook','bestiary','heritage'):
             self.panel_return=self.state
         self.set_state(name)
 
@@ -77,6 +78,12 @@ class LearningUI:
         self.set_state(self.panel_return)
 
     def interact(self):
+        from .heritage import near_site
+        site=near_site(self.world)
+        if site:
+            self.heritage_key=site[2]
+            self.open_panel('heritage')
+            return
         station=self.world.near_station()
         if station:
             self.open_lesson(station[2])
@@ -255,7 +262,8 @@ class LearningUI:
             text(s,'RESUELTO' if topic in self.save.data['solved'] else 'POR RESOLVER',(x+534,y+168),11,CYAN,True,'midright')
         self.button('Volver',(65,628,171,48),self.close_panel,True,small=True)
         self.button('Mejoras',(250,628,190,48),lambda:self.open_panel('workshop'),small=True)
-        self.button('Ecos y guardianes',(454,628,257,48),lambda:self.open_panel('bestiary'),small=True)
+        self.button('Ecos y guardianes',(454,628,230,48),lambda:self.open_panel('bestiary'),small=True)
+        self.button('Patrimonio',(698,628,155,48),lambda:self.open_panel('heritage'),small=True,arrow=False)
         self.button('Anterior',(867,628,157,48),lambda:setattr(self,'notebook_page',self.notebook_page-1),enabled=self.notebook_page>0,small=True)
         self.button('Siguiente',(1039,628,177,48),lambda:setattr(self,'notebook_page',self.notebook_page+1),enabled=self.notebook_page<pages-1,small=True)
         text(s,f'Página {self.notebook_page+1} / {pages}',(1210,698),12,MUTED,False,'bottomright')
@@ -265,20 +273,45 @@ class LearningUI:
         self.educational_background()
         tracked(s,'GUÍA DE LOS ECOS · FICCIÓN',(65,32),12,CYAN,3)
         text(s,'Reconoce antes de atacar',(62,65),40,PAPER,True,serif=True)
-        for n,kind in enumerate(ENEMY_NAMES):
+        era=self.world.index
+        stage=self.world.stage
+        entries=[(kind,ENEMY_NAMES[kind],ENEMY_HINTS[kind],'royalist') for kind in ENEMY_NAMES]
+        from .humanoid_roster import ROLES
+        entries=[(kind,ROLES.get(era,{}).get(kind,label),hint,faction) for kind,label,hint,faction in entries]
+        if era==7 and stage<2:
+            from .argentina_history import ROLE_NAMES
+            entries=[(kind,ROLE_NAMES[kind],ENEMY_HINTS[kind],'royalist') for kind in ('walker','hopper','sentry','charger','armored')]
+        elif era==7:
+            entries=[('walker','Patrulla militar','Eco de fuerzas de represión estatal. Patrulla el suelo.','state_force'),
+                     ('sentry','Tirador militar','Eco del pasado. Avisa antes de disparar.','state_force'),
+                     ('armored','Guardia militar','Escudo y protección. Evita saltar sobre él.','state_force'),
+                     ('walker','Célula terrorista','Eco de terrorismo de organizaciones armadas.','armed_cell'),
+                     ('hopper','Armado clandestino','Se desplaza y salta al acercarte.','armed_cell'),
+                     ('sentry','Tirador clandestino','Figura armada ficticia. Dispara a distancia.','armed_cell')]
+        for n,(kind,label,hint,faction) in enumerate(entries):
             x,y=65+n%3*390,146+n//3*155
             rect(s,(22,38,48),(x,y,365,135),6)
-            e=Enemy(dict(x=x+25,y=y+58,left=0,right=2000,kind=kind),self.world.index)
+            e=Enemy(dict(x=x+25,y=y+58,left=0,right=2000,kind=kind,stage=stage,faction=faction),self.world.index)
             if kind=='flyer':
                 e.rect.y+=100
-            self.artist.enemy(s,e,0,self.time,self.world.index)
-            text(s,ENEMY_NAMES[kind],(x+95,y+23),21,PAPER,True)
-            wrapped(s,ENEMY_HINTS[kind],(x+95,y+61),245,15,MUTED,leading=23)
+            self.artist.enemy(s,e,0,self.time,self.world.index,stage)
+            text(s,label,(x+95,y+23),19,PAPER,True)
+            wrapped(s,hint,(x+95,y+61),245,14,MUTED,leading=22)
         from .campaign import ERA_LABELS
         era=self.world.index
         from .enemy_art import FAMILY_NAMES
         text(s,FAMILY_NAMES[era],(65,466),22,CYAN,True)
-        text(s,BOSS_NAMES[era],(65,511),24,GOLD,True)
-        wrapped(s,BOSS_HINTS[era]+' Los perfiles mayores añaden salvas, marcas de caída y una fase más intensa.',(65,553),1120,17,MUTED)
+        if era==7:
+            from .argentina_history import CONTEXT
+            wrapped(s,CONTEXT[stage],(65,506),1120,15,MUTED,leading=23)
+            text(s,BOSS_NAMES[era],(65,568),21,GOLD,True)
+            text(s,'Las figuras y el blindado son ficción del viaje temporal; la recuperación democrática se explica en los archivos.',(65,606),14,MUTED)
+        else:
+            text(s,BOSS_NAMES[era],(65,511),24,GOLD,True)
+            wrapped(s,BOSS_HINTS[era]+' Los perfiles mayores añaden salvas, marcas de caída y una fase más intensa.',(65,553),1120,17,MUTED)
         self.button('Volver',(65,638,200,47),lambda:self.set_state('notebook'),True,small=True)
         text(s,'Los ataques se anuncian. Aprender en el mapa del jefe prolonga su vulnerabilidad.',(1208,661),14,CYAN,False,'midright')
+
+    def heritage(self):
+        from .heritage import panel
+        panel(self)

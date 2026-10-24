@@ -1,9 +1,9 @@
-# Contenidos y fuentes de la beta educativa 0.5
+# Contenidos y fuentes de la beta educativa 0.6
 
 Las explicaciones son paráfrasis originales. Cada archivo del juego enlaza su fuente en el cuaderno.
 Los mapas son escenarios de ficción inspirados en temas concretos, no reconstrucciones exactas ni una historia universal. Los jefes y los enemigos son ficticios.
 
-El banco inicial contiene 288 preguntas escritas: 96 por perfil de edad, con dos variantes por archivo y perfil. Desde Configuración, los docentes pueden consultar todas las respuestas, agregar preguntas y modificar las existentes, incluida su explicación y referencia. Las referencias de esta página corresponden al contenido original; las incorporaciones del docente usan la referencia que este indique. Al abrir un archivo se elige una pregunta al azar y se mezclan las respuestas. Si hay varias, no se repite inmediatamente la anterior del mismo perfil.
+El banco inicial contiene 324 preguntas escritas: 108 por perfil de edad, con dos variantes por archivo y perfil. Desde Configuración, los docentes pueden consultar todas las respuestas, agregar preguntas y modificar las existentes, incluida su explicación y referencia. Las referencias de esta página corresponden al contenido original; las incorporaciones del docente usan la referencia que este indique. Al abrir un archivo se elige una pregunta al azar y se mezclan las respuestas. Si hay varias, no se repite inmediatamente la anterior del mismo perfil.
 
 Las preguntas de 6–9 años se centran en reconocer; las de 10–14, en relacionar y explicar; las de 15 en adelante, en inferir y valorar los límites de las evidencias. Son perfiles orientativos, no una evaluación curricular certificada.
 
@@ -49,126 +49,147 @@ Arte paleolítico y evidencias del pasado.
 - **Pintar en una cueva**. Fuente: [UNESCO · Cuevas del Vézère](https://whc.unesco.org/en/list/85/).
 - **Cuidar las evidencias**. Fuente: [UNESCO · Cuevas del Vézère](https://whc.unesco.org/en/list/85/).
 
-## 3.1 · El ágora de Atenas
+## 3.1 · Los canales del Nilo
+
+Crecidas, cultivos y navegación en el Antiguo Egipto.
+
+- **El río que alimenta**. Fuente: [British Museum · Explorar Egipto](https://www.britishmuseum.org/sites/default/files/2024-06/Museum_explorers_Ancient_Egypt.pdf).
+- **Mirar la vida cotidiana**. Fuente: [British Museum · Explorar Egipto](https://www.britishmuseum.org/sites/default/files/2024-06/Museum_explorers_Ancient_Egypt.pdf).
+
+## 3.2 · La meseta de Guiza
+
+Pirámides del Reino Antiguo, canteras y trabajo organizado.
+
+- **Piedra para la memoria**. Fuente: [UNESCO · Menfis y su necrópolis](https://whc.unesco.org/en/list/86/).
+- **Construir en equipo**. Fuente: [UNESCO · Menfis y su necrópolis](https://whc.unesco.org/en/list/86/).
+
+## 3.3 · El templo de la memoria
+
+Escritura, templos del Reino Nuevo y la tradición de Moisés.
+
+- **Escribir para conservar**. Fuente: [Fitzwilliam Museum · Escritura egipcia](https://fitzmuseum.cam.ac.uk/explore-our-collection/highlights/context/tradition-and-change/egyptian-writing).
+- **Moisés y los relatos del Éxodo**. Fuente: [British Museum · Moisés y el Éxodo en el arte](https://www.britishmuseum.org/collection/object/P_1875-0710-270).
+
+## 4.1 · El ágora de Atenas
 
 Participación política y exclusiones en la Grecia clásica.
 
 - **Decidir en Atenas**. Fuente: [British Museum · Atenas y ciudadanía](https://www.britishmuseum.org/sites/default/files/2023-04/Luxury_and_power_large_print_guide.pdf).
 - **Las personas que quedaban fuera**. Fuente: [British Museum · Atenas y ciudadanía](https://www.britishmuseum.org/sites/default/files/2023-04/Luxury_and_power_large_print_guide.pdf).
 
-## 3.2 · Las rutas del Mediterráneo
+## 4.2 · Las rutas del Mediterráneo
 
 Cerámica, navegación e intercambio.
 
 - **Barcos que conectan ciudades**. Fuente: [British Museum · Atenas y el Mediterráneo](https://www.britishmuseum.org/collection/galleries/greece-athens-and-lycia).
 - **La cerámica también viaja**. Fuente: [British Museum · Atenas y el Mediterráneo](https://www.britishmuseum.org/collection/galleries/greece-athens-and-lycia).
 
-## 3.3 · El santuario de Olimpia
+## 4.3 · El santuario de Olimpia
 
 Juegos, arquitectura y encuentros entre ciudades.
 
 - **Encuentro en Olimpia**. Fuente: [UNESCO · Olimpia](https://whc.unesco.org/en/list/517/).
 - **Piedras con distintas funciones**. Fuente: [UNESCO · Olimpia](https://whc.unesco.org/en/list/517/).
 
-## 4.1 · Los campos de la abadía
+## 5.1 · Los campos de la abadía
 
 Ganadería y economía de un monasterio inglés.
 
 - **Ovejas y lana**. Fuente: [English Heritage · Byland Abbey](https://www.english-heritage.org.uk/visit/places/byland-abbey/history/).
 - **Un caso no es toda una época**. Fuente: [English Heritage · Byland Abbey](https://www.english-heritage.org.uk/visit/places/byland-abbey/history/).
 
-## 4.2 · La ciudad de los mercaderes
+## 5.2 · La ciudad de los mercaderes
 
 Mercados y documentos medievales de Inglaterra y Gales.
 
 - **Un lugar para intercambiar**. Fuente: [The National Archives · Mercados y ferias](https://www.nationalarchives.gov.uk/help-with-your-research/research-guides/markets-fairs).
 - **Los archivos guardan pistas**. Fuente: [The National Archives · Mercados y ferias](https://www.nationalarchives.gov.uk/help-with-your-research/research-guides/markets-fairs).
 
-## 4.3 · Las torres de luz
+## 5.3 · Las torres de luz
 
 Arcos, vidrieras y construcción gótica europea.
 
 - **Arcos que apuntan al cielo**. Fuente: [Victoria and Albert Museum · El gótico](https://www.vam.ac.uk/articles/the-gothic-style-an-introduction).
 - **Luz de colores**. Fuente: [Victoria and Albert Museum · El gótico](https://www.vam.ac.uk/articles/the-gothic-style-an-introduction).
 
-## 5.1 · La fuerza del vapor
+## 6.1 · La fuerza del vapor
 
 Máquinas, minas y transformación de energía.
 
 - **La máquina que sacaba agua**. Fuente: [National Museums Scotland · Motor de Newcomen](https://www.nms.ac.uk/discover-catalogue/the-newcomen-engine-and-its-role-in-britains-industrial-revolution).
 - **Energía para transformar**. Fuente: [National Museums Scotland · Motor de Newcomen](https://www.nms.ac.uk/discover-catalogue/the-newcomen-engine-and-its-role-in-britains-industrial-revolution).
 
-## 5.2 · El camino de hierro
+## 6.2 · El camino de hierro
 
 Ferrocarril y pruebas de nuevas tecnologías.
 
 - **Una locomotora a prueba**. Fuente: [Science Museum Group · Rocket](https://collection.sciencemuseumgroup.org.uk/objects/co26704).
 - **Objetos que cuentan tecnología**. Fuente: [Science Museum Group · Rocket](https://collection.sciencemuseumgroup.org.uk/objects/co26704).
 
-## 5.3 · La ciudad eléctrica
+## 6.3 · La ciudad eléctrica
 
 Innovación y adopción gradual de la electricidad.
 
 - **La luz llega poco a poco**. Fuente: [London Museum · Electricidad](https://www.londonmuseum.org.uk/collections/london-stories/when-did-london-get-electricity/).
 - **Inventar también es colaborar**. Fuente: [London Museum · Electricidad](https://www.londonmuseum.org.uk/collections/london-stories/when-did-london-get-electricity/).
 
-## 6.1 · Cartas desde 1914
+## 7.1 · Cartas desde 1914
 
 Primera Guerra Mundial: alcance y vida civil.
 
 - **Una guerra de alcance mundial**. Fuente: [National Army Museum · Primera Guerra Mundial](https://www.nam.ac.uk/explore/first-world-war).
 - **Detrás de los frentes**. Fuente: [Parlamento británico · La población civil](https://www.parliament.uk/about/living-heritage/transformingsociety/private-lives/yourcountry/overview/homefront/).
 
-## 6.2 · Los refugios de 1939
+## 7.2 · Los refugios de 1939
 
 Segunda Guerra Mundial: población civil y protección.
 
 - **Una nueva guerra mundial**. Fuente: [National Army Museum · Primera Guerra Mundial](https://www.nam.ac.uk/explore/first-world-war).
 - **Proteger la vida cotidiana**. Fuente: [Parlamento británico · La población civil](https://www.parliament.uk/about/living-heritage/transformingsociety/private-lives/yourcountry/overview/homefront/).
 
-## 6.3 · Reconstruir la paz
+## 7.3 · Reconstruir la paz
 
 1945 y 1948: cooperación y derechos humanos.
 
 - **Cooperar después de la guerra**. Fuente: [ONU · Historia de las Naciones Unidas](https://www.un.org/en/about-us/history-of-the-un).
 - **Derechos para todas las personas**. Fuente: [ONU · Declaración Universal de Derechos Humanos](https://www.un.org/en/about-us/universal-declaration-of-human-rights).
 
-## 7.1 · La ciudad de las redes
+## 8.1 · La ciudad de las redes
 
 Conectividad, acceso y cooperación digital.
 
 - **Conectarse también es acceder**. Fuente: [ONU · Cooperación digital](https://www.un.org/en/content/digital-cooperation-roadmap/).
 - **Compartir conocimiento digital**. Fuente: [ONU · Cooperación digital](https://www.un.org/en/content/digital-cooperation-roadmap/).
 
-## 7.2 · La energía del mañana
+## 8.2 · La energía del mañana
 
 Fuentes renovables y transformación de energía.
 
 - **Energía del Sol y del viento**. Fuente: [ONU · Energía renovable](https://www.un.org/en/climatechange/what-is-renewable-energy).
 - **Elegir fuentes de energía**. Fuente: [ONU · Energía renovable](https://www.un.org/en/climatechange/what-is-renewable-energy).
 
-## 7.3 · El observatorio del presente
+## 8.3 · El observatorio del presente
 
 Cooperación científica y salud mundial.
 
 - **Cooperación por la salud**. Fuente: [OMS · Historia de la cooperación en salud](https://www.who.int/about/history).
 - **Instituciones con historia**. Fuente: [OMS · Historia de la cooperación en salud](https://www.who.int/about/history).
 
-## 8.1 · Buenos Aires, 1810
+## AR.1 · Buenos Aires, 1810
 
 Revolución de Mayo y formación de la Primera Junta.
 
 - **Mayo: elegir autoridades**. Fuente: [Museo Histórico Nacional · Mayo e Independencia](https://museohistoriconacional.cultura.gob.ar/exhibicion/la-revolucion-de-mayo-y-la-guerra-de-independencia/).
 - **Proyectos en discusión**. Fuente: [Museo Histórico Nacional · Mayo e Independencia](https://museohistoriconacional.cultura.gob.ar/exhibicion/la-revolucion-de-mayo-y-la-guerra-de-independencia/).
 
-## 8.2 · Tucumán, 1816
+## AR.2 · Tucumán, 1816
 
 La declaración de independencia y sus documentos.
 
 - **El Congreso de Tucumán**. Fuente: [Argentina · 9 de Julio](https://www.argentina.gob.ar/node/204987).
 - **Una transformación que continúa**. Fuente: [Argentina · 9 de Julio](https://www.argentina.gob.ar/node/204987).
 
-## 8.3 · Democracia, 1983
+## AR.3 · Democracia, 1983
 
 Recuperación democrática, participación y memoria.
 
@@ -177,10 +198,51 @@ Recuperación democrática, participación y memoria.
 
 ## Campaña y expansión argentina
 
-La campaña general tiene 21 mapas. Las dos guerras mundiales se tratan en una época con tres mapas: 1914, 1939 y reconstrucción desde 1945. La actualidad añade redes, renovables y cooperación científica. Argentina es una expansión incluida de tres mapas: 1810, 1816 y 1983. Los adversarios son anomalías ficticias, no poblaciones ni países reales.
+La campaña general tiene 24 mapas. Las dos guerras mundiales se tratan en una época con tres mapas: 1914, 1939 y reconstrucción desde 1945. La actualidad añade redes, renovables y cooperación científica. Argentina es una expansión incluida de tres mapas: 1810, 1816 y 1983. Los adversarios son anomalías ficticias, no poblaciones ni países reales.
 
 ## Cómo funciona el aprendizaje
 
 Cada archivo resuelto por primera vez da dos puntos de conocimiento, compartidos entre los perfiles de edad. Un error muestra la respuesta y una explicación, permite reintentar y no resta energía ni puntos. Los repasos no repiten recompensas. Los archivos descubiertos se pueden consultar en el cuaderno.
 
 En los terceros mapas, resolver al menos un archivo de ese mapa prolonga 0,8 segundos el período vulnerable del jefe. Ninguna mejora ni respuesta es obligatoria para superar las rutas o los combates.
+
+## Patrimonio y tradiciones
+
+### Nuestra Señora de Luján
+
+La devoción a la Virgen de Luján se vincula con una imagen llegada desde Brasil en 1630. La tradición de la carreta relata que la imagen permaneció junto al río Luján. Es patrona de la Argentina y forma parte de su historia religiosa, artística y de peregrinaciones.
+
+Esta hornacina es una ilustración del juego: no sitúa la basílica actual en el Buenos Aires de 1810. El manto celeste, las manos unidas y la corona distinguen esta representación.
+
+Fuente: [Santuario de Luján · Historia](https://santuariodelujan.org.ar/historia/).
+
+### Nuestra Señora de Itatí
+
+La Virgen de Itatí es patrona de Corrientes. Su devoción está ligada a la localidad de Itatí, fundada en 1615 junto al Paraná. Su imagen y las peregrinaciones tienen un lugar destacado en la cultura religiosa del nordeste argentino.
+
+Esta representación lleva manto azul, túnica clara, corona y manos unidas. Es una referencia cultural traída por el reloj; no significa que Itatí se encuentre en Tucumán o en Buenos Aires. Su basílica actual es del siglo XX.
+
+Fuente: [Argentina · Basílica de Itatí](https://www.argentina.gob.ar/viaja-por-argentina/que-hacer/visitar-la-basilica-de-la-virgen-de-itati).
+
+### Moisés y la memoria del Éxodo
+
+En la tradición bíblica, Moisés guía la salida de los israelitas de Egipto. La apertura del mar es uno de los episodios del Éxodo representados a lo largo de los siglos en el arte religioso.
+
+El reloj proyecta aquí una ilustración de ese relato. No es una inscripción egipcia auténtica ni una escena fechada por la arqueología. Las pirámides de Guiza y los templos del Reino Nuevo corresponden a períodos distintos; este recorrido no identifica al faraón del Éxodo con un gobernante concreto.
+
+Fuente: [British Museum · El paso del mar en el arte](https://www.britishmuseum.org/collection/object/P_1875-0710-270).
+
+## Referencias para la ambientación argentina
+
+Los realistas son figuras ficticias inspiradas en conflictos del período independentista; los uniformes no reproducen un regimiento concreto. El Cabildo de 1810 y el Congreso de 1816 se presentan como procesos políticos, no como batallas documentadas en esos edificios.
+
+En 1983, los militares evocan represión y terrorismo de Estado durante la dictadura; las células terroristas evocan violencia de organizaciones armadas del período previo. No se representa el regreso democrático como una batalla ni se identifican grupos o personas reales. Las fichas distinguen ambas formas de violencia y explican la recuperación institucional.
+
+- [Museo del Cabildo](https://www.argentina.gob.ar/node/421639).
+- [Casa Histórica de Tucumán](https://www.argentina.gob.ar/node/412295).
+- [Museo Histórico Nacional · colección del traje](https://museohistoriconacional.cultura.gob.ar/info/coleccion-del-traje-argentino/).
+- [Dirección Nacional Electoral · elecciones de 1983](https://www.argentina.gob.ar/dine/elecciones-1983).
+- [Archivo Nacional de la Memoria](https://catalogo.jus.gob.ar/index.php/archivo-nacional-de-la-memoria).
+- [Biblioteca Nacional · documentos de la recuperación democrática](https://www.bn.gov.ar/micrositios/admin_assets/issues/files/c6f186381e146bb659027f121d3198f3.pdf).
+
+Egipto tiene tres mapas que evocan distintos períodos y temas: Nilo, Guiza y templos. Los signos pintados son decorativos, no transcripciones de inscripciones auténticas. La referencia a Moisés se presenta como tradición bíblica y cultural; no se le asigna una fecha arqueológica segura ni un faraón concreto.
