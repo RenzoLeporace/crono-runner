@@ -40,6 +40,8 @@ public final class MainActivity extends Activity {
         web.setBackgroundColor(0xff0d1b25);
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
+        web.getSettings().setDefaultTextEncodingName("UTF-8");
+        web.getSettings().setSupportZoom(false);
         web.getSettings().setAllowFileAccess(false);
         web.getSettings().setAllowContentAccess(false);
         web.getSettings().setMediaPlaybackRequiresUserGesture(false);
@@ -221,6 +223,10 @@ public final class MainActivity extends Activity {
     }
     @Override public void onBackPressed() {
         web.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_ESCAPE));web.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP,KeyEvent.KEYCODE_ESCAPE));
+    }
+    @Override public void onWindowFocusChanged(boolean focused){
+        super.onWindowFocusChanged(focused);
+        if(focused)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
     @Override protected void onDestroy(){network.shutdownNow();if(web!=null){web.removeJavascriptInterface("CronoAndroid");web.destroy();}super.onDestroy();}
     @Override protected void onPause(){if(web!=null)web.evaluateJavascript("window.dispatchEvent(new Event('blur'))",null);super.onPause();}

@@ -67,6 +67,7 @@ class Player:
         self.anim = 0.
         self.trail = []
         self.drop_time=0.
+        self.recovery_clock=0.
 
     def configure(self,upgrades,heal=False):
         self.upgrades=set(upgrades)
@@ -124,7 +125,8 @@ class Player:
                 events.append('jump')
             if not controls.held and self.vy < -250:
                 self.vy = approach(self.vy, -250, 4200 * dt)
-            self.vy = min(950, self.vy + GRAVITY * getattr(getattr(world,'mechanic',None),'gravity',1.) * dt)
+            brake=.38 if 'air_brake' in self.upgrades and controls.held and self.vy>0 else 1.
+            self.vy = min(950, self.vy + GRAVITY * getattr(getattr(world,'mechanic',None),'gravity',1.) * brake * dt)
             self.vx+=getattr(getattr(world,'mechanic',None),'wind',0.)*dt
         # Axis-separated collisions; float positions avoid low-speed quantisation.
         self.rect.x += self.vx * dt
@@ -186,6 +188,12 @@ class World:
         self.player.configure(self.upgrades,True)
         self.enemies = [Enemy(s,self.combat_era,self.difficulty) for s in self.data['enemies']]
         for enemy in self.enemies:
+            if enemy.kind!='flyer':
+                floors=[p for p in self.platforms if not p.moving and p.rect.left<=enemy.rect.centerx<=p.rect.right]
+                if floors:
+                    floor=min(floors,key=lambda p:abs(p.rect.top-enemy.rect.bottom))
+                    enemy.rect.bottom=floor.rect.top;enemy.base_y=enemy.rect.y
+                    enemy.left=max(enemy.left,floor.rect.left);enemy.right=min(enemy.right,floor.rect.right)
             enemy.variant='roman' if self.level_id==34 else 'malvinas' if self.level_id==33 else ''
             if self.level_id==33:enemy.stage=2
         self.hazards = [pg.FRect(s) for s in self.data['hazards']]
@@ -230,7 +238,7 @@ class World:
 
     def near_station(self):
         p=self.player.rect
-        candidates=[s for s in self.data['stations'] if abs(p.centerx-s[0])<85 and abs(p.bottom-s[1])<100]
+        candidates=[s for s in self.data['stations'] if abs(p.centerx-s[0])<(135 if 'insight' in self.upgrades else 85) and abs(p.bottom-s[1])<100]
         return min(candidates,key=lambda s:abs(p.centerx-s[0])) if candidates else None
 
     def selected_checkpoints(self,band):
@@ -273,6 +281,7 @@ class World:
             p.invincible=1.2
             return ['shield']
         p.hp -= 1
+        p.recovery_clock=0.
         p.invincible = (1.5,1.1,.8)[self.difficulty]
         p.hurt_time = .16
         p.vy = -330
@@ -285,6 +294,7 @@ class World:
 
     def update(self, dt, controls):
         self.time += dt
+        self.player.recovery_clock+=dt
         self.message_time = max(0, self.message_time - dt)
         self.portal_lock = max(0, self.portal_lock - dt)
         for platform in self.platforms:
@@ -303,7 +313,7 @@ class World:
         if controls.attack and p.shot_cooldown<=0:
             self.projectiles.append(Projectile(p.rect.centerx+p.facing*21,p.rect.centery,p.facing*680,
                                                owner='player',damage=3 if mounted else 2 if 'pulse' in self.upgrades else 1,kind='pulse'))
-            p.shot_cooldown=.34
+            p.shot_cooldown=.22 if 'rapid_pulse' in self.upgrades else .34
             events.append('shot')
         if p.rect.top > 800:
             self.respawn()
@@ -364,6 +374,8 @@ class World:
                         events+=self.damage(self.boss.rect.centerx)
                         if self.player is not p:
                             return events
+        if 'regeneration' in self.upgrades and p.recovery_clock>=30 and p.hp<p.max_hp:
+            p.hp+=1;p.recovery_clock=0;events.append('heal')
         for shot in self.projectiles:
             if not shot.alive:
                 continue
@@ -396,9 +408,13 @@ class World:
                     return events
         px, py = self.data['portal']
         if p.rect.colliderect(pg.FRect(px - 34, py - 120, 68, 120)):
-            if len(self.shards) == 3 and (not self.boss or not self.boss.alive):
+            if len(self.shards) == 3 and (not self.boss or not self.boss.alive) and self.story_ready:
                 self.complete = True
             elif self.portal_lock <= 0:
-                self.say('Libera al guardián de esta época para abrir el umbral.' if self.boss and self.boss.alive and len(self.shards)==3 else f'El umbral necesita los 3 fragmentos. Tienes {len(self.shards)}. Puedes volver a buscarlos.')
+                self.say('Historia pendiente: completa la misión y comprende un archivo. H abre tu objetivo.' if not self.story_ready else 'Libera al guardián.' if self.boss and self.boss.alive else f'Reúne los 3 fragmentos: {len(self.shards)}/3.')
                 self.portal_lock = 4
         return events
+
+    @property
+    def story_ready(self):
+        return getattr(self,'practice_mode',False) or self.mechanic.completed and bool({self.level_id*2,self.level_id*2+1}&self.answered)

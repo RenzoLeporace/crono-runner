@@ -20,9 +20,25 @@ ENTRIES={
 
 from .curiosities import extend_entries,MAP_CURIOSITIES
 ENTRIES=extend_entries(ENTRIES)
+ENTRIES['andes_route'].update(title='Carmen de Cuyo y Nuestra Señora del Rosario',
+ body='El 5 de enero de 1817, antes del Cruce de los Andes, se proclamó a la Virgen del Carmen de Cuyo como Patrona y Generala del Ejército de los Andes. San Martín le entregó su bastón de mando. Esa es la advocación directamente vinculada con este ejército.\n\nNuestra Señora del Rosario de Río Blanco y Paypaya es patrona de Jujuy. Se incluye aquí como una referencia cultural diferente, sin atribuirle el título de la Virgen del Carmen ni situar su santuario en el paso cordillerano.\n\nEl reloj reúne ambas ilustraciones para distinguir tradiciones, lugares y fuentes. No representa una aparición documentada durante el cruce. La preparación de rutas y provisiones sigue siendo indispensable para comprender la expedición.',
+ source='Gobierno de Mendoza · Bandera y Patrona del Ejército de los Andes',url='https://www.mendoza.gov.ar/prensa/se-conmemoro-el-dia-de-la-bandera-provincial/',
+ other_source='https://www.turismo.jujuy.gob.ar/event/peregrinacion-a-la-virgen-del-rosario/')
 
 @lru_cache(maxsize=40)
 def illustration(key):
+    if key=='andes_route':
+        p=Painter(360,350);p.r((25,49,65),(8,8,344,334),12)
+        for x,color in ((105,(124,81,58)),(258,(184,207,222))):
+            p.a((197,169,110),(x-49,57,98,103),0,math.tau,3)
+            p.p(color,[(x,89),(x-49,267),(x+48,267)])
+            p.e((201,160,119),(x-15,90,31,39));p.p((213,180,96),[(x-17,87),(x-21,68),(x-6,74),(x,60),(x+8,74),(x+23,68),(x+17,87)])
+            p.c((208,170,126),(x+26,162),13);p.r((217,208,172),(x+13,171,29,49),7)
+            p.l((205,167,113),(x-28,153),(x+9,184),5)
+        p.r((108,71,47),(84,173,31,38),2);p.r((213,188,128),(91,181,17,22),1)
+        for n in range(10):p.c((202,173,103),(240+math.sin(n*.5)*13,185+n*5),2)
+        p.l((205,179,108),(243,237),(243,253),3);p.l((205,179,108),(237,244),(250,244),3)
+        p.r((169,150,109),(24,279,312,4));return p.image()
     if key not in ('lujan','itati','moses'):
         from .curiosity_art import artifact
         return artifact(key,ENTRIES[key]['level'])
@@ -94,15 +110,17 @@ def near_site(world):
     return next((site for site in world.data.get('cultural_sites',())
                  if abs(p.centerx-site[0])<83 and abs(p.bottom-site[1])<83),None)
 
+@lru_cache(maxsize=40)
+def site_thumbnail(key):return pg.transform.smoothscale(illustration(key),(48,48))
+
 def draw_sites(s,world,camera,t):
     for wx,wy,key in world.data.get('cultural_sites',()):
         x=wx-camera
         if not -140<x<W+140:continue
-        img=pg.transform.smoothscale(illustration(key),(139,135))
-        s.blit(img,(int(x-69),int(wy-136)))
-        rect(s,(83,73,61),(x-64,wy-6,128,6),2)
-        if abs(world.player.rect.centerx-wx)<240:
-            text(s,'CURIOSIDAD · '+ENTRIES[key]['title'],(x,wy-160),10,GOLD,True,'center')
+        img=site_thumbnail(key)
+        s.blit(img,(int(x-24),int(wy-54)))
+        if abs(world.player.rect.centerx-wx)<100:
+            text(s,'E · Descubrir',(x,wy-70),12,GOLD,True,'center')
 
 def panel(game):
     from .learning_ui import wrapped
@@ -125,4 +143,5 @@ def panel(game):
     if game.heritage_height>295:text(s,'RePág / AvPág, rueda o desliza para seguir leyendo',(482,544),13,CYAN)
     text(s,'Ilustración original · representación cultural del viaje temporal',(482,570),13,MUTED)
     game.button('Consultar la fuente',(482,610,310,48),lambda:webbrowser.open(item['url']),small=True)
+    if item.get('other_source'):game.button('Fuente del Rosario',(810,610,370,48),lambda:webbrowser.open(item['other_source']),small=True)
     game.button('Volver al viaje',(65,630,270,48),game.close_panel,True,small=True)

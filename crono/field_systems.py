@@ -25,7 +25,7 @@ class FieldSystem:
         self.m=m;self.world=m.world;self.kind=m.kind
         self.collected=set();self.marks=[];self.clock=0.;self.distance=0.;self.goal=0.;self.started=False
         self.lifts=[];self.beams=[];self.sheltered_time=0.;self.crossed=set()
-        floors=[p for p in self.world.platforms if not p.moving and p.rect.w>=180]
+        floors=[p for p in self.world.platforms if not p.moving and p.rect.w>=180 and (self.kind!='chain' or not p.oneway)]
         self.points=[]
         for fraction in (.26,.57,.85):
             candidates=[p for p in floors if .15*self.world.width<p.rect.centerx<.92*self.world.width]
@@ -36,7 +36,7 @@ class FieldSystem:
             for x,y in m.devices:
                 p=Platform(dict(x=x+85,y=y-108,w=110,h=16,moving=True,oneway=True,axis='y',amplitude=90,speed=.85))
                 p.active=False;self.world.platforms.append(p);self.lifts.append(p)
-        if self.kind in LIGHTS or self.kind in ('bridge','chain'):
+        if self.kind in LIGHTS or self.kind=='bridge':
             from .physics import Platform
             for x,y in self.points:
                 top=y-88;width=145 if self.kind in LIGHTS else 220
@@ -62,12 +62,13 @@ class FieldSystem:
 
     @property
     def done(self):
+        if self.kind in ('naval','canal','tide'):return self.m.state.get('sea_complete',False)
         if self.kind in PICKUPS:return len(self.collected)==3
         if self.kind in LIFTS:return len(self.crossed)>=2
         if self.kind in LIGHTS or self.kind in ('bridge','chain'):return len(self.crossed)>=2
         if self.kind in ESCORTS:return self.escort_x>=self.m.devices[2][0]-100
         if self.kind in HAZARDS:return self.sheltered_time>=3 and len(self.crossed)>=2
-        if self.kind in ('naval','train','rail','canal','tide'):return self.distance>=900
+        if self.kind in ('train','rail'):return len(self.crossed)>=3
         if self.kind=='race':return len(self.crossed)>=3
         if self.kind in ('warmth','wind'):return len(self.crossed)>=3
         return self.m.state['step']>=3
@@ -91,7 +92,7 @@ class FieldSystem:
         if self.kind in ('naval','train','rail','canal','tide') and m.state['vehicle']:
             self.distance+=abs(p.vx)*dt
             if self.kind=='train' and controls.axis<0:p.vx*=.65
-        if self.kind in ('race','wind','warmth'):
+        if self.kind in ('race','wind','warmth','train','rail'):
             for i,(x,y) in enumerate(self.points):
                 if abs(p.rect.centerx-x)<100 and abs(p.rect.bottom-(y+40))<150:self.crossed.add(i)
             if self.kind=='race' and len(self.crossed)==3:self.goal=1
@@ -116,33 +117,47 @@ class FieldSystem:
                 if mark[2]<=0 and not m.sheltered and abs(p.rect.centerx-mark[0])<38:
                     events.extend(w.damage(mark[0]))
             self.marks=[mark for mark in self.marks if mark[2]>0]
+        if self.kind=='chain':
+            near=next((i for i,(x,y) in enumerate(self.points[:2]) if abs(p.rect.centerx-x)<90 and abs(p.rect.bottom-y-40)<55),None)
+            if near is not None and controls.drop and p.grounded and near not in self.crossed:
+                self.sheltered_time+=dt
+                if self.sheltered_time>=1.5:self.crossed.add(near);self.sheltered_time=0;w.say('Batería coordinada: cadena y defensa ribereña preparadas.');events.append('checkpoint')
         self.persist()
         return events
 
     def description(self):
+        if self.kind=='chain':return f'En las dos baterías señaladas, mantén ↓ para coordinar la defensa · {len(self.crossed)}/2'
+        if self.kind in ('naval','canal','tide'):return 'Travesía marítima completada' if self.done else 'Entra en la grieta del segundo puesto y completa el convoy marítimo.'
         if self.kind in PICKUPS:return PICKUPS[self.kind][1]+f' · {len(self.collected)}/3'
         if self.kind in LIFTS:return f'Usa dos elevadores activados · {len(self.crossed)}/2'
         if self.kind in LIGHTS or self.kind in ('bridge','chain'):return f'Recorre dos pasarelas restauradas · {len(self.crossed)}/2'
         if self.kind in ESCORTS:return 'Acompaña a tu aliado hasta el tercer puesto; despeja su camino.'
         if self.kind in HAZARDS:return f'Cruza dos refugios y espera a salvo tres segundos · {min(3,self.sheltered_time):.1f}/3 s'
-        if self.kind in ('naval','train','rail','canal','tide'):return f'Navega o conduce al menos 900 px · {int(min(900,self.distance))}/900'
+        if self.kind in ('train','rail'):return f'Comprueba las tres señales de la ruta ferroviaria · {len(self.crossed)}/3'
         return f'Alcanza las tres balizas de la ruta · {len(self.crossed)}/3'
 
     def draw(self,s,camera,t):
         if self.m.state['step']==0:return
         for i,(wx,y) in enumerate(self.points):
             x=wx-camera
-            if not -100<x<1380:continue
+            if not -100<x<s.get_width()+100:continue
+            if self.kind=='chain' and i<2:
+                rect(s,(111,92,68),(x-19,y+12,38,25),4)
+                circle(s,CYAN if i in self.crossed else GOLD,(x,y-1),16,3)
+                for n in range(12):
+                    px=x+28+n*13;py=y-3+math.sin(n/11*math.pi)*(7 if i in self.crossed else 25)
+                    pg.draw.ellipse(s,(181,173,142),pg.Rect(px,py,18,9),2)
+                text(s,'↓ COORDINAR BATERÍA',(x,y-41),12,GOLD,True,'center')
             if self.kind in PICKUPS and i not in self.collected:
                 color=GOLD if self.kind not in ('lunar','radio') else CYAN
                 circle(s,(19,39,48),(x,y),18);diamond(s,(x,y+math.sin(t*2+i)*3),11,color)
                 text(s,PICKUPS[self.kind][0],(x,y-36),11,color,True,'center')
-            elif self.kind in ('race','wind','warmth'):
+            elif self.kind in ('race','wind','warmth','train','rail'):
                 line(s,(156,144,111),(x,y+40),(x,y-70),3)
                 polygon(s,CYAN if i in self.crossed else GOLD,[(x,y-69),(x+52,y-53),(x,y-40)])
         if self.kind in ESCORTS:
             x=self.escort_x-camera;y=self.escort_y
-            if -100<x<1380:
+            if -100<x<s.get_width()+100:
                 if self.kind=='ballot':rect(s,(177,142,84),(x-18,y-49,36,28),3);line(s,(55,61,62),(x-9,y-45),(x+9,y-45),2)
                 else:
                     line(s,(144,152,134),(x-37,y-18),(x+38,y-18),5);rect(s,(119,142,134),(x-30,y-36,60,17),3)

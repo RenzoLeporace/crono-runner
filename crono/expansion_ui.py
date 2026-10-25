@@ -23,7 +23,7 @@ def prepare_world(world):
 def draw_missions(s,world,camera,t):
     if world.rescue_site:
         wx,y,key,item=world.rescue_site;x=wx-camera
-        if -220<x<1500:
+        if -220<x<s.get_width()+220:
             liberated=key in world.rescues_this_run
             circle(s,(202,158,119),(x,y-76),10);polygon(s,(77,116,118),[(x-10,y-63),(x+10,y-63),(x+15,y-26),(x-14,y-26)])
             for dx in (-6,6):line(s,(45,52,56),(x+dx,y-29),(x+dx,y-4),6)
@@ -34,7 +34,7 @@ def draw_missions(s,world,camera,t):
             text(s,'E · '+('Conversar' if liberated else 'Rescate opcional · explora este desvío'),(x,y-113),12,PAPER,False,'center')
     if world.rift_site:
         wx,y,destination=world.rift_site;x=wx-camera
-        if -150<x<1430:
+        if -150<x<s.get_width()+150:
             for n in range(4):pg.draw.ellipse(s,(171,142+n*12,221),pg.Rect(x-25-n*8,y-118-n*3,50+n*16,110+n*6),2)
             text(s,'GRIETA AL PASADO · E',(x,y-150),13,GOLD,True,'center')
 
@@ -91,12 +91,16 @@ class ExpansionUI:
     def activity_answer(self,choice):
         m=self.world.mechanic;result=m.activate(self.activity_index,choice)
         if result=='ok':
+            if m.kind in ('naval','canal','tide') and self.activity_index==1:
+                self.start_voyage();return
             if m.completed:
                 if not self.save.data['practice'] and self.world.level_id not in self.save.data['mechanics_completed']:
                     self.save.data['mechanics_completed'].append(self.world.level_id);self.save.data['coins']+=15
                 self.save.refresh_achievements()
             self.save.capture(self.world);self.set_state('play')
         elif result=='revisit':
+            if m.kind in ('naval','canal','tide') and self.activity_index==1:
+                self.start_voyage();return
             if m.vehicle_kind and self.activity_index==1:
                 m.state['vehicle']=True;m.state['vehicle_x']=m.devices[1][0];m.state['vehicle_y']=m.devices[1][1]-32
             self.set_state('play')
@@ -185,7 +189,8 @@ class ExpansionUI:
         text(s,f'{self.save.data["coins"]} ecos disponibles',(1210,96),24,GOLD,True,'topright')
         text(s,'Cada eco pequeño se guarda una sola vez. Explorar compra historia y nuevas apariencias.',(65,117),19,MUTED)
         self.button('Crono original',(65,171,270,48),lambda:self.equip_skin('crono'),small=True)
-        for n,item in enumerate(SKINS):
+        self.skin_page=max(0,min((len(SKINS)-1)//8,self.skin_page))
+        for n,item in enumerate(SKINS[self.skin_page*8:self.skin_page*8+8]):
             x=65+n%4*292;y=250+n//4*177
             rect(s,(25,44,53),(x,y,270,155),6)
             old=getattr(self.world.player,'skin','crono');self.world.player.skin=item['id']
@@ -196,6 +201,8 @@ class ExpansionUI:
             self.button('Ficha',(x+10,y+118,65,30),lambda k=item['id']:self.open_skin_card(k),small=True,arrow=False)
         self.button('Volver',(65,638,240,50),lambda:self.set_state(self.reward_return),True,small=True)
         self.button('Logros',(330,638,240,50),lambda:self.open_rewards('achievements'),small=True)
+        self.button('Anterior',(690,638,240,50),lambda:setattr(self,'skin_page',self.skin_page-1),enabled=self.skin_page>0,small=True)
+        self.button('Siguiente',(950,638,260,50),lambda:setattr(self,'skin_page',self.skin_page+1),enabled=(self.skin_page+1)*8<len(SKINS),small=True)
 
     def equip_skin(self,key):
         self.save.data['skin']=key;self.world.player.skin=key;self.save.write()

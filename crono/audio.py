@@ -2,6 +2,8 @@
 from array import array
 import math
 import pygame as pg
+from pathlib import Path
+import sys
 
 
 class Audio:
@@ -15,6 +17,7 @@ class Audio:
                 pg.mixer.init(22050, -16, 1, 512)
             self.ready = True
             pg.mixer.set_num_channels(16)
+            self.folder=Path(getattr(sys,'_MEIPASS',Path(__file__).resolve().parents[1]))/'assets'/'audio'
             effects = {
                 'jump': [(330,.065),(510,.065)], 'dash': [(160,.07),(90,.1)],
                 'echo': [(880,.06),(1320,.08)], 'shard': [(523,.1),(659,.1),(784,.1),(1046,.2)],
@@ -26,9 +29,12 @@ class Audio:
                 'block': [(220,.025),(330,.025)], 'boss': [(392,.12),(523,.12),(659,.12),(784,.3)],
             }
             for name, notes in effects.items():
-                self.sounds[name] = self.make(notes, .17)
-            for root in (130.81,146.83,164.81,123.47,110.):
-                self.ambient.append(self.pad(root))
+                file=self.folder/(name+'.wav')
+                self.sounds[name] = pg.mixer.Sound(str(file)) if file.exists() else self.make(notes,.12)
+            for name in ('cannon','heal','field_complete'):
+                file=self.folder/(name+'.wav')
+                if file.exists():self.sounds[name]=pg.mixer.Sound(str(file))
+            pg.mixer.set_reserved(1)
         except (pg.error, ValueError):
             self.ready = False
 
@@ -67,12 +73,17 @@ class Audio:
 
     def ambience(self, index):
         if self.ready:
-            pg.mixer.Channel(15).stop()
-            if self.enabled:
-                pg.mixer.Channel(15).play(self.ambient[index%5],loops=-1,fade_ms=700)
+            pg.mixer.music.stop()
+            file=self.folder/f'era-{index%9}.wav'
+            if self.enabled and file.exists():
+                try:pg.mixer.music.load(str(file));pg.mixer.music.set_volume(.7);pg.mixer.music.play(-1,fade_ms=500)
+                except pg.error:
+                    self.current_track=pg.mixer.Sound(str(file));self.current_track.set_volume(.7)
+                    pg.mixer.Channel(15).play(self.current_track,loops=-1,fade_ms=500)
 
     def toggle(self, index):
         self.enabled=not self.enabled
         if self.ready:
             pg.mixer.stop()
+            pg.mixer.music.stop()
         self.ambience(index)

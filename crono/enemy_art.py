@@ -29,6 +29,14 @@ def draw_enemy(s,e,camera,t,era,stage=0):
     gait=math.sin(t*10+e.left)*4
     def ellipse(color,box,width=0):
         pg.draw.ellipse(s,color,pg.Rect(*box),width)
+    if e.kind=='flyer' and era in (4,5):
+        if era==4:
+            ellipse((161,132,87),(x-39,y-65,78,39));line(s,dark,(x-22,y-29),(x-13,y-5),2);line(s,dark,(x+22,y-29),(x+13,y-5),2)
+            rect(s,(98,75,53),(x-16,y-9,32,13),3)
+        else:
+            polygon(s,(140,154,136),[(x-49,y-21),(x-12,y-29),(x-4,y-53),(x+7,y-53),(x+13,y-30),(x+51,y-18),(x+14,y-12),(x+8,y+4),(x-7,y+4),(x-14,y-13)])
+            line(s,PAPER,(x-12,y-42),(x+13,y-42),2);circle(s,(48,63,66),(x,y-28),5)
+        return
     if era==0:
         # Raptors stand on two legs; armored animals have low shells.
         if e.kind=='flyer':

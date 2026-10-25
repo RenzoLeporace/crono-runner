@@ -147,6 +147,20 @@ def projectiles(s,world,camera):
         if not -40<x<W+40:
             continue
         color=CYAN if shot.owner=='player' else (244,151,115)
+        if shot.kind in ('arrow','bolt','feather'):
+            sign=1 if shot.vx>0 else -1
+            line(s,(213,191,139),(x-sign*20,y),(x+sign*8,y),2)
+            polygon(s,(204,211,196),[(x+sign*12,y),(x+sign*3,y-4),(x+sign*3,y+4)])
+            line(s,(172,109,70),(x-sign*17,y),(x-sign*22,y-5),2);continue
+        if shot.kind in ('bullet','musket','rivet'):
+            line(s,(204,185,119),(x,y),(x-(1 if shot.vx>0 else -1)*12,y),2)
+            circle(s,(79,72,59),(x,y),3);continue
+        if shot.kind in ('cannonball','bomb'):
+            circle(s,(38,43,42),(x,y),7);circle(s,(144,143,118),(x-2,y-2),2);continue
+        if shot.kind in ('spore','ice'):
+            polygon(s,(142,177,101) if shot.kind=='spore' else (169,215,233),[(x,y-8),(x+5,y),(x,y+8),(x-5,y)],2);continue
+        if shot.kind in ('laser','spark'):
+            line(s,(225,122,82),(x-13,y),(x+13,y),2);line(s,(240,204,112),(x-7,y-3),(x+7,y+3),1);continue
         if world.index==7 and shot.owner=='enemy' and shot.kind not in ('wave','fall'):
             line(s,(249,215,152),(x,y),(x-(1 if shot.vx>0 else -1)*17,y),2)
             circle(s,PAPER,(x,y),2)

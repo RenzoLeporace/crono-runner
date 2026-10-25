@@ -206,6 +206,8 @@ class Save(Progression):
     def completed(self,world):
         self.record_map(world)
         if self.data['practice']:self.write();return
+        if world.story_ready and world.level_id not in self.data['story_seals']:
+            self.data['story_seals'].append(world.level_id);self.data['coins']+=20
         if is_bonus(world.level_id):
             self.data['bonus_progress'].pop(str(world.level_id),None);self.write();return
         if is_rift(world.level_id):

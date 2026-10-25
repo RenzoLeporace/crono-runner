@@ -63,7 +63,7 @@ class Mechanic:
             platform=min((p for p in floors if id(p) not in used),key=lambda p:abs(p.rect.centerx-world.width*fraction))
             used.add(id(platform))
             self.devices.append((platform.rect.centerx,platform.rect.top))
-        self.vehicle_kind=self.kind in ('naval','train','rail','canal','tide')
+        self.vehicle_kind=False
         self.state['vehicle_x']=self.devices[1][0];self.state['vehicle_y']=self.devices[1][1]-32
         self.wind=0.;self.gravity=1.;self.speed=1.;self.sheltered=False
         from .field_systems import FieldSystem
@@ -87,6 +87,7 @@ class Mechanic:
         self.state['activated']=[i for i in value.get('activated',[]) if type(i) is int and 0<=i<3] if isinstance(value.get('activated',[]),list) else []
         # Mounting never survives loading; restore to a safe anchor first.
         self.state['vehicle']=False
+        self.state['sea_complete']=value.get('sea_complete') is True
         self.field.restore(value)
     def near(self):
         p=self.world.player.rect
@@ -107,6 +108,7 @@ class Mechanic:
 
     def update(self,dt,controls):
         w=self.world;p=w.player;t=w.time;step=self.state['step']
+        self.state['vehicle']=False
         self.gravity=.48 if self.kind=='lunar' else 1.
         self.wind=(math.sin(t*.55)*38 if self.kind in ('wind','provisions','radio') else 0.)
         self.speed=.85 if self.kind=='plaza' and step<2 else 1.
@@ -142,10 +144,11 @@ class Mechanic:
         self.field.draw(s,camera,t)
         for i,(wx,y) in enumerate(self.devices):
             x=wx-camera
-            if not -160<x<1440:continue
+            if not -160<x<s.get_width()+160:continue
             active=i in self.state['activated'];c=CYAN if active else GOLD
-            rect(s,(30,44,49),(x-28,y-72,56,68),5)
-            rect(s,(94,102,97),(x-36,y-8,72,8),2)
+            # Compact markers; detailed tools are inspected in the activity panel.
+            rect(s,(30,44,49),(x-18,y-44,36,38),5)
+            rect(s,(94,102,97),(x-23,y-6,46,6),2)
             if self.kind in ('wheel','steam','counterweight','crane'):
                 circle(s,c,(x,y-49),22,3)
                 for n in range(6):
@@ -159,15 +162,15 @@ class Mechanic:
                 polygon(s,(89,110,104),[(x-62,y-6),(x,y-103),(x+62,y-6)])
                 line(s,c,(x,y-95),(x,y-12),2)
                 rect(s,(22,35,41),(x-19,y-39,38,35),2)
-            elif self.vehicle_kind:
-                polygon(s,(142,100,66),[(x-53,y-49),(x+56,y-49),(x+37,y-20),(x-35,y-20)])
-                line(s,c,(x,y-50),(x,y-116),3)
-                polygon(s,(217,208,172),[(x+4,y-111),(x+4,y-55),(x+48,y-55)])
+            elif self.kind in ('naval','canal','tide'):
+                for radius in (22,29):pg.draw.ellipse(s,c,pg.Rect(x-radius,y-76,radius*2,70),2)
+                polygon(s,(194,167,113),[(x-12,y-31),(x+12,y-31),(x+7,y-20),(x-8,y-20)])
             else:
                 polygon(s,c,[(x-19,y-60),(x,y-67),(x+19,y-60),(x+19,y-27),(x,y-21),(x-19,y-27)],2)
                 line(s,c,(x,y-61),(x,y-28),2)
-            diamond(s,(x,y-138),8,c,active)
-            text(s,f'{i+1} · '+('LISTO' if active else self.operations[i]),(x,y-163),12,c,True,'center')
+            diamond(s,(x,y-119),6,c,active)
+            if abs(wx-self.world.player.rect.centerx)<160:
+                text(s,f'E · Puesto {i+1}'+(' · LISTO' if active else ''),(x,y-139),12,c,True,'center')
         if self.state['vehicle']:
             x=self.state['vehicle_x']-camera;y=self.state['vehicle_y']
             polygon(s,(90,69,56),[(x-80,y+4),(x+85,y+4),(x+55,y+35),(x-55,y+35)])

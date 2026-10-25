@@ -1,4 +1,5 @@
 """Large landscape entry menus for touch screens; shares the campaign state."""
+import pygame as pg
 from .art import text,tracked,rect,line,PAPER,CYAN,GOLD,MUTED
 from .campaign import CHAPTER_ORDER,ERA_LABELS,chapter_levels,level_label
 from .education import STAGES
@@ -6,15 +7,19 @@ from .learning_ui import wrapped
 
 class MobileUI:
     def mobile_menu(self):
-        s=self.canvas;self.artist.background(s,8,0,self.time,0);self.dim(180)
+        s=self.canvas
+        if self.mobile_menu_background is None:
+            self.artist.background(s,8,0,0,0);self.dim(180);self.mobile_menu_background=s.copy()
+        else:s.blit(self.mobile_menu_background,(0,0))
         tracked(s,'ECOS DEL TIEMPO',(65,38),15,CYAN,4)
         text(s,'CRONO',(60,77),84,PAPER,True,serif=True)
         text(s,self.school.active['alias'],(1205,66),25,GOLD,True,'topright')
         text(s,'© 2026 Renzo Leporace',(1205,111),18,MUTED,False,'topright')
         if self.save.data['practice']:text(s,'PRUEBA DOCENTE · TODO DESBLOQUEADO · SIN RANKING',(65,181),18,GOLD,True)
+        self.button('Tutorial',(950,145,260,52),self.start_tutorial,small=True)
         started=self.save.data['started']
         actions=(('Continuar el viaje' if started else 'Comenzar el viaje',self.continue_game if started else lambda:self.load(0)),
-            ('Argentina',self.continue_dlc),('Épocas y rutas',lambda:self.set_state('chapters')),('Perfiles y aula',self.open_community),
+            ('Expansiones',lambda:self.set_state('dlc_menu')),('Épocas y rutas',lambda:self.set_state('chapters')),('Perfiles y aula',self.open_community),
             ('Logros y apariencias',self.open_rewards),('Configuración',self.open_settings),('Créditos',lambda:self.set_state('credits')),('Salir',lambda:setattr(self,'running',False)))
         for i,(label,action) in enumerate(actions):
             self.button(label,(65+i%2*585,220+i//2*116,555,98),action,primary=i==0,arrow=True)

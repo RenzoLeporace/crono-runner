@@ -1,10 +1,17 @@
 """Landscape multitouch controls in logical coordinates, independent fingers."""
 import pygame as pg
+from functools import lru_cache
 from .art import rect,text,line,polygon,CYAN,PAPER
 
 DEFAULT_KEYS=dict(left=pg.K_a,right=pg.K_d,jump=pg.K_SPACE,dash=pg.K_LSHIFT,attack=pg.K_f,interact=pg.K_e,drop=pg.K_s,pause=pg.K_ESCAPE)
 KEY_LABELS=dict(left='Izquierda',right='Derecha',jump='Saltar',dash='Impulso',attack='Disparar',interact='Interactuar',drop='Descender',pause='Pausa')
-TOUCH_BOXES=dict(left=(28,563,100,105),right=(146,563,100,105),drop=(88,448,100,90),jump=(1128,553,122,118),dash=(996,553,109,118),attack=(1128,422,122,108),interact=(996,422,109,108))
+TOUCH_BOXES=dict(left=(22,568,78,78),right=(112,568,78,78),drop=(68,482,66,66),jump=(1178,604,78,78),dash=(1084,604,72,72),attack=(1178,510,72,72),interact=(1084,510,72,72))
+
+@lru_cache(maxsize=8)
+def touch_panel(width,height,active):
+    panel=pg.Surface((width,height),pg.SRCALPHA)
+    pg.draw.circle(panel,(21,51,61,170 if active else 62),(width//2,height//2),min(width,height)//2-2)
+    return panel
 
 class TouchUI:
     def init_touch(self):self.fingers={};self.finger_positions={};self.rebind_action=None
@@ -19,16 +26,21 @@ class TouchUI:
         dw,dh=self.display.get_size();pos=self.logical_mouse((event.x*dw,event.y*dh));key=event.finger_id
         previous_pos=self.finger_positions.get(key,pos);self.finger_positions[key]=pos
         if event.type==pg.FINGERUP:self.finger_positions.pop(key,None)
-        if self.state=='play':
+        if self.state in ('play','voyage'):
             if event.type==pg.FINGERUP:self.fingers.pop(key,None);return True
+            if event.type==pg.FINGERDOWN:
+                for box,action,enabled in self.buttons[:]:
+                    if enabled and box.collidepoint(pos):action();return True
             action=next((name for name,box in TOUCH_BOXES.items() if pg.Rect(box).collidepoint(pos)),None)
             previous=self.fingers.get(key);self.fingers[key]=action
             if event.type==pg.FINGERDOWN or action!=previous:
                 if action=='jump':self.jump_pending=True
                 elif action=='dash':self.dash_pending=True
                 elif action=='attack':self.shoot_pending=True
-                elif action=='interact':self.interact()
-                elif pos[0]>1180 and pos[1]<100:self.set_state('pause')
+                elif action=='interact' and self.state=='play':self.interact()
+                elif pos[0]>1180 and pos[1]<100:
+                    if self.state=='voyage':self.voyage.paused=True
+                    else:self.set_state('pause')
             return True
         if event.type==pg.FINGERDOWN:
             self.mouse=pos
@@ -47,15 +59,22 @@ class TouchUI:
     def draw_touch(self):
         for name,box in TOUCH_BOXES.items():
             active=self.touch_down(name)
-            panel=pg.Surface((box[2],box[3]),pg.SRCALPHA);panel.fill((23,55,65,220) if active else (13,29,41,172))
-            self.canvas.blit(panel,box[:2]);pg.draw.rect(self.canvas,CYAN if active else (134,169,174),box,2,border_radius=16)
+            if self.state=='voyage' and name in ('dash','interact'):continue
+            panel=touch_panel(box[2],box[3],active)
+            self.canvas.blit(panel,box[:2]);pg.draw.circle(self.canvas,CYAN if active else (166,191,190),pg.Rect(box).center,min(box[2],box[3])//2-2,2 if active else 1)
             label=dict(left='◀',right='▶',drop='↓',jump='SALTO',dash='IMPULSO',attack='PULSO',interact='USAR')[name]
             cx,cy=box[0]+box[2]/2,box[1]+box[3]/2
             if name in ('left','right'):
                 sign=-1 if name=='left' else 1
                 polygon(self.canvas,PAPER,[(cx+sign*18,cy),(cx-sign*10,cy-18),(cx-sign*10,cy+18)])
             elif name=='drop':polygon(self.canvas,PAPER,[(cx-17,cy-9),(cx+17,cy-9),(cx,cy+17)])
-            else:text(self.canvas,label,(cx,cy),17,PAPER,True,'center')
+            elif name=='attack':
+                pg.draw.circle(self.canvas,PAPER,(cx,cy),11,2)
+                line(self.canvas,PAPER,(cx-17,cy),(cx+17,cy),2);line(self.canvas,PAPER,(cx,cy-17),(cx,cy+17),2)
+            elif name=='jump':
+                line(self.canvas,PAPER,(cx,cy+15),(cx,cy-13),3);polygon(self.canvas,PAPER,[(cx,cy-18),(cx-10,cy-4),(cx+10,cy-4)])
+            elif name=='dash':polygon(self.canvas,PAPER,[(cx+4,cy-20),(cx-13,cy+3),(cx-1,cy+3),(cx-5,cy+20),(cx+14,cy-5),(cx+3,cy-5)])
+            else:text(self.canvas,'E',(cx,cy),23,PAPER,True,'center')
     def binding_event(self,event):
         if self.state!='accessibility' or not self.rebind_action or event.type!=pg.KEYDOWN:return False
         if event.key==pg.K_ESCAPE:self.rebind_action=None;return True

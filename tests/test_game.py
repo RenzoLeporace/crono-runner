@@ -1,3 +1,4 @@
+from story_fixture import complete_story
 """Regression checks against real simulation and UI, with no interactive window."""
 import os
 import sys
@@ -161,6 +162,7 @@ class PhysicsTests(unittest.TestCase):
         w.update(STEP,Controls())
         self.assertFalse(w.complete)
         w.shards={0,1,2}
+        complete_story(w)
         w.update(STEP,Controls())
         self.assertTrue(w.complete)
 
@@ -191,6 +193,7 @@ class CampaignTests(unittest.TestCase):
                     w.boss.hp=0
                     w.boss.alive=False
                 w.player.rect.midbottom=w.data['portal']
+                complete_story(w)
                 w.update(STEP,Controls())
                 self.assertTrue(w.complete)
                 save.completed(w)
@@ -290,6 +293,7 @@ class InterfaceTests(unittest.TestCase):
         game.world.boss.alive=False
         game.world.boss.hp=0
         game.world.player.rect.midbottom=game.world.data['portal']
+        complete_story(game.world)
         game.set_state('play')
         game.update(STEP)
         self.assertEqual(game.state,'complete')

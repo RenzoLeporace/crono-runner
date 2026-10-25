@@ -32,3 +32,13 @@ San Martín se prepara en Cuyo en 1816 y cruza en 1817; el rescate no es un suce
 
 Ilustraciones, uniformes y escenarios son interpretaciones originales. Contrasta fichas y fuentes y pregunta qué no puede saberse a partir de una imagen del juego. Se requieren sesiones con estudiantes y docentes para evaluar equilibrio, accesibilidad y eficacia educativa.
 
+
+## Avance histórico obligatorio · 0.8
+
+El panel Historia lista tres fragmentos, tres puestos de decisión, aplicación física y un archivo comprendido. Todo es necesario para salir; también el guardián cuando lo haya. Las respuestas erróneas dan pistas y permiten volver a intentar sin perder energía. No se recomienda resolver por ensayo: pide que expliquen qué fuente o razonamiento apoya su elección.
+
+Obligado exige mantener abajo en dos baterías señaladas para coordinar la defensa. Sus cadenas no son puentes transitables. En Nilo, mareas y Brown, el puesto del barco abre un nivel acuático independiente; su progreso se conserva y vuelve al origen al terminar. Estos niveles contienen tres decisiones contextualizadas. Las recompensas de saber, mejora de puntuación y sello histórico hacen que aprender también ayude a jugar.
+
+Las primeras respuestas a archivos dan saber para 12 habilidades. El primer sello de misión da 20 ecos y la primera travesía marítima 25. Las repeticiones no duplican esos premios. La práctica docente permite recorrer todo sin alterar premios ni clasificación reales.
+
+Para un grupo que necesite ayuda con controles usa Tutorial y asistencia mínima. En iPhone, la edición web es individual y experimental; para salas de aula utiliza Windows/Android. El contenido y la actividad deben revisarse previamente con el criterio curricular del docente.

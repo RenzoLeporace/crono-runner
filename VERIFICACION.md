@@ -1,49 +1,37 @@
-# Verificación · beta educativa 0.7
+# Verificación funcional · beta educativa 0.8
 
-24 de octubre de 2026. Windows 11, Python 3.12, pygame-ce 2.5.7.
+25 de octubre de 2026. Comprobaciones realizadas por el agente principal; no se convocaron subagentes ni se hicieron nuevas auditorías. Los informes 0.7 en docs corresponden únicamente a aquella versión.
 
-## Fuente
+## Código y juego
 
-113 pruebas correctas en la ejecución final del agente principal; las revisiones independientes cerraron con 109 y 112 pruebas, con HTTP real sobre localhost. La cobertura de rutas obligatorias, tres fragmentos, dos archivos y reducción de anclas se amplió a los 36 mapas. Se validan 1296 registros únicos en 72 temas y tres edades; seis alternativas por combinación.
+La suite general pasó **124/124 pruebas** en 217,651 segundos. Tras los ajustes de caché e interfaz, las cinco comprobaciones enfocadas de interfaz 0.8 pasaron en 46,568 segundos. Incluyen cámara de 1280, 1600 y 1920 píxeles lógicos, conservación del tamaño del personaje, zonas laterales dibujadas, caché reutilizada, menús, música, currículo y guardado marítimo.
 
-Se comprobaron migración de partidas y bancos, aislamiento de perfiles, práctica sin premios ni ranking reales, mejores puntuaciones por mapa, cinco rescates, tres grietas y retorno exacto, 60 condiciones de logros, compras de skins, teclado y multitouch, preguntas y reflexiones exportadas.
+Las tres travesías acuáticas se completaron con simulación de controles reales, recogida de cargas, disparos, errores/reintentos educativos, guardián y muelle. Se comprueba la vuelta al punto de origen tras recargar y la recompensa única. Ningún mapa terrestre puede volver a activar el antiguo barco montable.
 
-Las 36 aplicaciones físicas de actividad se completaron en fixtures con posiciones preparadas, con progreso persistente y premio único. La reacción a daño real y derrota está comprobada en los 18 jefes. Los nueve encuentros originales se vencen en simulaciones de mínima; no se afirma que los nueve nuevos se hayan derrotado sin mejoras o sin muertes.
+Se comprueba el bloqueo del portal sin misión y archivo; los fragmentos solos ya no abren la salida. Las actividades físicas existentes, reducción de anclas, perfiles, editor docente, importación/exportación, puntuaciones, 60 condiciones de logros y salas HTTP locales siguen cubiertos por la suite. Los nueve guardianes originales se derrotaron en simulaciones de mínima con movimiento, salto, descenso y esquiva de marcas, usando el nuevo alcance corto; esto no constituye una campaña humana completa.
 
-Un ensayo independiente de 100 ciclos de compras y recarga pasó después de añadir reintentos ante bloqueos breves de OneDrive. La regresión simula además un bloqueo persistente: conserva el archivo anterior, el temporal y el aviso.
+## Windows y Android
 
-## Auditorías previas a compilar
+Windows se genera con PyInstaller incluyendo la música original. El paquete conserva el EXE y `_internal`; no necesita Python instalado. El empaquetador ejecuta las escenas del EXE antes de crear el ZIP y comprueba su integridad y exclusión de partidas personales.
 
-Los dos auditores aprobaron pasar de fuente a generación de candidatos, con límites explícitos. [Informe consolidado](docs/AUDITORIA-0.7.md), [juego y arte](docs/AUDITORIA-0.7-JUGABILIDAD.md), [sistemas y aula](docs/AUDITORIA-0.7-SISTEMAS.md).
+El APK real se generó con SDK 34 y JDK 17, se alineó y se verificó su firma beta v2/v3. Incluye AndroidManifest.xml, classes.dex, CPython WebAssembly, pygame y todos los recursos offline; el intermedio webapp.apk de pygbag no es el APK instalable. Android mínimo 8 (API 26).
 
-## Artefactos
+El intento de arrancar el APK 0.8 en el emulador aislado se detuvo antes de Android por espacio libre insuficiente para el AVD. Por tanto no se afirma una ejecución del APK 0.8 en emulador; las pruebas instaladas de la versión 0.7 quedan documentadas en sus informes históricos.
 
-El EXE Windows se compila con PyInstaller y se entrega con _internal. El empaquetado ejecuta 33 escenas del EXE, revisa las capturas, comprueba integridad ZIP y excluye partidas y bancos personales.
+## Web experimental para iOS
 
-Android utiliza el mismo juego Python sobre CPython WebAssembly y pygame-ce offline dentro de una WebView nativa, con controles táctiles y puentes Java para almacenamiento, teclado, documentos y LAN. El APK real contiene AndroidManifest.xml y classes.dex y se alinea y firma con las herramientas SDK 34. No se entrega el archivo web intermedio de pygbag como APK instalable. Firma beta local, minSdk 26 y targetSdk 34.
+El motor web arrancó en Edge/Chromium local a 1600×720, con cámara ancha y controles táctiles. La prueba conservó datos Unicode en IndexedDB tras recargar y volvió a iniciar el juego después de cortar la conexión; no hubo excepciones Python/JavaScript ni peticiones fallidas en esa ejecución. La caché offline requiere HTTPS o localhost; una IP de PC mediante HTTP sigue necesitando el servidor conectado.
 
-El arranque WebAssembly en Edge se comprobó bloqueando todas las peticiones externas: sin peticiones fallidas ni excepciones Python. El contenedor móvil compila y el APK pasa integridad y verificación de firma v2/v3. Las comprobaciones de instalación y funcionamiento de los candidatos se registran al final de este documento al completarse.
+La muestra de rendimiento web de ese ensayo fue **35,5 FPS** y **29,8 ms de render p95** en Edge headless de esta PC, con juego y tutorial inicial. Es una observación de ese entorno, no un benchmark de teléfonos ni garantía de 60 FPS. La optimización reutiliza escenarios, paneles táctiles y texto, evita dibujos fuera de cámara y reduce efectos ambientales móviles.
+
+La edición iOS es web experimental, no un IPA firmado. No se probó Safari ni un iPhone/iPad físico. La versión web ofrece progreso individual y no cliente de salas LAN; para salas utiliza Windows o el APK Android.
 
 ## Límites
 
-No hubo una campaña humana completa de los 36 mapas ni un piloto con alumnos/docentes. No se verificó un mando físico. Las pruebas automáticas y el emulador no garantizan equilibrio, accesibilidad, eficacia educativa ni rendimiento en todos los equipos/teléfonos. Las misiones, uniformes y escenas son interpretaciones de ficción con fichas y fuentes; no son reconstrucciones exactas.
+No se completó una campaña humana de los 36 mapas ni un piloto escolar. No se verificaron teléfonos físicos o un mando físico. Las misiones y escenas históricas son interpretaciones, y el contenido requiere revisión curricular docente. El juego no cifra las salas HTTP ni impide alteraciones de rankings locales.
 
-Las salas usan HTTP en una red local de confianza. No hay nube, ranking global, protección antitrampas ni cifrado de archivos por el PIN. El docente debe gestionar permisos de red y archivos exportados conforme a su institución.
+Los hashes finales y tamaños se entregan en Entrega/CHECKSUMS.json y permiten identificar exactamente los paquetes distribuidos.
 
+## Paquete Windows final
 
-
-## Comprobación de los paquetes finales
-
-El EXE 0.7 se ejecutó en 33 escenas, con PNG válidos de 1280×720. El ZIP pasó CRC y exclusión de partidas, perfiles y bancos personales. El auditor original inspeccionó además los menús de skins, logros, banco y pruebas docentes.
-
-El APK Android real se instaló en un emulador aislado Android 14 (API 34). Se comprobaron arranque offline, navegación táctil, tres campos con editor nativo, perfiles conservados tras detener y reabrir el proceso, PIN guardado y acceso posterior, importación JSON con BOM/vista previa/respaldo, exportación de banco conservando tildes y CSV con BOM. El cliente Android se unió a una sala Windows y recibió el ranking con otro cliente PC. Una actualización presentó un cierre de conexión intermitente; el candidato final solicita conexiones HTTP independientes para evitar reutilizar conexiones cerradas por el servidor local.
-
-Las pruebas finales de fuente son **113/113 correctas**, incluida una nueva comprobación de las 60 condiciones de logros y del beneficio real de energía. Los controles simultáneos se verificaron mediante eventos de dos dedos en la suite; no se afirma una prueba con dedos físicos. No se completó en Android una campaña ni una grieta de principio a fin. La comprobación LAN usa la red virtual del emulador hacia el host Windows, no varios teléfonos físicos sobre una WiFi escolar.
-
-El emulador de Google APIs sufrió fallos de su proveedor de fuentes; se desactivaron sus servicios de Google únicamente en el entorno aislado de auditoría. El juego no necesita Google Play Services ni Internet. Esto no sustituye la prueba en teléfonos físicos.
-
-La verificación final de la sala Android repitió tres sincronizaciones completas, cada una con HTTP 200 en /results, /activity y /rankings. El ajuste final declara el tamaño UTF-8 de la petición y solicita conexión independiente; el error de lectura observado dejó de reproducirse en esas repeticiones.
-
-Ejecutable Windows final: SHA-256 cd873e5f7379a9508a2e1767aaab145505cf75c0dd2803caefd4c447c26d2ed9.
-APK final: SHA-256 18e7406d1b63b573dde29c25d9a12130cceda7dd92d7fe135ed0ee5dbe47e90d.
-Las revisiones independientes corresponden a las etapas documentadas; los últimos paquetes y sus hashes se verificaron por el agente principal.
+El ejecutable 0.8 abrió correctamente **36 escenas**, incluidas Historia, Expansiones, travesía marítima, skins, docentes y las rutas bonus. Cada ejecución terminó con código 0 y una captura PNG válida. El ZIP pasó integridad CRC y contiene el lanzador para iPhone y sus recursos públicos. No incluye partidas ni bancos personales.

@@ -1,10 +1,11 @@
 """Stage the actual game and its offline WebAssembly runtime for Android.
 
 This creates web assets, not an Android APK. build_android.py performs the
-separate Android packaging and signing step after source audits are complete.
+separate Android packaging and signing step after functional checks are complete.
 """
 import hashlib
 import json
+import re
 import os
 from pathlib import Path
 import shutil
@@ -32,9 +33,10 @@ def prepare():
     shutil.copy2(ROOT/'android'/'main.py',APP/'main.py')
     shutil.copytree(ROOT/'crono',APP/'crono',dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
     shutil.copytree(ROOT/'licencias',APP/'licencias',dirs_exist_ok=True)
+    shutil.copytree(ROOT/'assets',APP/'assets',dirs_exist_ok=True)
     for filename in ('COPYRIGHT.txt','LICENCIAS.txt','FUENTES.md'):shutil.copy2(ROOT/filename,APP/filename)
     env=os.environ.copy();env['PYTHONPATH']=str(WORK/'toolchain');env['PYTHONUTF8']='1'
-    subprocess.run([sys.executable,'-m','pygbag','--build','--no_opt','--ume_block','0','--title','CRONO · Ecos del tiempo',str(APP)],env=env,cwd=ROOT,check=True)
+    subprocess.run([sys.executable,'-m','pygbag','--build','--no_opt','--disable-sound-format-error','--ume_block','0','--title','CRONO · Ecos del tiempo',str(APP)],env=env,cwd=ROOT,check=True)
     output=APP/'build'/'web';assets=ROOT/'android'/'app'/'src'/'main'/'assets'
     assets.mkdir(parents=True,exist_ok=True)
     for filename in ('webapp.tar.gz','webapp.apk','favicon.png'):shutil.copy2(output/filename,assets/filename)
@@ -44,10 +46,13 @@ def prepare():
     html=html.replace('Ready to start ! Please click/touch page','CRONO · Toca para comenzar')
     html=html.replace('background-color:powderblue','background-color:#0d1b25').replace('background: green','background: #193b49').replace('color: blue','color: #b4f3e9')
     html=html.replace('Loading, please wait','Cargando CRONO…')
-    html+='\n<style>html,body{overflow:hidden;touch-action:none}#canvas{touch-action:none}#infobox{font:20px sans-serif;border-radius:12px}#html{display:none}</style>'
+    html=re.sub(r'<meta name="viewport"[^>]*>','',html)
+    html=html.replace('<head>','<head><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">')
+    html+='\n<style>html,body{margin:0;padding:0;overflow:hidden;touch-action:none;background:#102a38}#canvas{touch-action:none;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important}#infobox{font:20px sans-serif;border-radius:12px}#html{display:none}#crono-rotate{display:none}@media(orientation:portrait){#crono-rotate{display:grid;position:fixed;inset:0;place-items:center;background:#102a38;color:#e4edda;font:24px sans-serif;z-index:90}}</style><div id="crono-rotate">Gira el dispositivo para explorar en horizontal.</div>'
     (assets/'index.html').write_text(html,encoding='utf-8')
     for relative in FILES+('index-0.9.3-cp312.json','cp312/'+WHEEL):
         target=assets/'runtime'/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(RUNTIME/relative,target)
+    (assets/'runtime'/'empty.html').write_text('<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>',encoding='utf-8')
     rc=assets/'runtime'/'cpythonrc.py'
     source=rc.read_text(encoding='utf-8')
     source=source.replace('import aio.toplevel','import os\n    # CRONO offline distribution: all package resources stay in this APK.\n    os.environ["PYGPI"] = str(platform.window.location.origin) + "/runtime/"\n    import aio.toplevel',1)

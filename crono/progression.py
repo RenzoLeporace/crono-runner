@@ -10,7 +10,8 @@ def extra_defaults():
         skin_cards_seen=[],skin='crono',master_enabled=True,metrics={},attempts=[],reviews=[],
         bonus_progress={},rift_progress={},active_rift=None,rift_return=None,rift_finished=False,practice=False,
         motor_band=None,reading_size=19,key_bindings={},touch_controls=False,
-        practice_records={},lowest_difficulty=1,session_room=None)
+        practice_records={},lowest_difficulty=1,session_room=None,tutorial_done=False,
+        sea_session=None,voyage_progress={},voyages_completed=[],story_seals=[])
 
 def load_extra(raw):
     result=extra_defaults()
@@ -27,8 +28,10 @@ def load_extra(raw):
     for key,allowed in (('bonus_unlocked',BONUS_LEVEL_IDS),('rifts_completed',RIFT_LEVEL_IDS),('mechanics_completed',range(36))):
         result[key]=sorted({v for v in result[key] if type(v) is int and v in allowed})
     result['attempts']=[v for v in result['attempts'][-10000:] if isinstance(v,dict)]
-    for key in ('bonus_progress','rift_progress'):
+    for key in ('bonus_progress','rift_progress','voyage_progress'):
         result[key]={str(k):v for k,v in result[key].items() if str(k).isdigit() and isinstance(v,dict)}
+    for key in ('voyages_completed','story_seals'):
+        result[key]=sorted({v for v in result[key] if type(v) is int and 0<=v<36})
     result['fragments_by_level']={str(k):[i for i in v if type(i) is int and 0<=i<3] for k,v in result['fragments_by_level'].items() if str(k).isdigit() and isinstance(v,list)}
     metrics={}
     for k,v in result['metrics'].items():
@@ -56,9 +59,10 @@ def map_score(world):
     combat=defeated*120+(1000 if world.boss and not world.boss.alive else 0)
     care=max(0,700-world.deaths*140)
     band=getattr(world,'lowest_difficulty',world.difficulty)
-    total=round((speed+exploration+combat+care)*(1,1.15,1.3)[band])
+    learning=len({world.level_id*2,world.level_id*2+1}&world.answered)*700
+    total=round((speed+exploration+combat+care+learning)*(1,1.15,1.3)[band])
     return dict(score=total,speed_points=speed,exploration_points=exploration,combat_points=combat,
-        care_points=care,echoes=len(world.echoes),kills=defeated,discoveries=discoveries,
+        care_points=care,learning_points=learning,echoes=len(world.echoes),kills=defeated,discoveries=discoveries,
         mechanics=mechanics,rescues=rescues,time=round(world.time,2),deaths=world.deaths,difficulty=band)
 
 class Progression:

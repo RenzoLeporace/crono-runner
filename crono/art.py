@@ -43,8 +43,12 @@ def font(size, bold=False, serif=False):
     return pg.font.SysFont('cambria' if serif else 'segoeui', size, bold=bold)
 
 
+@lru_cache(maxsize=1200)
+def rendered_text(value,size,color,bold,serif):
+    return font(size,bold,serif).render(value,True,color)
+
 def text(surface, value, pos, size=20, color=PAPER, bold=False, anchor='topleft', serif=False):
-    image = font(size, bold, serif).render(str(value), True, color)
+    image = rendered_text(str(value),size,tuple(color),bold,serif)
     bounds = image.get_rect(**{anchor: (int(pos[0]), int(pos[1]))})
     surface.blit(image, bounds)
     return bounds
@@ -54,7 +58,7 @@ def tracked(surface, value, pos, size=13, color=MUTED, spacing=3):
     x, y = pos
     f = font(size, True)
     for ch in value:
-        glyph = f.render(ch, True, color)
+        glyph = rendered_text(ch,size,tuple(color),True,False)
         surface.blit(glyph, (x, y))
         x += glyph.get_width() + spacing
     return x
@@ -189,11 +193,12 @@ class Artist:
             a=world.platforms[i].rect
             b=world.platforms[i+1].rect
             midpoint=(a.right+b.left)/2-camera
-            glow(surface,(midpoint,735),95,era.near)
+            if -95<midpoint<W+95:glow(surface,(midpoint,735),95,era.near)
         for n, (wx, wy) in enumerate(world.data['checkpoints']):
             if n not in world.checkpoint_ids:
                 continue
             x=wx-camera
+            if not -90<x<W+90:continue
             active = n <= world.checkpoint
             color=CYAN if active else era.accent
             rect(surface,era.rock,(x-18,wy-8,36,8))
@@ -205,6 +210,7 @@ class Artist:
             elif abs(world.player.rect.centerx-wx)<160:
                 text(surface,'ANCLA TEMPORAL',(x,wy-110),11,color,True,'center')
         for hazard in world.hazards:
+            if hazard.right<camera-20 or hazard.left>camera+W+20:continue
             x,y=hazard.x-camera,hazard.y
             for xx in range(0,int(hazard.w)-6,13):
                 polygon(surface,(205,108,105),[(x+xx,y+14),(x+xx+6,y-2),(x+xx+13,y+14)])
@@ -230,7 +236,8 @@ class Artist:
                     angle=time+j*math.tau/3
                     circle(surface,CYAN,(x+math.cos(angle)*26,y+math.sin(angle)*18),1)
         px,py=world.data['portal']
-        self.portal(surface,px-camera,py,time,len(world.shards)==3 and (not world.boss or not world.boss.alive))
+        if -180<px-camera<W+180:
+            self.portal(surface,px-camera,py,time,len(world.shards)==3 and world.story_ready and (not world.boss or not world.boss.alive))
         if abs(world.player.rect.centerx-px)<250:
             text(surface,'AL PRESENTE' if world.level_id in (20,23) else 'SIGUIENTE ÉPOCA' if world.stage==2 else 'SIGUIENTE MAPA',(px-camera,py-166),12,CYAN,True,'center')
             label='Guardián por liberar' if world.boss and world.boss.alive else f'{len(world.shards)} / 3 fragmentos'
@@ -335,20 +342,25 @@ class Artist:
         draw_enemy(surface,enemy,camera,time,enemy.era,enemy.stage if index>=9 else stage)
 
     def foreground(self,surface,world,camera):
-        surface.blit(self.vignette,(0,0))
+        if not getattr(world,'mobile_render',False) and surface.get_width()==self.vignette.get_width():surface.blit(self.vignette,(0,0))
 
     def scene(self,surface,world,camera,time):
         from .educational_art import map_features,learning_objects,boss_art,projectiles
         from .visuals import ambient_back,ambient_front
-        self.background(surface,world.index,camera,time,world.stage)
-        ambient_back(surface,world,camera,time)
-        map_features(surface,world,camera,time)
-        ambient_front(surface,world,camera,time)
+        mobile=getattr(world,'mobile_render',False)
+        if mobile:
+            from .viewport import mobile_backdrop
+            mobile_backdrop(self,surface,world,camera)
+        else:
+            self.background(surface,world.index,camera,time,world.stage)
+            ambient_back(surface,world,camera,time)
+            map_features(surface,world,camera,time)
+            ambient_front(surface,world,camera,time)
         self.scenery(surface,world,camera,time)
-        if world.index==7:
+        if world.index==7 and not mobile:
             from .argentina_art import props
             props(surface,world,camera,time)
-        elif world.index<7:
+        elif world.index<7 and not mobile:
             from .period_art import props
             props(surface,world,camera,time)
         learning_objects(surface,world,camera,time)
@@ -357,6 +369,11 @@ class Artist:
         world.mechanic.draw(surface,camera,time)
         from .expansion_ui import draw_missions
         draw_missions(surface,world,camera,time)
+        # The walkable rim always remains visible in front of exhibits/tools.
+        for platform in world.platforms:
+            r=platform.rect
+            if platform.active and r.right>=camera and r.left<=camera+surface.get_width():
+                line(surface,(187,184,142),(r.left-camera,r.top),(r.right-camera,r.top),3)
         for enemy in world.enemies:
             if world.index==7:
                 enemy.show_label=abs(world.player.rect.centerx-enemy.rect.centerx)<240

@@ -343,6 +343,10 @@ UPGRADES=[
  dict(id='pulse',name='Pulso amplificado',cost=6,description='Duplica el daño de los disparos temporales.',requires=None),
  dict(id='boots',name='Botas del explorador',cost=4,description='Aumenta la velocidad de carrera y el control en el aire.',requires=None),
  dict(id='vitality2',name='Núcleo resistente',cost=6,description='Otra unidad de energía máxima, hasta cinco.',requires='vitality'),
+ dict(id='air_brake',name='Vela temporal',cost=5,description='Mantén salto al caer para planear y controlar el descenso.',requires=None),
+ dict(id='rapid_pulse',name='Ritmo del explorador',cost=8,description='Reduce la recarga del pulso de 0,34 a 0,22 segundos. Conserva su alcance corto.',requires='pulse'),
+ dict(id='regeneration',name='Memoria reparadora',cost=9,description='Recupera una energía después de 30 segundos sin recibir daño.',requires='vitality'),
+ dict(id='insight',name='Mirada del historiador',cost=5,description='Amplía el alcance para interactuar con archivos de 85 a 135 píxeles.',requires=None),
 ]
 
 

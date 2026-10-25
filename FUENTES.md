@@ -573,3 +573,14 @@ En 1983, los militares evocan represión y terrorismo de Estado durante la dicta
 - [Biblioteca Nacional · documentos de la recuperación democrática](https://www.bn.gov.ar/micrositios/admin_assets/issues/files/c6f186381e146bb659027f121d3198f3.pdf).
 
 Egipto tiene tres mapas que evocan distintos períodos y temas: Nilo, Guiza y templos. Los signos pintados son decorativos, no transcripciones de inscripciones auténticas. La referencia a Moisés se presenta como tradición bíblica y cultural; no se le asigna una fecha arqueológica segura ni un faraón concreto.
+
+
+## Advocaciones en el Cruce de los Andes · beta 0.8
+
+La ficha distingue Carmen de Cuyo, patrona y generala del Ejército de los Andes, de Nuestra Señora del Rosario de Río Blanco y Paypaya, patrona de Jujuy. No se atribuye el mismo patronazgo a ambas. La aparición del objeto en el mapa es una invitación cultural a consultar fuentes, no evidencia de un encuentro de Crono.
+
+- [Gobierno de Mendoza · Bandera provincial y Virgen del Carmen de Cuyo](https://www.mendoza.gov.ar/prensa/se-conmemoro-el-dia-de-la-bandera-provincial/).
+- [Turismo de Jujuy · Virgen del Rosario de Río Blanco y Paypaya](https://www.turismo.jujuy.gob.ar/event/peregrinacion-a-la-virgen-del-rosario/).
+- [Argentina · Nuestra Señora del Carmen](https://www.argentina.gob.ar/noticias/dia-de-nuestra-senora-del-carmen).
+
+Las nuevas apariencias llevan referencias a museos, bibliotecas e instituciones científicas en su ficha de juego; las siluetas son ilustrativas. Las travesías marítimas son ficción interactiva: en el Cretácico, el esquife y Crono son viajeros temporales, nunca habitantes humanos de esa época.

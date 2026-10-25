@@ -19,14 +19,16 @@ class Projectile:
         self.rect=pg.FRect(x-7,y-5,14,10) if kind!='wave' else pg.FRect(x-15,559,30,25)
         self.vx,self.vy=vx,vy
         self.owner,self.damage,self.kind=owner,damage,kind
-        self.ttl=3.2
+        self.ttl=.48 if owner=='player' else 2.6
+        self.travelled=0.;self.range=330 if owner=='player' else 780
         self.alive=True
 
     def update(self,dt):
         self.rect.x+=self.vx*dt
         self.rect.y+=self.vy*dt
+        self.travelled+=math.hypot(self.vx,self.vy)*dt
         self.ttl-=dt
-        if self.ttl<=0:
+        if self.ttl<=0 or self.travelled>=self.range:
             self.alive=False
 
 
@@ -95,7 +97,8 @@ class Enemy:
             if p and distance<650 and self.timer<=0:
                 self.direction=1 if p.rect.centerx>self.rect.centerx else -1
                 for vy in ((-85,0,85) if self.difficulty==2 else (0,)):
-                    world.projectiles.append(Projectile(self.rect.centerx,self.rect.centery,self.direction*235*rate,vy))
+                    kind=('spore','ice','arrow','bolt','rivet','bullet','laser','musket','arrow')[self.era]
+                    world.projectiles.append(Projectile(self.rect.centerx,self.rect.centery,self.direction*235*rate,vy,kind=kind))
                 self.timer=2.4/rate
         elif self.kind=='hopper':
             if p and distance<470 and self.timer<=0 and self.rect.y>=self.base_y:
@@ -115,7 +118,7 @@ class Enemy:
                 # The hovering eye brightens before firing a single aimed shot.
                 dx=p.rect.centerx-self.rect.centerx;dy=p.rect.centery-self.rect.centery
                 scale=275/max(1,math.hypot(dx,dy))
-                world.projectiles.append(Projectile(self.rect.centerx,self.rect.centery,dx*scale,dy*scale))
+                world.projectiles.append(Projectile(self.rect.centerx,self.rect.centery,dx*scale,dy*scale,kind='feather' if self.era in (0,1,2,3,8) else 'bomb' if self.era==5 else 'spark'))
                 self.timer=2.1
         elif self.kind=='charger':
             if self.mode=='patrol' and p and distance<380 and self.timer<=0:

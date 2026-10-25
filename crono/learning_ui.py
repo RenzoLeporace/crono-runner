@@ -254,7 +254,8 @@ class LearningUI:
         text(s,f'{self.save.data["knowledge"]} puntos disponibles',(1208,84),24,GOLD,True,'topright')
         text(s,'Resuelve archivos por primera vez para obtener puntos. Las mejoras se conservan entre mapas y al morir.',(65,130),15,MUTED)
         owned=self.save.data['upgrades']
-        for n,item in enumerate(UPGRADES):
+        self.workshop_page=max(0,min((len(UPGRADES)-1)//8,self.workshop_page))
+        for n,item in enumerate(UPGRADES[self.workshop_page*8:self.workshop_page*8+8]):
             x=65+(n%2)*585
             y=175+(n//2)*105
             rect(s,(22,38,48),(x,y,558,93),6)
@@ -266,10 +267,13 @@ class LearningUI:
             self.button(label,(x+419,y+21,121,49),lambda key=item['id']:self.purchase(key),
                         primary=available,enabled=available,small=True,arrow=False)
             if item['requires'] and item['requires'] not in owned:
-                text(s,'Requiere Corazón del viajero',(x+18,y+73),10,GOLD)
+                requirement=next(u['name'] for u in UPGRADES if u['id']==item['requires'])
+                text(s,'Requiere '+requirement,(x+18,y+73),10,GOLD)
         self.button('Volver al viaje',(65,630,270,49),self.close_panel,True,small=True)
         self.button('Cuaderno',(353,630,205,49),lambda:self.open_panel('notebook'),small=True)
-        text(s,f'{len(owned)} / 8 mejoras instaladas',(1208,654),15,CYAN,False,'midright')
+        self.button('Anterior',(590,630,180,49),lambda:setattr(self,'workshop_page',self.workshop_page-1),enabled=self.workshop_page>0,small=True)
+        self.button('Siguiente',(790,630,180,49),lambda:setattr(self,'workshop_page',self.workshop_page+1),enabled=(self.workshop_page+1)*8<len(UPGRADES),small=True)
+        text(s,f'{len(owned)} / {len(UPGRADES)} habilidades',(1208,654),15,CYAN,False,'midright')
 
     def notebook(self):
         s=self.canvas

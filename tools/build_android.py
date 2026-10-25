@@ -30,7 +30,7 @@ def build():
     java=SOURCE/'java'/'org'/'renzoleporace'/'crono'/'MainActivity.java'
     run([JDK/'bin'/'javac.exe','-encoding','UTF-8','--release','8','-classpath',ANDROID,'-d',classes,java])
     run([TOOLS/'d8.bat','--release','--lib',ANDROID,'--min-api','26','--output',dex,*classes.rglob('*.class')])
-    unsigned=WORK/'crono-unsigned.apk';aligned=WORK/'crono-aligned.apk';target=release/'CRONO-Beta-Educativa-0.7-Android.apk'
+    unsigned=WORK/'crono-unsigned.apk';aligned=WORK/'crono-aligned.apk';target=release/'CRONO-Beta-Educativa-0.8-Android.apk'
     run([TOOLS/'aapt.exe','package','-f','-0','gz','-M',SOURCE/'AndroidManifest.xml','-S',SOURCE/'res','-A',assets,'-I',ANDROID,'-F',unsigned])
     # aapt transparently expands .gz assets and removes the suffix. The Python
     # loader requests the original gzip, so add it explicitly after packaging.

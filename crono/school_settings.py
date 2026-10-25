@@ -127,7 +127,7 @@ class SchoolSettingsUI:
             self.button(label,(65+i*292,116,270,51),lambda k=key:setattr(self,'school_tab',k),primary=self.school_tab==key,small=True,arrow=False)
         if self.school_tab=='files':
             if sys.platform=='emscripten':
-                text(s,'Elige un banco JSON con el selector de Android',(65,200),23,PAPER,True)
+                text(s,'Elige un banco JSON con el selector de tu dispositivo',(65,200),23,PAPER,True)
                 wrapped(s,'Revisar archivo abre tus documentos. Comprueba la vista previa antes de aplicar el banco.',(65,257),1110,21,CYAN)
             else:
                 text(s,'Ruta de un banco JSON para revisar antes de aplicar',(65,200),23,PAPER,True)

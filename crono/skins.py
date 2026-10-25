@@ -16,6 +16,15 @@ SKINS=(
   history='Un atuendo ficticio para quien reúne los 60 logros. Su Reloj del Cronista añade una unidad de energía máxima y 60 píxeles de alcance de atracción. Puedes desactivar ese beneficio conservando la apariencia.',url=''),
 )
 
+SKINS += (
+ dict(id='paleontologo',name='Explorador de fósiles',cost=75,color=(181,164,113),history='La paleontología estudia la vida del pasado mediante fósiles y su contexto. Este equipo de campo es moderno: las personas no convivieron con los dinosaurios del Cretácico; Crono llega allí por ficción temporal.',url='https://www.nhm.ac.uk/discover/dino-directory.html'),
+ dict(id='glacial',name='Abrigo del deshielo',cost=85,color=(135,115,91),history='Las poblaciones de regiones frías utilizaron recursos locales para protegerse y construir refugios. El atuendo ilustra aislamiento y abrigo; no reproduce una vestimenta única de todas las sociedades paleolíticas.',url='https://www.britishmuseum.org/collection'),
+ dict(id='agora',name='Mensajero del ágora',cost=100,color=(210,199,162),history='El ágora era un espacio de encuentro, intercambio y vida cívica de la polis. Esta túnica es una interpretación ilustrativa; la ciudadanía ateniense excluía a mujeres, esclavos y extranjeros residentes.',url='https://www.metmuseum.org/essays/ancient-greece'),
+ dict(id='copista',name='Copista medieval',cost=110,color=(111,80,86),history='Los manuscritos se copiaban y decoraban a mano. Bibliotecas y talleres conservaron y transformaron conocimientos. Esta capucha y su cuaderno aluden a esos oficios, sin representar a una persona concreta.',url='https://www.bl.uk/medieval-literature'),
+ dict(id='corresponsal',name='Correo entre refugios',cost=125,color=(119,133,108),history='Las cartas conservadas permiten estudiar experiencias de guerra, vínculos y vida cotidiana. Un testimonio aporta una perspectiva y debe contrastarse con otras fuentes. La ropa del juego representa un correo ficticio.',url='https://www.iwm.org.uk/history/first-world-war'),
+ dict(id='cientifica',name='Ciencia del presente',cost=135,color=(218,225,216),history='Investigar implica registrar, comparar evidencias y revisar explicaciones. El traje reconoce el trabajo cooperativo en ciencia; su cuaderno y sus gafas son elementos ilustrativos del viaje.',url='https://www.nasa.gov/learning-resources/'),
+)
+
 def buy_skin(save,key):
     item=next((s for s in SKINS if s['id']==key),None)
     if not item or key=='cronista' or key in save.data['purchased_skins'] or save.data['coins']<item['cost'] or save.data['practice']:return False
@@ -53,3 +62,25 @@ def details(s,player,y):
     elif key=='cronista':
         polygon(s,(99,64,95),[(28,y+16),(20,y+45),(32,y+39),(42,y+17)])
         circle(s,GOLD,(38,y+24),8,2);line(s,CYAN,(38,y+24),(38,y+18),2)
+    elif key=='paleontologo':
+        rect(s,(162,133,77),(28,y-14,24,13),3);rect(s,(205,177,115),(20,y-3,42,5),2)
+        line(s,(104,74,54),(29,y+18),(44,y+39),5);rect(s,(125,95,58),(43,y+25,12,15),2)
+    elif key=='glacial':
+        circle(s,(212,201,170),(40,y+3),20,6);rect(s,(176,157,123),(27,y+15,25,10),4)
+        for xx in (29,45):line(s,(214,205,180),(xx,y+28),(xx,y+44),4)
+    elif key=='agora':
+        polygon(s,(239,225,184),[(26,y+15),(47,y+17),(53,y+42),(28,y+42)])
+        line(s,(143,102,76),(28,y+17),(48,y+36),4);circle(s,GOLD,(31,y+19),4)
+        rect(s,(213,196,142),(19,y+22,7,21),2)
+    elif key=='copista':
+        polygon(s,(88,56,65),[(23,y+9),(28,y-22),(45,y-18),(58,y+11),(46,y+7),(40,y-5),(31,y+7)])
+        polygon(s,(87,58,73),[(28,y+15),(18,y+48),(52,y+48),(47,y+16)])
+        rect(s,(211,193,142),(18,y+26,14,17),2)
+    elif key=='corresponsal':
+        rect(s,(81,99,78),(27,y-11,26,12),4);line(s,(51,65,55),(25,y+2),(55,y+2),4)
+        line(s,(93,72,51),(30,y+18),(49,y+39),5);rect(s,(137,105,64),(43,y+32,16,16),2)
+        rect(s,(222,213,184),(46,y+35,10,6),1)
+    elif key=='cientifica':
+        for xx in (35,45):circle(s,CYAN,(xx,y+3),5,2)
+        line(s,CYAN,(35,y+3),(45,y+3),2);polygon(s,(239,238,220),[(27,y+18),(25,y+45),(38,y+42),(50,y+45),(47,y+18)])
+        line(s,(107,129,136),(38,y+23),(38,y+40),2);rect(s,(65,125,125),(20,y+29,11,16),1)

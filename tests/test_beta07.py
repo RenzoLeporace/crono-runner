@@ -113,10 +113,10 @@ class Beta07Tests(unittest.TestCase):
                 w=World(*divmod(level,3));w.enemies=[];w.hazards=[];m=w.mechanic;f=m.field
                 for i in range(3):m.activate(i,i)
                 w.update(STEP,Controls());self.assertFalse(m.completed)
-                if f.kind in PICKUPS or f.kind in ('race','wind','warmth'):
+                if f.kind in PICKUPS or f.kind in ('race','wind','warmth','rail','train'):
                     for x,y in f.points:
                         w.player.rect.midbottom=(x,y+40);w.player.vy=0;w.update(STEP,Controls())
-                elif f.kind in LIFTS or f.kind in LIGHTS or f.kind in ('bridge','chain'):
+                elif f.kind in LIFTS or f.kind in LIGHTS or f.kind=='bridge':
                     for lift in f.lifts:
                         w.player.rect.midbottom=(lift.rect.centerx,lift.rect.top-9);w.player.vy=200;w.player.support=None;w.player.grounded=False
                         for _ in range(110):
@@ -130,20 +130,24 @@ class Beta07Tests(unittest.TestCase):
                     for x,y in m.devices[:2]:w.player.rect.midbottom=(x,y);w.update(STEP,Controls())
                     w.player.rect.midbottom=m.devices[1]
                     for _ in range(120*4):w.update(STEP,Controls())
-                elif m.vehicle_kind:
-                    m.state['vehicle']=True
-                    for _ in range(120*4):w.update(STEP,Controls(axis=1))
+                elif f.kind=='chain':
+                    for x,y in f.points[:2]:
+                        w.player.rect.midbottom=(x,y+40);w.player.vy=0
+                        for _ in range(200):w.update(STEP,Controls(drop=True))
+                elif f.kind in ('naval','canal','tide'):
+                    # Full aquatic navigation and return are exercised separately.
+                    m.state['sea_complete']=True;f.distance=900;f.persist()
                 self.assertTrue(m.completed)
                 self.save.capture(w);coins=self.save.data['coins'];self.save.capture(w);self.assertEqual(self.save.data['coins'],coins)
                 target=World(*divmod(level,3));Save(self.save.path).restore(target)
                 self.assertTrue(target.mechanic.completed);w.respawn();self.assertTrue(m.completed)
 
-    def test_vehicle_timers_orientation_and_damage(self):
+    def test_legacy_vehicle_flags_cannot_make_a_land_boat(self):
         w=World(9,2);w.enemies=[];w.hazards=[];w.mechanic.state['vehicle']=True;w.player.dash_time=.12
         w.update(STEP,Controls(axis=-1,attack=True))
-        self.assertEqual(w.player.dash_time,0);self.assertEqual(w.player.facing,-1)
+        self.assertFalse(w.mechanic.state['vehicle']);self.assertEqual(w.player.facing,-1)
         self.assertTrue(any(s.owner=='player' and s.vx<0 for s in w.projectiles))
-        hp=w.player.hp;w.player.invincible=0;self.assertIn('hurt',w.damage(w.player.rect.centerx+50));self.assertEqual(w.player.hp,hp-1)
+        hp=w.player.hp;w.player.invincible=0;w.player.dash_time=0;self.assertIn('hurt',w.damage(w.player.rect.centerx+50));self.assertEqual(w.player.hp,hp-1)
 
     def test_field_damage_has_feedback(self):
         w=World(0,2);w.enemies=[];w.hazards=[];w.mechanic.activate(0,0)

@@ -29,7 +29,8 @@ args=[sys.executable,'-m','PyInstaller','--noconfirm','--onedir','--console' if 
       '--name','CRONO-Debug' if debug else 'CRONO - Ecos del tiempo','--icon',str(ROOT/'tools'/'crono.ico'),
       '--distpath',str(ROOT/'build'/'debug') if debug else str(ROOT/'build'/'release'),'--workpath',str(ROOT/'build'/'work'),
       '--specpath',str(ROOT/'build'),'--paths',str(ROOT/'.vendor'),
-      '--add-data',str(ROOT/'licencias')+os.pathsep+'licencias']
+      '--add-data',str(ROOT/'licencias')+os.pathsep+'licencias',
+      '--add-data',str(ROOT/'assets')+os.pathsep+'assets']
 for module in ('numpy','PIL','matplotlib','tkinter','pandas','IPython','pytest','scipy'):
     args.extend(['--exclude-module',module])
 args.append(str(ROOT/'Main.py'))

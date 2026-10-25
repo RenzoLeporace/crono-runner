@@ -1,3 +1,4 @@
+from story_fixture import complete_story
 """New routes preserve old data; cultural visits and humanoid combat work in game."""
 import json
 import os
@@ -156,6 +157,7 @@ class ReworkInterfaceTests(unittest.TestCase):
     def test_autosave_does_not_capture_an_already_completed_map(self):
         g=self.game;g.load(0,0);g.begin();g.world.shards={0,1,2}
         g.world.player.rect.midbottom=g.world.data['portal'];g.autosave=15.01
+        complete_story(g.world)
         g.update(STEP)
         self.assertEqual(g.state,'complete');self.assertEqual(g.save.data['current'],1)
         self.assertIsNone(g.save.data['progress'])
