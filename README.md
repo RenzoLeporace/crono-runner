@@ -1,152 +1,83 @@
 # CRONO · Ecos del tiempo
 
-**Beta educativa 0.6 para Windows.** Plataformas de exploración: Crono atraviesa épocas, recupera su reloj y aprende para volver al presente.
+**Beta educativa 0.7.** Creado por **Renzo Leporace**. © 2026 Renzo Leporace. Todos los derechos reservados. [Derechos](COPYRIGHT.txt) · [Fuentes](FUENTES.md) · [Verificación](VERIFICACION.md) · [Auditoría](docs/AUDITORIA-0.7.md).
 
-[Descargar beta 0.6](https://github.com/RenzoLeporace/crono-runner/releases/tag/v0.6.0) · [Fuentes educativas](FUENTES.md) · [Verificación](VERIFICACION.md)
+Crono viajó al pasado y debe recorrer distintas épocas para regresar al presente. Plataformas, exploración, archivos educativos, rescates y excursiones opcionales comparten una campaña de ficción histórica.
 
-## Jugar
+## Entregas
 
-Extrae todo `CRONO-Beta-Educativa-0.6-Windows.zip` y abre **CRONO - Ecos del tiempo.exe** o **Jugar.bat**. Conserva **_internal** junto al ejecutable. No necesita Python ni conexión. Los enlaces educativos se abren solo al pulsar su botón.
+La entrega local se organiza en **Entrega/Proyecto**, **Entrega/Windows** y **Entrega/Android**. Los paquetes publicados están en [GitHub Releases](https://github.com/RenzoLeporace/crono-runner/releases).
 
-## Renovación visual de todos los mapas
+En Windows extrae todo el ZIP y abre **CRONO - Ecos del tiempo.exe**. Conserva **_internal** junto al EXE. No necesita Python ni Internet. En Android instala el APK firmado de pruebas y juega en horizontal; la primera carga prepara el motor incluido. Los controles táctiles están integrados. Los enlaces a fuentes se abren al pulsarlos. Consulta las comprobaciones y límites de cada plataforma en VERIFICACION.md.
 
-Los 21 escenarios anteriores se renovaron con materiales, objetos y hitos propios: manglares y estratos fósiles, glaciares y pinturas, pórticos y puertos, abadía y mercado, catedral con arcos apuntados, calderas y estación, refugios y reconstrucción, redes y observatorio. Las superficies transitables conservan un borde claro; el detalle de fondo no añade colisiones.
+## Campaña y exploración
 
-![Escenarios renovados](docs/imagenes/21-escenarios-renovados.png)
+Hay **36 mapas**: 24 principales, cuatro de Argentina, cinco bonus por rescates y tres excursiones mediante grietas. Las rutas extensas combinan alturas, ramales, retornos, galerías y hitos propios. Cada mapa contiene tres fragmentos, 48 ecos, dos archivos educativos, una curiosidad específica y una actividad contextual opcional.
 
-Argentina tiene fachadas variadas, balcones, persianas, tejas, carteles, faroles y pequeños objetos. Cabildo, Recova, Casa de Tucumán y Congreso aparecen en distintos distritos. Egipto aporta navegación y cultivos del Nilo, cantera y pirámides de Guiza, columnas y un templo nocturno.
-
-![Distritos argentinos](docs/imagenes/argentina-detalle.png)
-
-## Rutas
-
-Se reemplazaron las plantillas y mapas reflejados por **27 itinerarios propios** de aproximadamente 12.000–16.000 píxeles, frente a 4.550–5.700 anteriores. Hay terrazas a distintas alturas, balcones, galerías inferiores, bifurcaciones y retornos.
-
-Cada mapa tiene tres zonas, tres fragmentos en ramales, **48 ecos**, dos archivos educativos y anclas según dificultad: todas en mínima, cuatro en media y dos en máxima. En mapas de jefe siempre hay una de esas anclas antes de la arena. Las rutas obligatorias no requieren mejoras ni impulso. **V** abre el plano real de superficies, Crono, archivos, anclas, fragmentos y salida. **S / abajo** baja por las pasarelas delgadas.
-
-![Plano de rutas](docs/imagenes/plano-rutas.png)
-
-## Edad y dificultad
-
-El perfil se elige en el menú o en Configuración y cambia preguntas y combate, incluida la partida activa:
-
-| Perfil | Combate |
+| Recorrido | Mapas |
 | --- | --- |
-| 6–9 · Explorador | Mínimo: velocidades, resistencia y ventanas amplias de la beta anterior. |
-| 10–14 · Aventurero | Más velocidad y resistencia, cargas frecuentes, ataques combinados y marcas de caída en jefes. |
-| 15+ · Experto | Salvas de centinelas, alados con disparos apuntados, núcleos abiertos menos tiempo y segunda fase más intensa. |
+| Primigenio | Costa de los gigantes, Valle de los fósiles, Extinción |
+| Deshielo | Estepa del mamut, Refugio del fuego, Cueva de las manos |
+| Egipto | Canales del Nilo, Meseta de Guiza, Templo de la memoria |
+| Grecia | Ágora de Atenas, Rutas del Mediterráneo, Olimpia |
+| Medievo | Campos de la abadía, Ciudad de mercaderes, Torres de luz |
+| Industria | Fuerza del vapor, Camino de hierro, Ciudad eléctrica |
+| Guerras mundiales | Cartas desde 1914, Refugios de 1939, Reconstruir la paz |
+| Actualidad | Ciudad de las redes, Energía del mañana, Observatorio del presente |
+| Argentina | Buenos Aires 1810, Tucumán 1816, Vuelta de Obligado 1845, Democracia 1983 |
+| Bonus por rescates | Cruce de los Andes 1817, Brown y la guerra naval 1825–1828, Faro de Alejandría, Expreso nocturno, Hospital de campaña |
+| Grietas al pasado | Malvinas 1982, Pompeya 79, Apolo 11 1969 |
 
-La dificultad también reduce anclas: mínima conserva todas, media activa cuatro y máxima solo dos. Cambiar el perfil o cargar una partida conserva un ancla anterior que siga habilitada. El plano V muestra únicamente las anclas disponibles.
+Las actividades combinan tres puestos de preparación con una aplicación física: recuperar objetos, utilizar elevadores, revelar pasarelas, acompañar personas o una urna simbólica, cruzar refugios, conducir vehículos o recorrer balizas. El Nilo y Brown incluyen navegación; el ferrocarril, conducción; Apolo, menor gravedad y muestras. Completar una actividad da recompensa única y apoyo durante el mapa. Varias actividades comparten una familia de controles con objetivos y ambientación propios.
 
-Las marcas del suelo anticipan proyectiles de caída. Los enemigos que disparan brillan antes de hacerlo; las cargas muestran **!**. Los jefes solo reciben daño con el núcleo dorado. Resolver un archivo de su mapa prolonga la exposición. Cambiar la edad no revive adversarios derrotados.
+Rescatar a San Martín, Brown, una cartógrafa, una técnica ferroviaria y una médica abre los cinco bonus. El desvío de San Martín enlaza Tucumán con Cuyo en 1816; Brown aparece mediante una señal de otra fecha. Son encuentros ficticios explicados al interactuar. Las grietas parten de Democracia 1983, Torres de luz y Observatorio: al completar la excursión vuelves al punto de origen, conservas el progreso y recibes 40 ecos una sola vez.
 
-## Campaña y Argentina
+Hay **18 jefes**, con señales previas de ataque, ventanas vulnerables y reacción visible al daño confirmado. Los nuevos encuentros incorporan baterías costeras, rocas, salvas navales, ceniza y ataques orbitales. Resolver archivos o completar la actividad ayuda durante el combate. Los enemigos tienen modelos propios de su época; los realistas se distinguen mediante uniformes claros y la Cruz de Borgoña española.
 
-La campaña tiene **24 mapas en ocho épocas**. Argentina es una **expansión incluida de tres mapas**, disponible desde el menú, con progreso independiente. Hay nueve jefes finales.
+## Aprendizaje, recompensas y dificultad
 
-| Época | Mapa 1 | Mapa 2 | Mapa 3 y jefe |
-| --- | --- | --- | --- |
-| Primigenio | Costa de los gigantes | Valle de los fósiles | Extinción · Guardián del impacto |
-| Deshielo | Estepa del mamut | Refugio del fuego | Cueva de las manos · Matriarca de escarcha |
-| Antiguo Egipto | Canales del Nilo | Meseta de Guiza | Templo de la memoria · Centinela de arenisca |
-| Grecia | Ágora de Atenas | Rutas del Mediterráneo | Olimpia · Coloso de bronce |
-| Medievo | Campos de la abadía | Ciudad de mercaderes | Torres de luz · Vigía de las campanas |
-| Industria | Fuerza del vapor | Camino de hierro | Ciudad eléctrica · Titán de vapor |
-| Guerras mundiales | Cartas desde 1914 | Refugios de 1939 | Reconstruir la paz · Blindado del olvido |
-| Actualidad | Ciudad de las redes | Energía del mañana | Observatorio del presente · Núcleo de la red |
-| Argentina · DLC | Buenos Aires, 1810 | Tucumán, 1816 | Democracia, 1983 · Cerrojo del silencio |
+El banco contiene **1296 preguntas y actividades** en 72 archivos y tres edades: seis alternativas por tema y perfil. Incluye 432 preguntas factuales y 864 ejercicios de aplicación sobre fuentes, imágenes ilustrativas, razones y cronología. No son 1296 hechos históricos distintos. Se sortean preguntas y se mezclan respuestas, evitando repetición inmediata cuando hay alternativas.
 
-Las dos guerras mundiales comparten una época: contextos, vida civil y reconstrucción. Las figuras humanas son ecos de ficción del viaje temporal, sin identificar personas reales. Los adversarios son anomalías ficticias del reloj; los escenarios son interpretaciones educativas, no reconstrucciones exactas ni una historia universal. Argentina trata tres momentos concretos, no toda su historia.
+La primera respuesta correcta a un archivo da dos puntos de saber, compartidos entre edades. Los errores explican la respuesta sin quitar energía. Las mejoras se compran con saber y los repasos no duplican recompensas. El cuaderno permite revisar contenidos y fuentes, y escribir una justificación para el docente.
 
-Las nueve épocas tienen **siluetas propias**, además de seis comportamientos mezclados: patrulla, salto, vuelo, disparo, carga y armadura. Hay reptiles y fauna de estepa; hoplitas y arqueros; caballeros y ballesteros; autómatas bípedos y máquinas de vapor; infantería y blindados; robots bípedos y drones; guardias egipcios, escarabajos y halcones; realistas y figuras armadas en Argentina. Los protegidos llevan armadura o un distintivo de escudo: no se pueden pisar. Usa disparos o impulso.
+Los ecos pequeños sirven para comprar **seis skins con ficha histórica**, además de Crono y el traje de Cronista. Cada eco del mapa aporta moneda una sola vez. Los **60 logros** cubren campaña, exploración, aprendizaje, combate y rescates. Completarlos habilita el Reloj del Cronista: +1 de energía máxima y +60 píxeles de atracción, con opción de desactivarlo.
 
-![Familias de enemigos](docs/imagenes/enemigos-por-epoca.png)
+La edad cambia preguntas y dificultad: 6–9 mínima, 10–14 media y 15+ alta. En Accesibilidad puedes elegir asistencia motriz independientemente de la edad. La mínima conserva el reto anterior; las superiores aumentan resistencia, velocidad y combinaciones. Los jefes anticipan ataques para evitar permanecer quieto. Hay todas las anclas en mínima, cuatro en media y dos en alta, incluida una antes del jefe. Texto ajustable a 19, 22 y 25 píxeles y controles principales reasignables.
 
-Los ambientes incluyen meteoros y cenizas, nieve, cuevas, puertos, lluvia, trenes, trincheras vacías, refugios, redes, renovables, observatorio y arquitectura argentina. Los efectos de fondo no causan daño.
+Luján aparece únicamente en 1810, Itatí en 1816 y Moisés en el tercer mapa egipcio. Cada otro mapa tiene su propia curiosidad. Las fichas diferencian patrimonio religioso, tradición bíblica, evidencia y ficción. Las figuras armadas de 1983 son ecos del período previo: el regreso democrático no se presenta como una batalla histórica.
 
-![27 escenarios](docs/imagenes/27-mapas.png)
+## Docentes, alumnos y salas
 
-## Patrimonio y tradiciones
+**Configuración → Zona docente** permite revisar todas las preguntas, buscar, filtrar, añadir, duplicar y editar. Se validan campos y opciones y se conserva al menos una pregunta por tema y edad. Puedes importar JSON con vista previa, exportar, crear respaldos y seleccionar temas. Android utiliza el selector de documentos del sistema. El PIN docente es opcional y se configura en Privacidad.
 
-En los tres mapas argentinos hay hornacinas ilustradas de **Nuestra Señora de Luján** y **Nuestra Señora de Itatí**, con rasgos y fichas distintas. En el tercer mapa egipcio aparece una ilustración de **Moisés y el Éxodo**, presentada como tradición bíblica y cultural. Pulsa **E** al acercarte; también puedes abrir **Cuaderno → Patrimonio**. Estas visitas pausan la acción.
+**Desbloquear todo para probar** habilita mapas, bonus, grietas, mejoras y apariencias en una sesión de práctica. No altera desbloqueos ni consume monedas del alumno; sus resultados quedan fuera de rankings. Desde **Pausa → Pruebas docentes** puedes ir a puestos, curiosidad, rescate, grieta o jefe. Desactivar la práctica devuelve el progreso normal.
 
-Las imágenes son interpretaciones originales. Las fichas distinguen la ubicación real de Luján e Itatí de su presencia como referencias del reloj, y el relato religioso de las evidencias arqueológicas. No se fija una fecha ni un faraón concreto para el Éxodo.
+Cada perfil tiene alias, clase, institución y progreso independiente. Se registran intentos, primera respuesta, correcciones y justificaciones; el CSV incluye texto de preguntas y respuestas. Hay dos rankings: clase e institución. Cada mapa puntúa tiempo, enemigos, ecos, descubrimientos y objetivos; solo suma el mejor registro. Son rankings locales de aula sin verificación antitrampas de servidor.
 
-![Patrimonio](docs/imagenes/patrimonio-lujan.png)
+Un docente **crea la sala desde Windows**. En la misma LAN o WiFi, los alumnos de Windows o Android introducen IP, puerto y código. La sala comparte banco y temas y recibe mejores resultados, sin Internet. Mantén abierta la computadora docente y autoriza su acceso en una red privada si Windows lo solicita; el juego no cambia el firewall. Android actúa como cliente. El ranking institucional reúne alumnos conectados a esa sala, no servidores separados.
 
-En 1810 y 1816 los adversarios son realistas ficticios con mosquetes, uniformes, correajes y oficiales. En 1983, los militares y las células terroristas evocan violencias del período previo; la introducción y la guía dan contexto al regreso democrático. Se distinguen represión estatal y violencia de organizaciones armadas.
-
-## Aprender y mejorar
-
-Hay **324 preguntas originales**, 108 por perfil, para **54 archivos educativos**. Cada visita sortea una pregunta por edad y mezcla las respuestas; si hay varias, evita repetir inmediatamente la anterior.
-
-Pulsa **E** junto a un archivo para leer y responder. La primera respuesta correcta da dos puntos de conocimiento. Equivocarse explica la respuesta sin restar energía ni puntos. Repasar, cambiar de edad o añadir preguntas al mismo archivo no repite la recompensa.
-
-**U** abre ocho mejoras permanentes: dos aumentos de energía, segundo salto, imán, impulso mejorado, escudo, pulso amplificado y botas. **C** abre el cuaderno con repasos, fuentes y guía de adversarios. Los archivos no son obligatorios para superar rutas ni jefes.
-
-## Docentes
-
-En **Configuración → Ver y editar preguntas** se ven todas las preguntas y respuestas correctas, sin desbloqueos. Hay búsqueda y filtros por época, mapa y edad, incluidos los contenidos nuevos.
-
-**Nueva pregunta**, **Editar** y **Duplicar** permiten elegir mapa, archivo y edad; escribir pregunta, tres opciones, respuesta correcta, explicación y referencia opcional. Guardar aplica el contenido inmediatamente al sorteo. La explicación sirve de pista y devolución.
-
-Los campos admiten tildes, selección, Ctrl+A y Ctrl+C/V. Tab cambia de campo; Ctrl+Enter o Ctrl+S guarda. Las lecturas largas se desplazan con la rueda. Se validan vacíos, opciones repetidas y que cada archivo y edad conserve preguntas. Cancelar o cerrar protege cambios sin guardar.
-
-El banco se guarda en **contenido/preguntas.json**, separado del alumno. Cada modificación de un banco existente crea respaldo en **contenido/respaldos**; también hay **Crear respaldo**. Un viaje nuevo no borra preguntas. Los bancos 0.4 y 0.5 se amplían sin perder modificaciones ni preguntas propias. Para compartirlos copia `contenido` con el juego cerrado. La zona docente no tiene contraseña.
+Consulta [la guía de aula de 15–25 minutos](docs/GUIA-DOCENTE.md). Usa alias sin datos personales; los archivos son locales y se pueden borrar perfiles. La LAN debe ser de confianza.
 
 ## Controles
 
-| Acción | Teclado | Mando SDL habitual |
+| Acción | Teclado predeterminado | Android |
 | --- | --- | --- |
-| Mover | A/D o flechas | Palanca / cruceta |
-| Saltar | Espacio / W / arriba | A |
-| Bajar por pasarela | S / abajo | Teclado |
-| Impulso | Shift / X | X / RB |
-| Disparar | F, mantener para repetir | B |
-| Archivo educativo | E | Y |
-| Plano | V | Desde pausa |
-| Taller / cuaderno | U / C | Desde pausa |
-| Pausa | Esc / P | Start |
-| Volver al ancla | R | Desde pausa |
-| Pantalla completa | F11 | — |
-| Sonido / captura | M / F12 | — |
+| Mover | A/D o flechas | Cruceta |
+| Saltar | Espacio / W / arriba | Salto |
+| Bajar de pasarela | S / abajo | Abajo |
+| Impulso | Shift / X | Impulso |
+| Disparar | F, mantener | Disparo, mantener |
+| Interactuar / subir y bajar de vehículo | E | Interactuar |
+| Plano | V | Pausa |
+| Mejoras / cuaderno | U / C | Botones inferiores |
+| Pausa | Esc / P | II / atrás |
+| Ancla | R | Pausa |
+| Pantalla completa / sonido / captura | F11 / M / F12 | Configuración |
 
-Menús con ratón, flechas y Enter; respuestas con 1, 2 y 3. Los botones de mando pueden variar; no se verificó hardware físico.
+Menús con ratón, flechas y Enter; respuestas con 1–3. Lecturas con rueda, PageUp/PageDown y desplazamiento táctil. Soporte de mando SDL sin comprobar un mando físico. En vehículos E primero permite bajar; vuelve a pulsar para usar un puesto cercano.
 
-## Guardado y migración
+## Datos y desarrollo
 
-**saves/progreso.json** usa formato 4. Campaña y Argentina tienen mapa, desbloqueos y ancla independientes; comparten conocimiento, mejoras y cuaderno. Morir conserva aprendizaje y mejoras; un jefe vivo reinicia el combate.
+Guardados formato 5 en saves; banco formato 4 en contenido/preguntas.json; respaldos en contenido/respaldos. Se migran versiones anteriores conservando IDs y modificaciones. Los paquetes no incluyen partidas, tokens de salas ni bancos personales. Android conserva datos en almacenamiento privado; desinstalar los borra.
 
-Se importan partidas antiguas con respaldo previo. La beta 0.5 conserva mapas, anclas habilitadas, fragmentos, daño a enemigos y preguntas personalizadas: los IDs anteriores siguen estables. Egipto se inserta cronológicamente sin moverlos. En partidas avanzadas queda disponible desde Épocas. Una campaña 0.5 terminada mantiene su final y permite visitar Egipto. Al cambiar toda la geometría, una partida 0.4 retoma su mapa desde una entrada segura: conserva fragmentos, ecos, aprendizaje y mejoras, pero no coordenadas de anclas ni enemigos del mapa anterior. Una campaña 0.4 terminada abre las guerras para continuar hasta el nuevo final.
-
-Para trasladar alumnos copia `saves`; para preguntas copia `contenido`. El ZIP no incluye partidas ni bancos personalizados. Nuevo viaje reinicia el progreso de ambas campañas y las mejoras compartidas, pero conserva el banco docente.
-
-## Desarrollo
-
-Python 3.12 en Windows:
-
-```powershell
-python -m pip install -r requirements.txt
-python Main.py
-python tests/test_game.py
-python tests/test_education.py
-python tests/test_teacher.py
-python tests/test_expansion.py
-python tests/test_rework.py
-```
-
-Para compilar y empaquetar:
-
-```powershell
-python -m pip install -r requirements-build.txt
-python tools/build_beta.py
-python tools/package_beta.py
-```
-
-El empaquetado comprueba dieciséis pantallas del ejecutable. `python tools/capture_education.py` genera la revisión visual. Ejemplo: `python Main.py --headless --era 8 --map 1 --scene play --camera 600 --capture capturas/argentina.png`. En la línea de comandos se conservan los IDs anteriores: época 6, guerras; 7, actualidad; 8, Argentina; 9, Egipto. Los menús muestran el orden cronológico. También hay escenas `atlas`, `boss`, `quiz`, `settings`, `teacher` y `question_edit`.
-
-El informe independiente solicitado está en [Auditoría de la beta](docs/AUDITORIA-0.6.md), con correcciones y mejoras propuestas para escuelas.
-
-La simulación usa 120 Hz. Arte y audio se generan por código. `routes.py`: itinerarios; `combat.py`: dificultad; `enemy_art.py`: modelos; `expansion_content.py`: lecciones; `campaign.py`: campañas; `question_bank.py` y `teacher_ui.py`: docentes. El original y la beta 0.2 están en `legacy`. Licencias de terceros en `LICENCIAS.txt` y `licencias`.
-
-Esta beta requiere sesiones humanas de equilibrio y revisión docente; las comprobaciones automáticas no las sustituyen.
+Instala requirements.txt, ejecuta Main.py y verifica con python -m unittest discover -s tests -p "test_*.py". Windows se genera con tools/build_beta.py y tools/package_beta.py. Android usa tools/prepare_android.py (motor WebAssembly offline) y tools/build_android.py (APK Android real con SDK 34 y JDK). El archivo intermedio .apk de pygbag es un contenedor web, no la entrega instalable. El APK final se alinea, firma y verifica con herramientas Android. Tecnología y licencias en LICENCIAS.txt.

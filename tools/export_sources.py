@@ -4,13 +4,13 @@ import sys
 ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT),str(ROOT/'.vendor')]
 from crono.education import SOURCES,STAGES,LESSONS
-from crono.campaign import CHAPTER_ORDER,level_label
-rows=['# Contenidos y fuentes de la beta educativa 0.6','',
+from crono.campaign import DISPLAY_LEVEL_IDS,level_label
+rows=['# Contenidos y fuentes de la beta educativa 0.7','',
       'Las explicaciones son paráfrasis originales. Cada archivo del juego enlaza su fuente en el cuaderno.',
       'Los mapas son escenarios de ficción inspirados en temas concretos, no reconstrucciones exactas ni una historia universal. Los jefes y los enemigos son ficticios.','',
-      'El banco inicial contiene 324 preguntas escritas: 108 por perfil de edad, con dos variantes por archivo y perfil. Desde Configuración, los docentes pueden consultar todas las respuestas, agregar preguntas y modificar las existentes, incluida su explicación y referencia. Las referencias de esta página corresponden al contenido original; las incorporaciones del docente usan la referencia que este indique. Al abrir un archivo se elige una pregunta al azar y se mezclan las respuestas. Si hay varias, no se repite inmediatamente la anterior del mismo perfil.','',
+      'El banco inicial contiene 1296 registros para 72 temas y tres edades: 432 preguntas factuales y 864 tareas de aplicación sobre fuentes, imágenes, razones y cronología. Cada tema y edad tiene seis alternativas; no equivalen a 1296 hechos históricos distintos. Desde Configuración, los docentes pueden consultar todas las respuestas, agregar preguntas y modificar las existentes, incluida su explicación y referencia. Las referencias de esta página corresponden al contenido original; las incorporaciones del docente usan la referencia que este indique. Al abrir un archivo se elige una pregunta al azar y se mezclan las respuestas. Si hay varias, no se repite inmediatamente la anterior del mismo perfil.','',
       'Las preguntas de 6–9 años se centran en reconocer; las de 10–14, en relacionar y explicar; las de 15 en adelante, en inferir y valorar los límites de las evidencias. Son perfiles orientativos, no una evaluación curricular certificada.','']
-for level_id in (e*3+n for e in CHAPTER_ORDER for n in range(3)):
+for level_id in DISPLAY_LEVEL_IDS:
     stage=STAGES[level_id]
     rows.extend([f'## {level_label(level_id)} · {stage.name}','',stage.focus,''])
     for topic in range(level_id*2,level_id*2+2):
@@ -18,9 +18,9 @@ for level_id in (e*3+n for e in CHAPTER_ORDER for n in range(3)):
         title,url=SOURCES[lesson.source]
         rows.extend([f'- **{lesson.title}**. Fuente: [{title}]({url}).'])
     rows.append('')
-rows.extend(['## Campaña y expansión argentina' , '', 'La campaña general tiene 24 mapas. Las dos guerras mundiales se tratan en una época con tres mapas: 1914, 1939 y reconstrucción desde 1945. La actualidad añade redes, renovables y cooperación científica. Argentina es una expansión incluida de tres mapas: 1810, 1816 y 1983. Los adversarios son anomalías ficticias, no poblaciones ni países reales.', '', '## Cómo funciona el aprendizaje','',
+rows.extend(['## Campaña y expansión argentina' , '', 'La campaña general tiene 24 mapas. Las dos guerras mundiales se tratan en una época con tres mapas: 1914, 1939 y reconstrucción desde 1945. La actualidad añade redes, renovables y cooperación científica. Argentina incluye cuatro mapas normales: 1810, 1816, Obligado 1845 y 1983. Hay cinco bonus por rescates y tres grietas, para un total de 36 mapas. Los rescates son ficción del reloj y las grietas devuelven al origen; no alteran los desenlaces históricos. Los adversarios son anomalías ficticias, no poblaciones ni países reales.', '', '## Cómo funciona el aprendizaje','',
              'Cada archivo resuelto por primera vez da dos puntos de conocimiento, compartidos entre los perfiles de edad. Un error muestra la respuesta y una explicación, permite reintentar y no resta energía ni puntos. Los repasos no repiten recompensas. Los archivos descubiertos se pueden consultar en el cuaderno.',
-             '', 'En los terceros mapas, resolver al menos un archivo de ese mapa prolonga 0,8 segundos el período vulnerable del jefe. Ninguna mejora ni respuesta es obligatoria para superar las rutas o los combates.'])
+             '', 'En los mapas con jefe, resolver al menos un archivo de ese mapa prolonga 0,8 segundos el período vulnerable del jefe. Ninguna mejora ni respuesta es obligatoria para superar las rutas o los combates.'])
 from crono.heritage import ENTRIES
 rows.extend(['','## Patrimonio y tradiciones',''])
 for entry in ENTRIES.values():

@@ -155,10 +155,13 @@ class Boss:
         self.alive=True
         self.phase='waiting'
         self.timer=self.attack_time=self.hit_flash=0.
+        self.hit_reaction=0.
+        self.last_damage=0
         self.direction=-1
         self.cycle=0
         self.scholarly=False
         self.telegraphs=[]
+        self.camp_time=0.;self.camp_position=None;self.aim_warning=0.;self.aim_target=None
         self.set_difficulty(difficulty)
 
     def set_difficulty(self,band):
@@ -170,7 +173,10 @@ class Boss:
     def hit(self,damage):
         if not self.active or not self.alive or self.phase!='exposed' or self.hit_flash>0:
             return False
+        previous=self.hp
         self.hp=max(0,self.hp-damage)
+        self.last_damage=previous-self.hp
+        self.hit_reaction=.34 if self.hp else .65
         self.hit_flash=(.23,.2,.16)[self.difficulty]
         if self.hp==0:
             self.alive=False
@@ -180,6 +186,8 @@ class Boss:
         return False
 
     def begin_attack(self,world):
+        from .journey_encounters import begin
+        if begin(self,world):return
         self.phase='attack'
         self.attack_time=0
         self.timer=(.5,.85,.5,1.15,.75,.95,1.1,.85,.9)[self.era]
@@ -211,12 +219,15 @@ class Boss:
                 world.projectiles.append(Projectile(x,510,sign*290))
 
     def update(self,dt,world):
+        self.hit_reaction=max(0,self.hit_reaction-dt)
         if not self.alive:
             return
         self.hit_flash=max(0,self.hit_flash-dt)
         if not self.active:
             if world.player.rect.centerx>self.left+130 and len(world.shards)==3:
                 self.active=True
+                self.deaths_on_activation=world.deaths
+                if world.boss_deaths_start is None:world.boss_deaths_start=world.deaths
                 self.phase='warning'
                 self.timer=1.3
                 world.projectiles=[]
@@ -230,6 +241,20 @@ class Boss:
         self.scholarly=any(t in world.answered for t in (world.level_id*2,world.level_id*2+1))
         self.timer-=dt
         p=world.player
+        if self.difficulty:
+            if self.camp_position is None or abs(p.rect.centerx-self.camp_position)>95:
+                self.camp_position=p.rect.centerx;self.camp_time=0.
+            else:self.camp_time+=dt
+            if self.camp_time>2.7-self.difficulty*.45 and not self.aim_warning:
+                self.aim_target=p.rect.center;self.aim_warning=.95 if self.difficulty==1 else .75
+                self.camp_time=0.
+            if self.aim_warning:
+                self.aim_warning=max(0,self.aim_warning-dt)
+                if not self.aim_warning:
+                    delta=pg.Vector2(self.aim_target)-pg.Vector2(self.rect.center)
+                    if delta.length()>0:
+                        delta.scale_to_length(330+self.difficulty*35)
+                        world.projectiles.append(Projectile(*self.rect.center,*delta,kind='aimed'))
         rate=(1,1.15,1.3)[self.difficulty]
         if self.phase=='warning':
             self.direction=1 if p.rect.centerx>self.rect.centerx else -1
@@ -237,6 +262,8 @@ class Boss:
                 self.begin_attack(world)
         elif self.phase=='attack':
             self.attack_time+=dt
+            from .journey_encounters import movement
+            movement(self,dt,world)
             if self.era==1:
                 self.rect.x+=self.direction*435*rate*dt
             elif self.era==3:
@@ -249,7 +276,7 @@ class Boss:
             if self.timer<=0:
                 self.rect.bottom=584
                 self.phase='exposed'
-                self.timer=(1.65,1.25,.9)[self.difficulty]+(.8 if self.scholarly else 0)
+                self.timer=(1.65,1.25,.9)[self.difficulty]+(.8 if self.scholarly else 0)+(.6 if getattr(self,'field_support',False) else 0)
         elif self.phase=='exposed' and self.timer<=0:
             self.phase='warning'
             base=1.2 if self.hp>self.max_hp/2 else .85

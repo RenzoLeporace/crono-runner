@@ -319,6 +319,7 @@ class Question:
     correct: int
     explanation: str = ''
     source: str = ''
+    kind: str = 'choice'
 
 
 def choose_question(topic,band,rng=None,previous=None):
@@ -396,4 +397,7 @@ extend_content(Stage,lesson,STAGES,LESSONS,SOURCES)
 from .egypt_content import extend_egypt
 extend_egypt(Stage,lesson,STAGES,LESSONS,SOURCES)
 
-assert len(STAGES)==27 and len(LESSONS)==54
+from .journey_content import extend_journeys
+extend_journeys(Stage,lesson,STAGES,LESSONS,SOURCES)
+
+assert len(STAGES)==36 and len(LESSONS)==72

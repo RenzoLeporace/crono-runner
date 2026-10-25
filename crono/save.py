@@ -5,7 +5,9 @@ import os
 from pathlib import Path
 import sys
 from .education import UPGRADES,LESSONS
-from .campaign import MAIN_LEVELS,TOTAL_LEVELS,DLC_START,MAIN_LEVEL_IDS,DLC_LEVEL_IDS,is_dlc,rank,successor,final_level
+from .campaign import MAIN_LEVELS,TOTAL_LEVELS,DLC_START,MAIN_LEVEL_IDS,DLC_LEVEL_IDS,is_dlc,rank,successor,final_level,is_bonus,is_rift
+from .progression import Progression,extra_defaults,load_extra,progress_slot
+from .storage import atomic_replace
 
 
 def save_path():
@@ -14,29 +16,34 @@ def save_path():
 
 
 def defaults():
-    return dict(version=4,unlocked=0,current=0,started=False,finished=False,
+    result=dict(version=5,unlocked=0,current=0,started=False,finished=False,
                 dlc_unlocked=DLC_START,dlc_current=DLC_START,dlc_started=False,dlc_finished=False,dlc_progress=None,
                 sound=True,fullscreen=False,progress=None,records={},age_band=1,
                 knowledge=0,upgrades=[],solved=[],discovered=[])
+    result.update(extra_defaults())
+    return result
 
 
 def valid_ids(values,total):
     return sorted({i for i in values if type(i) is int and 0<=i<total}) if isinstance(values,list) else []
 
 
-class Save:
+class Save(Progression):
     def __init__(self,path=None):
         self.path=Path(path) if path else save_path()
         self.data=defaults()
         self.warning=''
         self.legacy_bytes=None
         try:
+            from .mobile import ensure_file
+            ensure_file(self.path)
             raw_bytes=self.path.read_bytes()
             raw=json.loads(raw_bytes.decode('utf-8-sig'))
-            if not isinstance(raw,dict) or raw.get('version') not in (1,2,3,4):
+            if not isinstance(raw,dict) or raw.get('version') not in (1,2,3,4,5):
                 raise ValueError('Formato de guardado desconocido')
             legacy=raw.get('version')==1
-            if raw.get('version') in (1,2,3):
+            self.data.update(load_extra(raw))
+            if raw.get('version') in (1,2,3,4):
                 self.legacy_bytes=raw_bytes
             for key in ('unlocked','current'):
                 value=raw.get(key,0)
@@ -44,7 +51,7 @@ class Save:
                 self.data[key]=candidate if candidate in MAIN_LEVEL_IDS else 0
             for key in ('dlc_unlocked','dlc_current'):
                 value=raw.get(key,DLC_START)
-                self.data[key]=max(DLC_START,min(DLC_LEVEL_IDS[-1],value)) if type(value) is int else DLC_START
+                self.data[key]=value if type(value) is int and value in DLC_LEVEL_IDS else DLC_START
             for key in ('started','finished','sound','fullscreen','dlc_started','dlc_finished'):
                 if type(raw.get(key)) is bool:
                     self.data[key]=raw[key]
@@ -73,7 +80,7 @@ class Save:
                 stage=p.get('stage',0)
                 self.data['progress']['stage']=stage if type(stage) is int and 0<=stage<3 else 0
             p=raw.get('dlc_progress')
-            if isinstance(p,dict) and p.get('index')==7 and type(p.get('stage')) is int and 0<=p['stage']<3:
+            if isinstance(p,dict) and type(p.get('index')) is int and type(p.get('stage')) is int and p['index']*3+p['stage'] in DLC_LEVEL_IDS and 0<=p['stage']<3:
                 self.data['dlc_progress']=dict(p)
         except FileNotFoundError:
             pass
@@ -88,20 +95,26 @@ class Save:
                 backup=self.path.with_name(self.path.stem+f'-v{version}-respaldo.json')
                 if not backup.exists():
                     backup.write_bytes(self.legacy_bytes)
+                    from .mobile import persist
+                    persist(backup)
                 self.legacy_bytes=None
             temporary=self.path.with_suffix('.tmp')
             temporary.write_text(json.dumps(self.data,ensure_ascii=False,indent=2),encoding='utf-8')
-            os.replace(temporary,self.path)
+            atomic_replace(temporary,self.path)
+            from .mobile import persist
+            persist(self.path)
             self.warning=''
         except OSError:
             self.warning='No se pudo guardar el progreso en esta carpeta.'
 
     def discover(self,topic):
+        if self.data['practice']:return
         if topic not in self.data['discovered']:
             self.data['discovered'].append(topic)
             self.write()
 
     def answer(self,topic):
+        if self.data['practice']:return False
         if type(topic) is not int or not 0<=topic<len(LESSONS) or topic in self.data['solved']:
             return False
         self.data['solved'].append(topic)
@@ -112,6 +125,7 @@ class Save:
         return True
 
     def buy(self,upgrade_id):
+        if self.data['practice']:return False
         item=next((u for u in UPGRADES if u['id']==upgrade_id),None)
         if not item or upgrade_id in self.data['upgrades'] or self.data['knowledge']<item['cost']:
             return False
@@ -123,23 +137,40 @@ class Save:
         return True
 
     def capture(self,world):
+        if self.data['practice']:return
+        self.bank_world(world)
         dlc=is_dlc(world.level_id)
-        self.data.update(**({'dlc_started':True,'dlc_current':world.level_id} if dlc else {'started':True,'current':world.level_id}))
-        self.data['upgrades']=sorted(world.upgrades)
+        if not is_bonus(world.level_id) and not is_rift(world.level_id):
+            self.data.update(**({'dlc_started':True,'dlc_current':world.level_id} if dlc else {'started':True,'current':world.level_id}))
+        from .education import UPGRADES
+        self.data['upgrades']=sorted(world.upgrades&{u['id'] for u in UPGRADES})
         self.data['solved']=sorted(world.answered|set(self.data['solved']))
-        self.data['dlc_progress' if dlc else 'progress']=dict(layout_version=world.data['layout_version'],index=world.index,stage=world.stage,shards=sorted(world.shards),
+        progress=dict(layout_version=world.data['layout_version'],index=world.index,stage=world.stage,shards=sorted(world.shards),
             echoes=sorted(world.echoes),checkpoint=world.checkpoint,time=world.time,
-            deaths=world.deaths,defeated=[i for i,e in enumerate(world.enemies) if not e.alive],
-            enemy_hp=[e.hp if e.alive else 0 for e in world.enemies],boss_hp=world.boss.hp if world.boss else None)
+            deaths=world.deaths,boss_deaths_start=world.boss_deaths_start,defeated=[i for i,e in enumerate(world.enemies) if not e.alive],
+            enemy_hp=[e.hp if e.alive else 0 for e in world.enemies],boss_hp=world.boss.hp if world.boss else None,
+            mechanics=getattr(getattr(world,'mechanic',None),'state',{}),
+            curiosities=sorted(getattr(world,'curiosities_this_run',set())),
+            rescues=sorted(getattr(world,'rescues_this_run',set())),lowest_difficulty=getattr(world,'lowest_difficulty',world.difficulty))
+        slot=progress_slot(world.level_id)
+        if slot in ('bonus_progress','rift_progress'):self.data[slot][str(world.level_id)]=progress
+        else:self.data[slot]=progress
+        self.refresh_achievements()
         self.write()
 
     def restore(self,world):
-        world.upgrades=set(self.data['upgrades'])
+        world.upgrades=self.effective_upgrades()
         world.answered=set(self.data['solved'])
         world.player.configure(world.upgrades,True)
-        p=self.data.get('dlc_progress' if is_dlc(world.level_id) else 'progress')
-        if not p or p.get('index')!=world.index or p.get('stage',0)!=world.stage:
+        slot=progress_slot(world.level_id);p=self.data.get(slot)
+        if slot in ('bonus_progress','rift_progress'):p=p.get(str(world.level_id)) if isinstance(p,dict) else None
+        if not isinstance(p,dict) or p.get('index')!=world.index or p.get('stage',0)!=world.stage:
             return
+        world.curiosities_this_run=set(v for v in p.get('curiosities',[]) if isinstance(v,str)) if isinstance(p.get('curiosities',[]),list) else set()
+        world.rescues_this_run=set(v for v in p.get('rescues',[]) if isinstance(v,str)) if isinstance(p.get('rescues',[]),list) else set()
+        lowest=p.get('lowest_difficulty',world.difficulty)
+        world.lowest_difficulty=min(world.difficulty,lowest) if type(lowest) is int and 0<=lowest<=2 else world.difficulty
+        if hasattr(world,'mechanic') and isinstance(p.get('mechanics'),dict):world.mechanic.restore(p['mechanics'])
         if p.get('layout_version')!=world.data['layout_version']:
             # Checkpoint/enemy IDs belonged to a different route. Keep learning,
             # upgrades and the three already collected fragments, restart safely.
@@ -157,6 +188,8 @@ class Save:
             value=p.get(key,0)
             if type(value) in (int,float) and math.isfinite(value) and 0<=value<1e9:
                 setattr(world,key,value)
+        start=p.get('boss_deaths_start')
+        world.boss_deaths_start=start if type(start) is int and 0<=start<=world.deaths else None
         for i in valid_ids(p.get('defeated',[]),len(world.enemies)):
             world.enemies[i].alive=False
             world.enemies[i].hp=0
@@ -171,6 +204,17 @@ class Save:
             world.boss.alive=world.boss.hp>0
 
     def completed(self,world):
+        self.record_map(world)
+        if self.data['practice']:self.write();return
+        if is_bonus(world.level_id):
+            self.data['bonus_progress'].pop(str(world.level_id),None);self.write();return
+        if is_rift(world.level_id):
+            self.data['rift_finished']=True
+            if world.level_id not in self.data['rifts_completed']:
+                self.data['rifts_completed'].append(world.level_id)
+                if not self.data['practice']:self.data['coins']+=40
+            self.data['rift_progress'].pop(str(world.level_id),None)
+            self.refresh_achievements();self.write();return
         prefix='dlc_' if is_dlc(world.level_id) else ''
         following=successor(world.level_id)
         frontier=self.data[prefix+'unlocked']
@@ -179,9 +223,4 @@ class Save:
         self.data[prefix+'started']=True
         self.data[prefix+'progress']=None
         self.data[prefix+'finished']=final_level(world.level_id) or self.data[prefix+'finished']
-        old=self.data['records'].get(str(world.level_id),{})
-        previous=old.get('echoes',0)
-        previous=previous if type(previous) is int else 0
-        self.data['records'][str(world.level_id)]=dict(echoes=max(previous,len(world.echoes)),
-                                                   time=round(world.time,2),deaths=world.deaths)
         self.write()

@@ -27,9 +27,9 @@ class EducationTests(unittest.TestCase):
         self.folder.cleanup()
 
     def test_324_authored_questions_cover_every_age_and_map(self):
-        self.assertEqual(len(STAGES),27)
-        self.assertEqual(len(LESSONS),54)
-        self.assertEqual(sum(len(l.questions) for l in LESSONS),324)
+        self.assertEqual(len(STAGES),36)
+        self.assertEqual(len(LESSONS),72)
+        self.assertEqual(sum(len(l.questions) for l in LESSONS),432)
         positions=set()
         for topic,lesson in enumerate(LESSONS):
             for band in range(3):
@@ -89,7 +89,7 @@ class EducationTests(unittest.TestCase):
         self.assertEqual(w.checkpoint,-1)
         migrated.capture(w)
         self.assertTrue(self.save.path.with_name('progress-v1-respaldo.json').exists())
-        self.assertEqual(Save(self.save.path).data['version'],4)
+        self.assertEqual(Save(self.save.path).data['version'],5)
 
     def test_profile_and_upgrades_persist_on_save_restore(self):
         self.save.data.update(age_band=0,knowledge=10)

@@ -7,7 +7,7 @@ from .humanoid_roster import HEIGHTS
 from .art import text,circle,glow,GOLD,PAPER
 
 @lru_cache(maxsize=512)
-def figure(era,kind,stage,frame,warning=False):
+def figure(era,kind,stage,frame,warning=False,variant=''):
     p=Painter(112,112)
     step=math.sin(frame*math.tau/8)*6
     skin=(173,123,84);ink=(30,37,42);steel=(159,176,184);gold=(207,163,77)
@@ -151,13 +151,29 @@ def figure(era,kind,stage,frame,warning=False):
             for yy in (52,84):p.l((148,103,53),(20,yy),(46,yy),2)
         elif era==2:
             for xx in (35,64):p.e(gold,(xx,35,14,13))
+    if variant=='roman':
+        # Roman-inspired segmented cuirass and tall shield, distinct from hoplites.
+        p.r((102,108,110),(39,35,31,32),4)
+        for yy in range(39,65,5):p.l((187,185,166),(41,yy),(68,yy),3)
+        p.r((137,52,46),(18,45,30,49),7);p.r((207,170,89),(20,47,26,45),6,2)
+        p.l((207,170,89),(23,54),(42,86),2);p.l((207,170,89),(42,54),(23,86),2)
+        p.e((155,164,162),(40,12,33,18));p.r((178,179,157),(40,25,32,5),2)
+        p.l((189,185,157),(44,29),(46,39),4);p.l((189,185,157),(67,28),(66,38),4)
+    elif variant=='malvinas':
+        # Cold-weather field clothing: helmet cover, collar and weatherproof cape.
+        p.p((89,103,85),[(33,37),(72,37),(79,75),(30,75)])
+        p.l((139,147,117),(37,42),(72,70),3)
+        for xx in (37,56):p.r((106,115,87),(xx,58,12,13),2)
+        p.e((82,100,81),(38,12,36,23));p.r((48,64,62),(38,27,36,5),2)
+        p.r((131,132,106),(44,33,23,9),3)
+        p.l((47,53,48),(62,64),(104,49),5)
     return pg.transform.smoothscale(p.image(),(90,90))
 
 def draw_humanoid(s,e,camera,t,stage):
     x,y=e.rect.centerx-camera,e.rect.bottom
     warning=e.kind=='charger' and e.mode=='warning' or e.kind=='sentry' and e.timer<.5
     frame=int(e.time*10)%8 if e.kind!='sentry' and e.mode!='warning' else 0
-    img=figure(e.era,e.kind,stage,frame,warning)
+    img=figure(e.era,e.kind,stage,frame,warning,getattr(e,'variant',''))
     if e.direction<0:img=pg.transform.flip(img,True,False)
     s.blit(img,(int(x-43),int(y-85)))
     top=y-HEIGHTS[e.era]

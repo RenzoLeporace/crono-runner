@@ -14,7 +14,12 @@ from .learning_ui import LearningUI, wrapped,wrap_rows
 from .education import AGE_BANDS, STAGES
 from .teacher_ui import TeacherUI
 from .atlas import AtlasUI
-from .campaign import MAIN_ERAS,MAIN_LEVELS,TOTAL_LEVELS,DLC_START,ERA_LABELS,DIFFICULTIES,MAIN_ERA_IDS,CHAPTER_ORDER,rank,successor,final_level,unlocked,level_label
+from .community_ui import CommunityUI
+from .expansion_ui import ExpansionUI
+from .touch import TouchUI
+from .school_settings import SchoolSettingsUI
+from .mobile_ui import MobileUI
+from .campaign import MAIN_ERAS,MAIN_LEVELS,TOTAL_LEVELS,DLC_START,ERA_LABELS,DIFFICULTIES,MAIN_ERA_IDS,CHAPTER_ORDER,rank,successor,final_level,unlocked,level_label,chapter_levels,is_rift,is_bonus,DLC_LEVEL_IDS
 
 
 def duration(seconds):
@@ -22,16 +27,20 @@ def duration(seconds):
     return f'{value//60:02d}:{value%60:02d}'
 
 
-class Game(TeacherUI,LearningUI,AtlasUI):
+class Game(MobileUI,CommunityUI,ExpansionUI,TouchUI,SchoolSettingsUI,TeacherUI,LearningUI,AtlasUI):
     def __init__(self, headless=False, save_file=None,bank_file=None):
         pg.mixer.pre_init(22050,-16,1,512)
         pg.init()
         from .art import font
         font.cache_clear()
         self.save=Save(save_file)
+        self.init_community(save_file)
+        self.init_expansion()
+        self.init_touch()
+        self.init_school_settings()
         self.fullscreen=self.save.data['fullscreen'] and not headless
         self.display=pg.display.set_mode((W,H),pg.FULLSCREEN if self.fullscreen else pg.RESIZABLE)
-        pg.display.set_caption('CRONO · Ecos del tiempo | Beta educativa 0.6')
+        pg.display.set_caption('CRONO · Ecos del tiempo | Beta educativa 0.7')
         icon=pg.Surface((48,48),pg.SRCALPHA)
         clock_icon(icon,24,24,19,CYAN)
         pg.display.set_icon(icon)
@@ -50,6 +59,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         self.accumulator=0.
         self.jump_pending=self.dash_pending=False
         self.shoot_pending=False
+        if hasattr(self,'fingers'):self.fingers.clear()
         self.joy_jump=False
         self.joystick=None
         self.connect_controller()
@@ -64,6 +74,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         self.notice_time=6 if self.notice else 0
         self.confirm_new=False
         self.audio.ambience(0)
+        if self.room_client:self.sync_room()
 
     def connect_controller(self):
         try:
@@ -79,14 +90,18 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         self.buttons=[]
         self.jump_pending=self.dash_pending=False
         self.shoot_pending=False
+        if hasattr(self,'fingers'):self.fingers.clear()
         self.accumulator=0
-        if state not in ('teacher','question_edit'):
+        if state not in ('teacher','question_edit','profile_create','room_join','teacher_access','school_settings','reflection'):
             pg.key.stop_text_input()
             pg.key.set_repeat()
 
     def load(self,index,stage=0,restore=False):
         self.chapter_era=index
-        self.world=World(index,stage,self.save.data['upgrades'],self.save.data['solved'],self.save.data['age_band'])
+        self.world=World(index,stage,self.save.effective_upgrades(),self.save.data['solved'],self.save.combat_band())
+        self.world.player.skin=self.save.data['skin']
+        topics=self.room_topics if self.room_client is not None and self.room_topics is not None else self.school.config.get('topics',[])
+        if topics:self.world.data['stations']=[s for s in self.world.data['stations'] if s[2] in topics]
         if restore:
             self.save.restore(self.world)
         self.camera=max(0,min(self.world.width-W,self.world.player.rect.centerx-W*.37))
@@ -95,9 +110,14 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         self.intro_time=0
         self.autosave=0
         self.set_state('intro')
-        self.audio.ambience(index)
+        self.audio.ambience(self.world.combat_era)
+        self.session_started=False
 
     def continue_game(self):
+        if self.save.data.get('active_rift') is not None:
+            if self.save.data.get('rift_finished'):
+                self.return_from_rift();return
+            self.load(*divmod(self.save.data['active_rift'],3),restore=True);return
         if self.save.data['finished'] and self.save.data['progress'] is None:
             self.world=World(6,2,difficulty=self.save.data['age_band'])
             self.chapter_era=6
@@ -107,6 +127,8 @@ class Game(TeacherUI,LearningUI,AtlasUI):
             self.load(era,stage,restore=True)
 
     def continue_dlc(self):
+        if self.save.data.get('active_rift') is not None:
+            self.continue_game();return
         self.chapter_era=7
         if self.save.data['dlc_finished'] and self.save.data['dlc_progress'] is None:
             self.world=World(7,2,difficulty=self.save.data['age_band'])
@@ -116,6 +138,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
             self.load(era,stage,restore=True)
 
     def begin(self):
+        self.session_started=True
         self.set_state('play')
         self.save.capture(self.world)
 
@@ -189,6 +212,11 @@ class Game(TeacherUI,LearningUI,AtlasUI):
 
     def events(self):
         for event in pg.event.get():
+            # SDL also emits a mouse event for each finger. Discard it before
+            # text-field handlers, otherwise one tap opens two native editors.
+            if getattr(event,'touch',False) and event.type in (pg.MOUSEBUTTONDOWN,pg.MOUSEBUTTONUP,pg.MOUSEMOTION):continue
+            if self.touch_event(event) or self.binding_event(event) or self.handle_community_event(event) or self.handle_school_event(event):
+                continue
             if self.learning_scroll(event):
                 continue
             if self.handle_teacher_event(event):
@@ -201,6 +229,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
                 self.joystick=None
                 self.joy_jump=False
             elif event.type==pg.WINDOWFOCUSLOST and self.state=='play':
+                self.save.capture(self.world)
                 self.set_state('pause')
             elif event.type==pg.MOUSEMOTION:
                 self.mouse=self.logical_mouse(event.pos)
@@ -223,13 +252,13 @@ class Game(TeacherUI,LearningUI,AtlasUI):
                 elif key==pg.K_F12:
                     self.screenshot()
                 elif self.state=='play':
-                    if key in (pg.K_SPACE,pg.K_w,pg.K_UP):
+                    if key in (self.key_for('jump'),pg.K_UP):
                         self.jump_pending=True
-                    elif key in (pg.K_LSHIFT,pg.K_RSHIFT,pg.K_x):
+                    elif key==self.key_for('dash'):
                         self.dash_pending=True
-                    elif key==pg.K_f:
+                    elif key==self.key_for('attack'):
                         self.shoot_pending=True
-                    elif key==pg.K_e:
+                    elif key==self.key_for('interact'):
                         self.interact()
                     elif key==pg.K_u:
                         self.open_panel('workshop')
@@ -237,7 +266,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
                         self.open_panel('notebook')
                     elif key==pg.K_v:
                         self.open_atlas()
-                    elif key in (pg.K_ESCAPE,pg.K_p):
+                    elif key==self.key_for('pause'):
                         self.set_state('pause')
                     elif key==pg.K_r:
                         self.world.respawn()
@@ -315,6 +344,10 @@ class Game(TeacherUI,LearningUI,AtlasUI):
                                    .35+n%5*.1,color])
 
     def update(self,dt):
+        from .mobile import poll_text,poll_files
+        poll_text()
+        poll_files()
+        self.poll_room()
         self.time+=dt
         self.notice_time=max(0,self.notice_time-dt)
         if self.state=='intro':
@@ -322,7 +355,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         if self.state!='play':
             return
         keys=pg.key.get_pressed()
-        axis=float(bool(keys[pg.K_d] or keys[pg.K_RIGHT]))-float(bool(keys[pg.K_a] or keys[pg.K_LEFT]))
+        axis=float(bool(keys[self.key_for('right')] or keys[pg.K_RIGHT] or self.touch_down('right')))-float(bool(keys[self.key_for('left')] or keys[pg.K_LEFT] or self.touch_down('left')))
         if self.joystick:
             try:
                 stick=self.joystick.get_axis(0)
@@ -334,10 +367,10 @@ class Game(TeacherUI,LearningUI,AtlasUI):
                         axis=hat
             except pg.error:
                 self.joystick=None
-        held=bool(keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP] or self.joy_jump)
+        held=bool(keys[self.key_for('jump')] or keys[pg.K_UP] or self.joy_jump or self.touch_down('jump'))
         self.accumulator+=min(dt,.1)
         while self.accumulator>=STEP:
-            controls=Controls(axis,self.jump_pending,held,self.dash_pending,self.shoot_pending or bool(keys[pg.K_f]),bool(keys[pg.K_s] or keys[pg.K_DOWN]))
+            controls=Controls(axis,self.jump_pending,held,self.dash_pending,self.shoot_pending or bool(keys[self.key_for('attack')] or self.touch_down('attack')),bool(keys[self.key_for('drop')] or keys[pg.K_DOWN] or self.touch_down('drop')))
             self.jump_pending=self.dash_pending=False
             self.shoot_pending=False
             old_player=self.world.player
@@ -348,13 +381,14 @@ class Game(TeacherUI,LearningUI,AtlasUI):
                     self.spawn_particles(e)
                 if e in ('hurt','death'):
                     self.flash=.22
-                if e in ('checkpoint','shard','boss'):
+                if e in ('checkpoint','shard','boss','field_complete'):
                     self.save.capture(self.world)
             if old_player is not self.world.player:
                 self.camera=max(0,min(self.world.width-W,self.world.player.rect.centerx-W*.37))
             self.accumulator-=STEP
             if self.world.complete:
                 self.save.completed(self.world)
+                self.sync_room()
                 self.audio.play('portal')
                 self.set_state('complete')
                 break
@@ -383,15 +417,16 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         clock_icon(s,48,41,19,CYAN,self.world.time*.4)
         tracked(s,'CRONO',(80,19),13,PAPER,3)
         text(s,f'{level_label(self.world.level_id)}  /  {self.world.data["meta"].name}',(80,43),13,MUTED)
-        count=3 if self.world.index==7 else MAIN_ERAS
-        progress=self.world.stage if self.world.index==7 else MAIN_ERA_IDS.index(self.world.index)
+        count=4 if self.world.level_id in DLC_LEVEL_IDS else 3 if self.world.index>=9 else MAIN_ERAS
+        progress=DLC_LEVEL_IDS.index(self.world.level_id) if self.world.level_id in DLC_LEVEL_IDS else self.world.stage if self.world.index>=9 else MAIN_ERA_IDS.index(self.world.index)
         for i in range(count):
             color=CYAN if i<=progress else (63,80,88)
             x=(557 if count==3 else 507)+i*25
             if i<count-1:
                 line(s,(63,80,88),(x+7,39),(x+25,39))
             diamond(s,(x,39),7,color,i<=progress)
-        text(s,ERAS[self.world.index].date+' · '+('mínima','media','alta')[self.world.difficulty]+f' · {len(self.world.checkpoint_ids)} anclas',(586,63),10,MUTED,False,'center')
+        from .journeys import date_for
+        text(s,date_for(self.world.level_id)+' · '+('mínima','media','alta')[self.world.difficulty]+f' · {len(self.world.checkpoint_ids)} anclas',(586,63),10,MUTED,False,'center')
         for i in range(3):
             diamond(s,(801+i*23,32),10,CYAN if i<len(self.world.shards) else (65,91,95),i<len(self.world.shards))
         text(s,'FRAGMENTOS',(825,59),10,MUTED,True,'center')
@@ -406,6 +441,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         text(s,'IMPULSO',(1064,59),10,CYAN if ready else MUTED,True,'center')
         text(s,f'{self.save.data["knowledge"]:02d}',(1151,27),19,GOLD,True,'center')
         text(s,'SABER',(1151,59),10,MUTED,True,'center')
+        if self.save.data['practice']:text(s,'PRUEBA DOCENTE · SIN RANKING',(1175,79),10,GOLD,True,'topright')
         self.button('II',(1200,22,51,43),lambda:self.set_state('pause'),small=True)
         boss=self.world.boss
         fighting=boss and boss.active and boss.alive
@@ -426,6 +462,8 @@ class Game(TeacherUI,LearningUI,AtlasUI):
             text(s,message,(W/2,yy+20),16,CYAN,False,'center')
         elif self.world.time<14 and not fighting:
             text(s,'Reúne 3 fragmentos y encuentra el umbral',(W/2,123),16,PAPER,False,'center')
+        if self.world.mechanic.state['step']:
+            text(s,self.world.mechanic.field.description(),(W/2,232 if fighting and self.world.message_time>0 else 185 if fighting else 161),13,CYAN,True,'center')
         by=H-34
         rect(s,(13,27,35),(30,by-19,245,39),5)
         line(s,(62,90,93),(47,by),(257,by),2)
@@ -448,6 +486,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
             text(s,'ESPACIO salto · SHIFT impulso · F disparo',(W/2,H-31),12,PAPER,False,'center')
 
     def menu(self):
+        if self.touch_enabled():self.mobile_menu();return
         s=self.canvas
         self.artist.background(s,0,230,self.time)
         from .physics import Platform
@@ -471,7 +510,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         text(s,'CRONO',(58,100),116,PAPER,True,serif=True)
         tracked(s,'E C O S  D E L  T I E M P O',(66,229),17,GOLD,3)
         text(s,'El pasado te separa de tu hogar.',(66,284),22,PAPER)
-        text(s,'24 mapas + Argentina. Rutas amplias y combate por edad.',(66,318),16,MUTED)
+        text(s,'36 mapas · rescates, grietas y memorias para descubrir.',(66,318),16,MUTED)
         started=self.save.data['started']
         self.button('Continuar el viaje' if started else 'Comenzar el viaje',(66,411,350,52),
                     self.continue_game if started else lambda:self.load(0),True)
@@ -482,6 +521,9 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         if started:
             self.button('Nuevo viaje',(66,588,211,35),lambda:setattr(self,'confirm_new',True),small=True)
         self.button('Salir',(289 if started else 66,588,127 if started else 350,35),lambda:setattr(self,'running',False),small=True)
+        self.button('Perfiles / aula',(450,411,280,52),self.open_community,small=True)
+        self.button('Logros y apariencias',(450,475,280,46),self.open_rewards,small=True)
+        self.button('Créditos',(450,533,280,43),lambda:self.set_state('credits'),small=True)
         self.age_switch(66,363)
         self.button('Argentina · expansión incluida',(850,549,360,49),self.continue_dlc,True,small=True)
         line(s,(62,83,83),(66,640),(1214,640))
@@ -492,8 +534,9 @@ class Game(TeacherUI,LearningUI,AtlasUI):
             tracked(s,label,(x+18,660),10,color,2)
             if i<MAIN_ERAS-1:
                 line(s,(57,77,78),(x+116,669),(x+132,669))
-        text(s,f'BETA EDUCATIVA 0.6   /   {len(self.bank.records)} preguntas   ·   F11 pantalla completa',(1212,32),11,MUTED,False,'topright')
+        text(s,f'BETA EDUCATIVA 0.7   /   {len(self.bank.records)} preguntas   ·   F11 pantalla completa',(1212,32),11,MUTED,False,'topright')
         text(s,'EL MUNDO PRIMIGENIO',(1045,604),11,CYAN,True,'center')
+        text(s,'© 2026 Renzo Leporace · Todos los derechos reservados',(1212,699),11,MUTED,False,'bottomright')
         if self.confirm_new:
             self.dim(210)
             self.buttons=[]
@@ -512,9 +555,10 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         self.artist.scene(self.canvas,self.world,self.camera,self.time)
         self.dim(195)
         era=ERAS[self.world.index]
-        tracked(self.canvas,f'{"ARGENTINA · DLC" if self.world.index==7 else "ÉPOCA "+str(MAIN_ERA_IDS.index(self.world.index)+1)+" / 8"} · MAPA {self.world.stage+1} / 3',(88,118),13,CYAN,3)
+        tracked(self.canvas,f'{ERA_LABELS[self.world.index]} · MAPA {level_label(self.world.level_id)}',(88,118),13,CYAN,3)
         text(self.canvas,self.world.data['meta'].name,(85,164),43,PAPER,True,serif=True)
-        text(self.canvas,era.name+' · '+era.date,(88,233),14,GOLD,True)
+        from .journeys import date_for
+        text(self.canvas,era.name+' · '+date_for(self.world.level_id),(88,233),14,GOLD,True)
         line(self.canvas,(66,92,95),(88,285),(710,285))
         wrapped(self.canvas,self.world.data['meta'].focus,(88,317),770,24,PAPER,True,leading=35)
         wrapped(self.canvas,self.world.data['route_name']+'. V abre el plano. E permite aprender; U abre las mejoras.',(88,390),770,16,MUTED,leading=25)
@@ -522,8 +566,8 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         self.button('Entrar en este mapa',(88,519,344,57),self.begin,True)
         self.button('Volver',(449,519,157,57),self.to_menu,small=True)
         clock_icon(self.canvas,1030,320,82,CYAN,self.time*.3)
-        progress=self.world.stage if self.world.index==7 else MAIN_ERA_IDS.index(self.world.index)
-        for i in range(3 if self.world.index==7 else MAIN_ERAS):
+        progress=self.world.stage if self.world.index not in MAIN_ERA_IDS else MAIN_ERA_IDS.index(self.world.index)
+        for i in range(3 if self.world.index not in MAIN_ERA_IDS else MAIN_ERAS):
             diamond(self.canvas,(916+i*30,457),8,CYAN if i<=progress else (72,91,98),i<=progress)
         if self.world.index==7:
             from .argentina_history import CONTEXT,SIMPLE_CONTEXT
@@ -532,32 +576,35 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         text(self.canvas,'ESPACIO o ENTER para continuar',(88,637),13,MUTED)
 
     def chapters(self):
+        if self.touch_enabled():self.mobile_chapters();return
         s=self.canvas
         self.artist.background(s,0,0,self.time)
         self.dim(220)
-        tracked(s,'24 MAPAS DE CAMPAÑA + 3 DE ARGENTINA',(65,28),11,CYAN,3)
+        tracked(s,'24 MAPAS DE CAMPAÑA · 4 ARGENTINOS · 5 BONUS · 3 GRIETAS',(65,28),11,CYAN,3)
         text(s,'Las huellas del tiempo',(62,61),39,PAPER,True,serif=True)
         text(s,'Cada ruta tiene desniveles, galerías y atajos. Argentina conserva su propio progreso.',(65,117),16,MUTED)
         for i,era_id in enumerate(CHAPTER_ORDER):
             label=ERA_LABELS[era_id]
-            x=65+i%5*234
-            y=160+i//5*56
-            self.button(label,(x,y,222,44),lambda n=era_id:setattr(self,'chapter_era',n),primary=self.chapter_era==era_id,small=True,arrow=False)
+            x=65+i%6*195
+            y=151+i//6*51
+            self.button(label,(x,y,185,44),lambda n=era_id:setattr(self,'chapter_era',n),primary=self.chapter_era==era_id,small=True,arrow=False)
         era=self.chapter_era
-        for stage in range(3):
-            level_id=era*3+stage
+        levels=chapter_levels(era)
+        for position,level_id in enumerate(levels):
+            map_era,stage=divmod(level_id,3)
             meta=STAGES[level_id]
-            x=65+stage*390
-            available=unlocked(level_id,self.save.data['dlc_unlocked' if era==7 else 'unlocked'])
-            rect(s,mix(ERAS[era].sky,INK,.35),(x,286,365,304),7)
-            tracked(s,f'MAPA {stage+1} / 3'+(' · GUARDIÁN' if stage==2 else ''),(x+21,301),11,GOLD,1)
-            wrapped(s,meta.name,(x+21,339),324,25,PAPER,True,leading=32)
-            wrapped(s,meta.focus,(x+21,424),324,16,MUTED,leading=23)
+            card_width=1170/len(levels)
+            x=65+position*card_width
+            available=self.save.can_enter(level_id)
+            rect(s,mix(ERAS[map_era].sky,INK,.35),(x,273,card_width-20,330),7)
+            tracked(s,f'MAPA {level_label(level_id)}',(x+16,289),11,GOLD,1)
+            wrapped(s,meta.name,(x+16,326),card_width-52,23,PAPER,True,leading=29)
+            wrapped(s,meta.focus,(x+16,416),card_width-52,15,MUTED,leading=22)
             record=self.save.data['records'].get(str(level_id))
             label='Volver a explorar' if record else 'Entrar' if available else 'Sin descubrir'
-            self.button(label,(x+20,520,325,49),lambda e=era,n=stage:self.load(e,n),enabled=available,small=True)
+            self.button(label,(x+16,537,card_width-52,49),lambda e=map_era,n=stage:self.load(e,n,restore=True),enabled=available,small=True)
         self.button('Volver al inicio',(65,631,260,48),lambda:self.set_state('menu'),small=True)
-        text(s,f'{len(self.save.data["records"])} / 27 mapas completados',(1210,655),15,CYAN,False,'midright')
+        text(s,f'{len(self.save.data["records"])} / {TOTAL_LEVELS} mapas completados',(1210,655),15,CYAN,False,'midright')
 
     def help(self):
         s=self.canvas
@@ -592,6 +639,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         self.artist.scene(self.canvas,self.world,self.camera,self.time)
         self.dim(205)
         s=self.canvas
+        if self.save.data['practice']:self.button('Pruebas docentes: ir a…',(35,120,335,65),lambda:self.set_state('teacher_tools'),small=True)
         rect(s,(17,31,42),(410,65,460,615),8)
         tracked(s,'EL TIEMPO PUEDE ESPERAR',(451,90),11,CYAN,2)
         text(s,'Una pausa en el viaje',(450,126),32,PAPER,True,serif=True)
@@ -621,13 +669,20 @@ class Game(TeacherUI,LearningUI,AtlasUI):
             tracked(s,label,(x-75,439),10,MUTED,1)
         line(s,(55,80,86),(340,484),(940,484))
         last=final_level(self.world.level_id)
+        from .progression import map_score
+        text(s,f'PUNTUACIÓN {map_score(self.world)["score"]:,} · velocidad + exploración + combate + cuidado',(640,482),16,GOLD,True,'center')
         label='Volver al presente' if last else 'Cruzar a la siguiente época' if self.world.stage==2 else 'Explorar el siguiente mapa'
         def advance():
-            if last:
+            if is_rift(self.world.level_id):
+                self.return_from_rift()
+            elif is_bonus(self.world.level_id):
+                self.set_state('chapters')
+            elif last:
                 self.set_state('ending')
             else:
                 era,stage=divmod(successor(self.world.level_id),3)
                 self.load(era,stage)
+        label='Regresar al mapa de origen' if is_rift(self.world.level_id) else 'Ver rutas desbloqueadas' if is_bonus(self.world.level_id) else label
         self.button(label,(409,531,462,58),advance,True)
         self.button('Guardar y volver al inicio',(409,606,462,45),lambda:self.set_state('menu'),small=True)
 
@@ -647,7 +702,7 @@ class Game(TeacherUI,LearningUI,AtlasUI):
         tracked(s,'COORDENADAS ENCONTRADAS',(434,185),12,CYAN,3)
         text(s,'Memoria recuperada.' if self.world.index==7 else 'Estás en casa.',(640,275),76,PAPER,True,'center',True)
         text(s,'El presente ya no parece un lugar tan corriente.',(640,351),23,PAPER,False,'center')
-        text(s,f'24 mapas + Argentina · 9 guardianes · {len(self.save.data["solved"])} archivos resueltos · {len(self.save.data["upgrades"])} mejoras',(640,394),17,CYAN,False,'center')
+        text(s,f'36 mapas · {len(self.save.data["solved"])} archivos resueltos · {len(self.save.data["upgrades"])} mejoras',(640,394),17,CYAN,False,'center')
         self.button('Volver a explorar',(464,483,352,55),lambda:self.set_state('chapters'),True)
         self.button('Inicio',(464,554,352,47),lambda:self.set_state('menu'),small=True)
         text(s,'CRONO · ECOS DEL TIEMPO',(640,658),13,CYAN,True,'center')
@@ -689,11 +744,26 @@ class Game(TeacherUI,LearningUI,AtlasUI):
             self.question_edit()
         elif self.state=='scenarios':
             self.scenarios()
+        elif self.state=='community':self.community()
+        elif self.state in ('profile_create','room_join','teacher_access'):self.community_form()
+        elif self.state=='activity':self.activity()
+        elif self.state=='rescue_info':self.rescue_info_screen()
+        elif self.state=='achievements':self.achievements()
+        elif self.state=='skins':self.skins()
+        elif self.state=='skin_card':self.skin_card()
+        elif self.state=='accessibility':self.accessibility()
+        elif self.state=='school_settings':self.school_settings()
+        elif self.state=='reflection':self.reflection()
+        elif self.state=='teacher_tools':self.teacher_tools()
+        elif self.state=='credits':
+            from .credits import draw
+            draw(self)
         else:
             self.artist.scene(self.canvas,self.world,self.camera,self.time)
             for x,y,vx,vy,life,color in self.particles:
                 circle(self.canvas,color,(x-self.camera,y),max(1,min(3,life*5)))
             self.hud()
+            if self.touch_enabled():self.draw_touch()
             if self.flash>0:
                 overlay=pg.Surface((W,H),pg.SRCALPHA)
                 overlay.fill((205,92,83,int(80*self.flash/.22)))
@@ -718,8 +788,10 @@ class Game(TeacherUI,LearningUI,AtlasUI):
             self.update(dt)
             self.render()
         active=self.state in ('play','pause','help_play','atlas') or (self.state=='quiz' and self.quiz_return=='play') or (self.state in ('workshop','notebook','bestiary','heritage') and self.panel_return in ('play','pause')) or (self.state in ('settings','teacher','question_edit','scenarios') and self.settings_return in ('play','pause'))
-        if active:
+        if active or getattr(self,'session_started',False) and not self.world.complete:
             self.save.capture(self.world)
+        if self.room:self.room.stop()
+        if self.room_pool:self.room_pool.shutdown(wait=False,cancel_futures=True)
         pg.quit()
 
 
@@ -732,10 +804,11 @@ def main():
     parser=argparse.ArgumentParser(description='CRONO · Ecos del tiempo')
     parser.add_argument('--headless',action='store_true',help='Render without opening a window')
     parser.add_argument('--capture',type=Path,help='Write a deterministic screenshot and exit')
-    parser.add_argument('--scene',choices=['menu','play','intro','chapters','help','pause','complete','ending','quiz','workshop','notebook','bestiary','boss','settings','teacher','question_edit','scenarios','atlas','heritage'],default='menu')
-    parser.add_argument('--era',type=int,choices=range(1,10),default=1)
+    parser.add_argument('--scene',choices=['menu','play','intro','chapters','help','pause','complete','ending','quiz','workshop','notebook','bestiary','boss','settings','teacher','question_edit','scenarios','atlas','heritage','community','school_settings','accessibility','activity','achievements','skins','skin_card','credits','teacher_tools'],default='menu')
+    parser.add_argument('--era',type=int,choices=range(1,13),default=1)
     parser.add_argument('--map',type=int,choices=range(1,4),default=1)
     parser.add_argument('--camera',type=float,default=0)
+    parser.add_argument('--touch',action='store_true',help='Preview multitouch controls')
     args=parser.parse_args()
     if args.headless:
         os.environ['SDL_VIDEODRIVER']='dummy'
@@ -743,6 +816,8 @@ def main():
     game=Game(args.headless)
     if args.capture:
         game.world=World(args.era-1,args.map-1)
+        game.chapter_era=game.world.index
+        if args.touch:game.save.data['touch_controls']=True
         game.state=args.scene
         game.time=8
         game.world.time=8
@@ -762,10 +837,12 @@ def main():
             game.world.boss.timer=.8
             game.camera=game.world.width-W
             game.state='play'
+        if args.scene=='teacher_tools':game.save.data['practice']=True
         if args.scene=='question_edit':
             game.edit_question(next(q['id'] for q in game.bank.records if q['topic']==game.world.level_id*2))
         if args.scene=='heritage':
-            game.heritage_key='moses' if game.world.index==8 else 'itati' if game.world.stage==1 else 'lujan'
+            from .curiosities import MAP_CURIOSITIES
+            game.heritage_key=MAP_CURIOSITIES[game.world.level_id]
         if args.scene=='scenarios':
             game.preview_level=game.world.level_id
             game.change_scenario(0)

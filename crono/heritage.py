@@ -18,8 +18,14 @@ ENTRIES={
     source='British Museum · El paso del mar en el arte',url='https://www.britishmuseum.org/collection/object/P_1875-0710-270'),
 }
 
-@lru_cache(maxsize=3)
+from .curiosities import extend_entries,MAP_CURIOSITIES
+ENTRIES=extend_entries(ENTRIES)
+
+@lru_cache(maxsize=40)
 def illustration(key):
+    if key not in ('lujan','itati','moses'):
+        from .curiosity_art import artifact
+        return artifact(key,ENTRIES[key]['level'])
     p=Painter(360,350)
     if key=='moses':
         p.r((24,58,79),(10,10,340,328),12)
@@ -96,23 +102,27 @@ def draw_sites(s,world,camera,t):
         s.blit(img,(int(x-69),int(wy-136)))
         rect(s,(83,73,61),(x-64,wy-6,128,6),2)
         if abs(world.player.rect.centerx-wx)<240:
-            title='MOISÉS · TRADICIÓN BÍBLICA' if key=='moses' else 'VIRGEN DE '+('LUJÁN' if key=='lujan' else 'ITATÍ')
-            text(s,title,(x,wy-160),10,GOLD,True,'center')
+            text(s,'CURIOSIDAD · '+ENTRIES[key]['title'],(x,wy-160),10,GOLD,True,'center')
 
 def panel(game):
     from .learning_ui import wrapped
     s=game.canvas;game.educational_background()
     item=ENTRIES[game.heritage_key]
-    text(s,'PATRIMONIO Y TRADICIONES',(65,32),13,CYAN,True)
+    text(s,'CURIOSIDADES DEL TIEMPO',(65,32),13,CYAN,True)
     text(s,item['title'],(62,68),38,PAPER,True,serif=True)
     text(s,item['subtitle'],(65,123),16,GOLD)
-    for n,key in enumerate(ENTRIES):
-        game.button(('Luján','Itatí','Moisés')[n],(65+n*180,169,166,42),lambda k=key:setattr(game,'heritage_key',k),
-                    primary=key==game.heritage_key,small=True,arrow=False)
+    keys=tuple(ENTRIES);index=keys.index(game.heritage_key)
+    game.button('Anterior',(65,169,180,42),lambda:(setattr(game,'heritage_key',keys[index-1]),setattr(game,'heritage_scroll',0)),enabled=index>0,small=True)
+    game.button('Siguiente',(263,169,180,42),lambda:(setattr(game,'heritage_key',keys[index+1]),setattr(game,'heritage_scroll',0)),enabled=index<len(keys)-1,small=True)
+    from .campaign import level_label
+    text(s,f'{index+1} / {len(keys)} · Hallazgo del mapa {level_label(item["level"])}',(482,179),16,GOLD)
     s.blit(illustration(game.heritage_key),(78,235))
-    y=247
+    old_clip=s.get_clip();s.set_clip(pg.Rect(480,240,714,298))
+    start=247-game.heritage_scroll;y=start
     for paragraph in item['body'].split('\n\n'):
-        y=wrapped(s,paragraph,(482,y),707,19,PAPER,leading=29)+24
+        y=wrapped(s,paragraph,(482,y),707,game.save.data['reading_size'],PAPER,leading=game.save.data['reading_size']+10)+24
+    game.heritage_height=y-start;s.set_clip(old_clip)
+    if game.heritage_height>295:text(s,'RePág / AvPág, rueda o desliza para seguir leyendo',(482,544),13,CYAN)
     text(s,'Ilustración original · representación cultural del viaje temporal',(482,570),13,MUTED)
     game.button('Consultar la fuente',(482,610,310,48),lambda:webbrowser.open(item['url']),small=True)
     game.button('Volver al viaje',(65,630,270,48),game.close_panel,True,small=True)

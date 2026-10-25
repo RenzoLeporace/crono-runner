@@ -66,13 +66,13 @@ class ReworkTests(unittest.TestCase):
         records.append(dict(records[0],id=10108,prompt='Una pregunta propia'))
         self.path.write_text(json.dumps(dict(version=2,questions=records)),encoding='utf-8')
         bank=QuestionBank(self.path)
-        self.assertFalse(bank.warning);self.assertEqual(len(bank.records),325)
+        self.assertFalse(bank.warning);self.assertEqual(len(bank.records),1297)
         self.assertEqual(bank.get(10108)['prompt'],'Una pregunta propia')
         self.assertEqual(bank.get(0)['correct'],2)
         for topic in range(48,54):
             for band in range(3):self.assertEqual(bank.choose(topic,band,random.Random(17)).topic,topic)
         bank.upsert(bank.get(10108));loaded=QuestionBank(self.path)
-        self.assertEqual(len(loaded.records),325);self.assertFalse(loaded.warning)
+        self.assertEqual(len(loaded.records),1297);self.assertFalse(loaded.warning)
 
     def test_argentine_factions_are_human_and_preserve_patrol_floors(self):
         for stage in range(3):
@@ -81,7 +81,7 @@ class ReworkTests(unittest.TestCase):
             self.assertEqual(factions,{'royalist'} if stage<2 else {'state_force','armed_cell'})
             for e,spec in zip(w.enemies,w.data['enemies']):
                 self.assertNotEqual(e.kind,'flyer');self.assertEqual(e.stage,stage)
-                self.assertAlmostEqual(e.rect.bottom,spec['y']+34)
+                self.assertTrue(any(p.rect.left<=e.rect.centerx<=p.rect.right and abs(p.rect.top-e.rect.bottom)<.1 for p in w.platforms))
                 if e.kind=='armored' and stage==2:self.assertEqual(e.faction,'state_force')
 
     def test_humanoid_collision_heads_match_their_taller_models(self):
@@ -105,10 +105,11 @@ class ReworkTests(unittest.TestCase):
                     self.assertTrue(any(p.rect.left+20<x<p.rect.right-20 and p.rect.top==y for p in w.platforms))
                     self.assertTrue(not w.boss or x<w.boss.left)
                     self.assertTrue(all(abs(x-sx)>100 for sx,sy,topic in w.data['stations']))
-                self.assertEqual({k for _,_,k in w.data['cultural_sites']},{'lujan','itati'} if era==7 else {'moses'} if stage==2 else set())
+                from crono.curiosities import MAP_CURIOSITIES
+                self.assertEqual({k for _,_,k in w.data['cultural_sites']},{MAP_CURIOSITIES[era*3+stage]})
 
     def test_higher_profiles_reduce_actual_checkpoints_and_keep_boss_anchor(self):
-        for level in range(27):
+        for level in range(36):
             worlds=[World(*divmod(level,3),difficulty=band) for band in range(3)]
             counts=[len(w.checkpoint_ids) for w in worlds]
             self.assertGreaterEqual(counts[0],6);self.assertEqual(counts[1:], [4,2])
@@ -178,7 +179,7 @@ class ReworkInterfaceTests(unittest.TestCase):
         self.assertEqual((g.world.index,g.world.stage),(2,0))
         g.edit_question(2000000);g.teacher_picker=True;g.render()
         # Third chronological chapter is Egypt, while its stable internal ID is 8.
-        self.assertEqual(len(g.buttons),28)
+        self.assertEqual(len(g.buttons),37)
         g.buttons[6][1]();self.assertEqual(g.teacher_draft['topic']//6,8)
         g.teacher_picker=False
 

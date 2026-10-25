@@ -35,16 +35,16 @@ class BankTests(unittest.TestCase):
         return d
 
     def test_all_324_questions_and_correct_answers_visible_without_student_unlocks(self):
-        self.assertEqual(len(self.bank.filtered()),324)
+        self.assertEqual(len(self.bank.filtered()),1296)
         for q in self.bank.records:
             self.assertEqual(len(q['options']),3)
             self.assertTrue(q['options'][q['correct']])
 
     def test_add_reload_and_use_in_actual_random_pool(self):
         key=self.bank.upsert(self.draft())
-        self.assertEqual(key,2000036)
+        self.assertEqual(key,max(q["id"] for q in builtin_records())+1)
         loaded=QuestionBank(self.path)
-        self.assertEqual(len(loaded.records),325)
+        self.assertEqual(len(loaded.records),1297)
         seen=set()
         for seed in range(60):
             q=loaded.choose(0,0,random.Random(seed))
@@ -60,12 +60,15 @@ class BankTests(unittest.TestCase):
                       explanation='La respuesta del docente es C.',source='Libro de aula')
         self.bank.upsert(edited)
         loaded=QuestionBank(self.path)
-        for seed in range(12):
+        seen=False
+        for seed in range(60):
             q=loaded.choose(0,0,random.Random(seed),previous=1)
-            self.assertEqual(q.id,0)
+            if q.id!=0:continue
+            seen=True
             self.assertEqual(q.prompt,'¿Qué opción cambió?')
             self.assertEqual(q.options[q.correct],'Respuesta C')
             self.assertEqual(q.explanation,'La respuesta del docente es C.')
+        self.assertTrue(seen)
 
     def test_backup_preserves_previous_edits(self):
         key=self.bank.upsert(self.draft())
@@ -88,17 +91,18 @@ class BankTests(unittest.TestCase):
             self.assertEqual(self.path.read_bytes(),before)
 
     def test_last_question_in_age_topic_cannot_be_moved_away(self):
-        first=self.bank.get(0)
-        first['topic']=1
-        self.bank.upsert(first)
-        second=self.bank.get(1)
+        pool=self.bank.filtered(era=0,stage=0,band=0)
+        pool=[q for q in pool if q['topic']==0]
+        for first in pool[:-1]:
+            first['topic']=1;self.bank.upsert(first)
+        second=pool[-1]
         second['topic']=1
         with self.assertRaises(ValueError):
             self.bank.upsert(second)
-        self.assertEqual(self.bank.choose(0,0).id,1)
+        self.assertEqual(self.bank.choose(0,0).id,second['id'])
 
     def test_filters_search_prompt_answer_and_explanation(self):
-        self.assertEqual(len(self.bank.filtered(era=0,stage=2,band=1)),4)
+        self.assertEqual(len(self.bank.filtered(era=0,stage=2,band=1)),12)
         self.assertTrue(self.bank.filtered(query='pterosaurios'))
         q=self.draft()
         q['explanation']='Palabraexclusiva para encontrar una explicación.'
@@ -203,15 +207,15 @@ class TeacherInterfaceTests(unittest.TestCase):
         g.edit_question(0,duplicate=True)
         g.teacher_fields[0].set_value('Una nueva pregunta para mi clase')
         g.save_question()
-        self.assertEqual(len(g.bank.records),325)
+        self.assertEqual(len(g.bank.records),1297)
         self.assertEqual(g.save.data['knowledge'],0)
-        q=g.bank.get(2000036)
+        q=g.bank.get(g.teacher_selected)
         self.assertEqual(q['prompt'],'Una nueva pregunta para mi clase')
         g.save.data['age_band']=0
         g.question_history[(0,0)]=1
         g.set_state('play')
         g.open_lesson(0)
-        self.assertIn(g.question.id,(0,2000036))
+        self.assertIn(g.question.id,{r['id'] for r in g.bank.records if r['topic']==0 and r['band']==0})
 
     def test_cancel_and_window_close_protect_unsaved_work(self):
         g=self.game
@@ -263,6 +267,8 @@ class TeacherInterfaceTests(unittest.TestCase):
         g.question_history[(0,0)]=1
         g.set_state('play')
         g.open_lesson(0)
+        from crono.education import Question
+        g.question=Question(d['id'],d['topic'],d['prompt'],tuple(d['options']),d['correct'],d['explanation'],d['source'])
         for mode in ('read','question','correct','wrong'):
             g.quiz_mode=mode
             g.render()
@@ -296,7 +302,7 @@ class TeacherInterfaceTests(unittest.TestCase):
         g.render()
         g.teacher_picker=True
         g.render()
-        self.assertEqual(len(g.buttons),28)
+        self.assertEqual(len(g.buttons),37)
         g.teacher_picker=False
         g.teacher_discard=True
         g.render()
@@ -311,9 +317,9 @@ class TeacherInterfaceTests(unittest.TestCase):
 
 class MapAppearanceTests(unittest.TestCase):
     def test_each_map_has_a_distinct_weather_or_visual_story(self):
-        self.assertEqual(len(MOODS),27)
-        self.assertEqual(len({m.weather for m in MOODS}),27)
-        self.assertEqual(len({(m.sky,m.horizon,m.weather) for m in MOODS}),27)
+        self.assertEqual(len(MOODS),36)
+        self.assertEqual(len({m.weather for m in MOODS}),36)
+        self.assertEqual(len({(m.sky,m.horizon,m.weather) for m in MOODS}),36)
         self.assertEqual(palette_for(0,2).kind,'ash')
         self.assertNotEqual(palette_for(0,0).top,palette_for(0,2).top)
         self.assertEqual(palette_for(1,1).kind,'cave')

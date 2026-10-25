@@ -52,6 +52,18 @@ ERAS.append(Era('EL REINO DEL NILO','Antiguo Egipto','Entre el río y la memoria
     'El reloj despierta entre canales, piedra y papiros.\nExplora siglos distintos de Egipto y distingue las evidencias de las tradiciones.',
     (44,77,102),(242,192,117),(180,134,86),(105,83,66),(94,72,51),(223,181,109),(96,221,206),'egypt'))
 
+ERAS.extend([
+    Era('ARGENTINA · RUTAS DE LA MEMORIA','1845 · 1817 · 1825–1828','Defensa y travesías',
+        'Recupera documentos y protege las rutas del reloj.\nDistingue las misiones de ficción de los hechos históricos.',
+        (34,59,78),(181,188,167),(96,124,127),(49,80,94),(61,78,80),(183,180,145),(126,219,233),'journey'),
+    Era('LOS CAMINOS RESCATADOS','Viajes desbloqueables','Personas que abren caminos',
+        'Cada rescate conserva una historia y abre otra ruta.\nLa cooperación también puede cambiar el viaje.',
+        (40,57,81),(187,172,138),(111,122,124),(61,79,96),(62,73,83),(185,180,153),(235,193,118),'journey'),
+    Era('GRIETAS AL PASADO','Excursiones históricas','Volver con memoria',
+        'Una grieta conduce a otro episodio del pasado.\nCompleta la excursión y regresa al lugar de origen con tu recompensa.',
+        (24,42,68),(139,162,171),(84,108,128),(44,65,89),(53,66,80),(166,190,192),(126,226,219),'journey'),
+])
+
 
 def level_data(index,stage=0):
     from .education import STAGES

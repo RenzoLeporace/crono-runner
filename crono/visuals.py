@@ -43,10 +43,19 @@ MOODS=(
  Mood('Campos, palmeras y barcos sobre el Nilo','nile',(35,97,123),(241,208,143),'egypt'),
  Mood('Canteras y pirámides entre dunas al atardecer','giza',(106,79,86),(244,182,105),'egypt'),
  Mood('Columnas pintadas, papiros y cielo estrellado','temple',(16,31,62),(91,101,129),'egypt'),
+ Mood('Barrancas, cadenas y barcos sobre el Paraná','obligado',(51,85,102),(184,197,168),'journey'),
+ Mood('Cordillera, nieve, arrieros y campamentos','andes',(34,68,99),(186,213,218),'journey'),
+ Mood('Velas, cubierta y estuario durante el combate','naval',(26,69,102),(159,191,184),'journey'),
+ Mood('Un puerto helenístico guiado por el faro','lighthouse',(20,45,74),(99,145,169),'journey'),
+ Mood('Ferrocarril de noche y señales encendidas','train',(16,28,51),(71,83,102),'journey'),
+ Mood('Suministros y rutas de evacuación','hospital',(49,66,73),(148,165,150),'journey'),
+ Mood('Viento atlántico, radio y memoria','malvinas',(40,62,79),(145,163,165),'journey'),
+ Mood('Ciudad romana y ceniza del Vesubio','volcano',(54,37,45),(173,122,86),'journey'),
+ Mood('Baja gravedad y luz sobre la superficie lunar','lunar',(6,13,32),(65,74,89),'journey'),
 )
 
 
-@lru_cache(maxsize=27)
+@lru_cache(maxsize=36)
 def palette_for(era,stage=0):
     base=ERAS[era]
     mood=MOODS[era*3+stage]

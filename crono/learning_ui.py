@@ -51,16 +51,18 @@ class LearningUI:
         self.question_history={}
         self.quiz_reward=False
         self.notebook_page=0
-        self.heritage_key='lujan'
+        self.heritage_key='wing'
+        self.heritage_scroll=0;self.heritage_height=0
         self.chapter_era=0
         self.quiz_scroll=0
         self.quiz_feedback_scroll=0
         self.quiz_fact_height=0
         self.quiz_feedback_height=0
+        self.quiz_fact_view_height=205
 
     def set_age(self,band):
         self.save.data['age_band']=band
-        self.world.set_difficulty(band)
+        self.world.set_difficulty(self.save.combat_band())
         self.save.write()
 
     def age_switch(self,x,y,width=350):
@@ -77,11 +79,20 @@ class LearningUI:
     def close_panel(self):
         self.set_state(self.panel_return)
 
+    def open_curiosities(self):
+        from .curiosities import MAP_CURIOSITIES
+        self.heritage_key=MAP_CURIOSITIES[self.world.level_id]
+        self.heritage_scroll=0
+        self.open_panel('heritage')
+
     def interact(self):
+        if self.expansion_interact():return
         from .heritage import near_site
         site=near_site(self.world)
         if site:
             self.heritage_key=site[2]
+            self.heritage_scroll=0
+            self.save.visit_curiosity(site[2],self.world)
             self.open_panel('heritage')
             return
         station=self.world.near_station()
@@ -96,7 +107,7 @@ class LearningUI:
         self.quiz_topic=topic
         band=self.save.data['age_band']
         key=(topic,band)
-        self.question=self.bank.choose(topic,band,random,self.question_history.get(key))
+        self.question=self.learning_bank().choose(topic,band,random,self.question_history.get(key))
         self.question_history[key]=self.question.id
         self.quiz_mode='read'
         self.quiz_reward=False
@@ -106,6 +117,8 @@ class LearningUI:
     def answer_question(self,choice):
         if self.quiz_mode!='question':
             return
+        first=not any(a.get('question')==self.question.id and a.get('practice',False)==self.save.data['practice'] for a in self.save.data['attempts'])
+        self.save.record_attempt(self.question,choice,first)
         if choice==self.question.correct:
             self.quiz_reward=self.save.answer(self.quiz_topic)
             self.world.answered.add(self.quiz_topic)
@@ -120,12 +133,24 @@ class LearningUI:
 
     def learning_scroll(self,event):
         import pygame as pg
-        if self.state!='quiz' or event.type!=pg.MOUSEWHEEL:
+        if self.state=='heritage':
+            if event.type==pg.MOUSEWHEEL:delta=-event.y*45
+            elif event.type==pg.KEYDOWN and event.key in (pg.K_PAGEUP,pg.K_PAGEDOWN):delta=140 if event.key==pg.K_PAGEDOWN else -140
+            else:return False
+            self.heritage_scroll=max(0,min(max(0,self.heritage_height-295),self.heritage_scroll+delta));return True
+        if self.state!='quiz':
             return False
-        if self.mouse[0]<520:
-            self.quiz_scroll=max(0,min(max(0,self.quiz_fact_height-205),self.quiz_scroll-event.y*40))
+        if event.type==pg.KEYDOWN and event.key==pg.K_TAB:
+            self.reading_pane='feedback' if self.reading_pane=='fact' else 'fact';return True
+        if event.type==pg.MOUSEWHEEL:
+            delta=-event.y*40;left=self.mouse[0]<520
+        elif event.type==pg.KEYDOWN and event.key in (pg.K_PAGEUP,pg.K_PAGEDOWN):
+            delta=140 if event.key==pg.K_PAGEDOWN else -140;left=self.reading_pane=='fact'
+        else:return False
+        if left:
+            self.quiz_scroll=max(0,min(max(0,self.quiz_fact_height-self.quiz_fact_view_height),self.quiz_scroll+delta))
         else:
-            self.quiz_feedback_scroll=max(0,min(max(0,self.quiz_feedback_height-265),self.quiz_feedback_scroll-event.y*40))
+            self.quiz_feedback_scroll=max(0,min(max(0,self.quiz_feedback_height-265),self.quiz_feedback_scroll+delta))
         return True
 
     def close_quiz(self):
@@ -154,12 +179,20 @@ class LearningUI:
         clock_icon(s,106,182,19,CYAN,self.time*.2)
         wrapped(s,lesson.title,(88,225),391,26,PAPER,True)
         import pygame as pg
+        image_question=getattr(self.question,'kind','choice')=='image'
+        if image_question:
+            from .heritage import illustration
+            from .curiosities import MAP_CURIOSITIES
+            rect(s,(22,39,48),(79,155,412,233),6)
+            s.blit(pg.transform.smoothscale(illustration(MAP_CURIOSITIES[self.quiz_topic//2]),(215,209)),(176,164))
+        top=391 if image_question else 312
+        self.quiz_fact_view_height=122 if image_question else 205
         old_clip=s.get_clip()
-        s.set_clip(pg.Rect(87,306,394,207))
-        self.quiz_fact_height=wrapped(s,fact,(88,312-self.quiz_scroll),391,19,PAPER,leading=30)-(312-self.quiz_scroll)
+        s.set_clip(pg.Rect(87,top-6,394,self.quiz_fact_view_height+2))
+        self.quiz_fact_height=wrapped(s,fact,(88,top-self.quiz_scroll),391,self.save.data['reading_size'],PAPER,leading=self.save.data['reading_size']+11)-(top-self.quiz_scroll)
         s.set_clip(old_clip)
-        if self.quiz_fact_height>205:
-            text(s,'Rueda del ratón: desplazar explicación',(88,517),10,CYAN)
+        if self.quiz_fact_height>self.quiz_fact_view_height:
+            text(s,'Rueda / RePág–AvPág / deslizar: leer',(88,517),10,CYAN)
         source=self.question.source
         source=next((label for label,url in SOURCES if url==source),source or 'Material del docente')
         wrapped(s,'Fuente: '+(source[:137]+'…' if len(source)>140 else source),(88,539),390,12,MUTED,leading=18)
@@ -185,7 +218,7 @@ class LearningUI:
             s.set_clip(pg.Rect(549,229,639,267))
             top=232-self.quiz_feedback_scroll
             y=wrapped(s,'Respuesta: '+self.question.options[self.question.correct],(550,top),630,21,PAPER,True,leading=31)
-            y=wrapped(s,fact,(550,y+21),630,18,MUTED,leading=29)
+            y=wrapped(s,fact,(550,y+21),630,self.save.data['reading_size'],MUTED,leading=self.save.data['reading_size']+11)
             self.quiz_feedback_height=y-top
             s.set_clip(old_clip)
             if self.quiz_feedback_height>265:
@@ -198,6 +231,7 @@ class LearningUI:
                 wrapped(s,'Equivocarse no quita energía ni puntos. Puedes volver a intentarlo.',(550,515),630,15,GOLD)
                 self.button('Intentar otra vez',(550,550,636,56),lambda:setattr(self,'quiz_mode','question'),True)
         self.button('Volver sin responder',(65,642,303,45),self.close_quiz,small=True)
+        if self.quiz_mode=='correct':self.button('Explicar mi respuesta',(390,642,285,45),self.open_reflection,small=True)
         text(s,'El juego permanece en pausa mientras aprendes.',(1210,663),13,MUTED,False,'midright')
 
     def purchase(self,upgrade_id):
@@ -263,7 +297,7 @@ class LearningUI:
         self.button('Volver',(65,628,171,48),self.close_panel,True,small=True)
         self.button('Mejoras',(250,628,190,48),lambda:self.open_panel('workshop'),small=True)
         self.button('Ecos y guardianes',(454,628,230,48),lambda:self.open_panel('bestiary'),small=True)
-        self.button('Patrimonio',(698,628,155,48),lambda:self.open_panel('heritage'),small=True,arrow=False)
+        self.button('Curiosidades',(698,628,155,48),self.open_curiosities,small=True,arrow=False)
         self.button('Anterior',(867,628,157,48),lambda:setattr(self,'notebook_page',self.notebook_page-1),enabled=self.notebook_page>0,small=True)
         self.button('Siguiente',(1039,628,177,48),lambda:setattr(self,'notebook_page',self.notebook_page+1),enabled=self.notebook_page<pages-1,small=True)
         text(s,f'Página {self.notebook_page+1} / {pages}',(1210,698),12,MUTED,False,'bottomright')
@@ -273,7 +307,7 @@ class LearningUI:
         self.educational_background()
         tracked(s,'GUÍA DE LOS ECOS · FICCIÓN',(65,32),12,CYAN,3)
         text(s,'Reconoce antes de atacar',(62,65),40,PAPER,True,serif=True)
-        era=self.world.index
+        era=self.world.combat_era
         stage=self.world.stage
         entries=[(kind,ENEMY_NAMES[kind],ENEMY_HINTS[kind],'royalist') for kind in ENEMY_NAMES]
         from .humanoid_roster import ROLES
@@ -291,14 +325,14 @@ class LearningUI:
         for n,(kind,label,hint,faction) in enumerate(entries):
             x,y=65+n%3*390,146+n//3*155
             rect(s,(22,38,48),(x,y,365,135),6)
-            e=Enemy(dict(x=x+25,y=y+58,left=0,right=2000,kind=kind,stage=stage,faction=faction),self.world.index)
+            e=Enemy(dict(x=x+25,y=y+58,left=0,right=2000,kind=kind,stage=stage,faction=faction),era)
             if kind=='flyer':
                 e.rect.y+=100
             self.artist.enemy(s,e,0,self.time,self.world.index,stage)
             text(s,label,(x+95,y+23),19,PAPER,True)
             wrapped(s,hint,(x+95,y+61),245,14,MUTED,leading=22)
         from .campaign import ERA_LABELS
-        era=self.world.index
+        era=self.world.combat_era
         from .enemy_art import FAMILY_NAMES
         text(s,FAMILY_NAMES[era],(65,466),22,CYAN,True)
         if era==7:

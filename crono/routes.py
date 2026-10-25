@@ -17,6 +17,9 @@ ITINERARIES=(
  '01234321212343210', '00012123212100010', '01212343212321000',
  '00012101232100010', '01232123210123210', '00123210123210000',
  '000101221232100101', '01234323210101210', '00123234321012100',
+ '000010121001232100', '01234343212321010', '00101232100121000',
+ '01234323434321010', '000101212321001010', '00121232101210010',
+ '001232101210123210', '01232100123210100', '001234343210123210',
 )
 ROUTE_NAMES=(
  ('Manglar','Copas enlazadas','Arrecife'),('Estratos','Garganta','Archivo fósil'),('Bosque caído','Cráter','Último refugio'),
@@ -28,6 +31,9 @@ ROUTE_NAMES=(
  ('Red local','Servidores','Antenas'),('Agua','Energía solar','Aerogeneradores'),('Laboratorio','Observatorio','Portal a casa'),
  ('Plaza de Mayo','Recova','Cabildo'),('Camino del norte','Patios','Casa de Tucumán'),('Calles','Plaza cívica','Congreso'),
  ('Cultivos','Canales','Puerto del Nilo'),('Canteras','Calzada','Meseta de Guiza'),('Avenida de esfinges','Sala de escribas','Santuario'),
+ ('Barrancas','Cadenas del Paraná','Baterías de Obligado'),('Campamento','Los pasos de la cordillera','Valle de llegada'),('Muelles','Canales de navegación','Combate naval'),
+ ('Puerto helenístico','Sala de lentes','La luz del faro'),('Patios de carga','Señales nocturnas','La locomotora'),('Suministros','Evacuación','Hospital de campaña'),
+ ('Costa y memoria','Puesto de radio','Ruta de ayuda'),('Calles romanas','Refugios bajo ceniza','Camino de salida'),('Módulo lunar','Campo de muestras','Regreso a la órbita'),
 )
 
 def build_route(index,stage,meta):
@@ -101,6 +107,10 @@ def build_route(index,stage,meta):
     if index==7:
         from .argentina_history import annotate_roster
         enemies=annotate_roster(enemies,stage)
+    elif index==9:
+        for spec in enemies:
+            if spec['kind']=='flyer':spec['kind']='sentry'
+            spec.update(stage=1,faction=('naval_raider','royalist','imperial_brazil')[stage])
     # Exactly 48 echoes: each upper route contributes, the remainder marks travel.
     echoes=[(platforms[b]['x']+78,platforms[b]['y']-36) for _,a,b,c in branches]
     for xx,yy,ww,k in main:
@@ -117,24 +127,21 @@ def build_route(index,stage,meta):
         tail_y=min(584,tail_y+64)
         k=add(tail_x,tail_y,200,28)
         links.append((previous,k));previous=k;tail_x+=280
-    arena_left=tail_x if stage==2 else None
-    end=add(tail_x,584,1280 if stage==2 else 520,220)
+    has_boss=stage==2 or index>=9
+    arena_left=tail_x if has_boss else None
+    end=add(tail_x,584,1280 if has_boss else 520,220)
     links.append((previous,end))
-    width=tail_x+(1280 if stage==2 else 520)
-    if stage==2:
+    width=tail_x+(1280 if has_boss else 520)
+    if has_boss:
         checkpoints.append((tail_x+70,584))
         add(tail_x+230,488,150,24,oneway=True)
         add(tail_x+1030,488,150,24,oneway=True)
-    cultural_sites=[]
-    if index in (7,8):
-        keys=('lujan','itati') if index==7 else (('moses',) if stage==2 else ())
-        for fraction,key in zip((.18,.64),keys):
-            xx,yy,ww,k=main[int(len(main)*fraction)]
-            cultural_sites.append((xx+ww*.28,yy,key))
+    from .curiosities import place_site
+    cultural_sites=place_site(index,stage,main,stations,enemies)
     zones=[(main[int(len(main)*f)][0],name) for f,name in zip((0,.35,.68),ROUTE_NAMES[level])]
     return dict(width=width,platforms=platforms,shards=targets,echoes=echoes,
         checkpoints=checkpoints,stations=stations,enemies=enemies,hazards=hazards,
-        spawn=(100,520),portal=(width-160,584),meta=meta,boss=stage==2,
+        spawn=(100,520),portal=(width-160,584),meta=meta,boss=has_boss,
         arena_left=arena_left,arena_right=width-30,route_links=links,
         cultural_sites=cultural_sites,main_nodes=[m[3] for m in main]+[end],zones=zones,route_name=' / '.join(ROUTE_NAMES[level]),
         layout_version=3)

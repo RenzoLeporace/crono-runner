@@ -13,8 +13,11 @@ def map_features(s,world,camera,time):
     elif world.index==7:
         from .argentina_art import street
         street(s,world,camera,time)
-    else:
+    elif world.index==8:
         from .egypt_art import landscape
+        landscape(s,world,camera,time)
+    else:
+        from .journey_art import landscape
         landscape(s,world,camera,time)
 
 
@@ -42,7 +45,12 @@ def learning_objects(s,world,camera,time):
 
 
 def boss_art(s,boss,camera,time):
-    if not boss or not boss.alive:
+    from .boss_feedback import draw
+    draw(s,boss,camera,time,_boss_body)
+
+
+def _boss_body(s,boss,camera,time):
+    if not boss or (not boss.alive and boss.hit_reaction<=0):
         return
     x,y=boss.rect.centerx-camera,boss.rect.bottom
     if not -230<x<W+230:
@@ -50,10 +58,13 @@ def boss_art(s,boss,camera,time):
     era=palette_for(boss.era,2)
     color=mix(era.top,era.near,.35)
     dark=era.rock
-    core=GOLD if boss.phase=='exposed' else (219,120,105)
+    core=CYAN if boss.phase=='defeated' else GOLD if boss.phase=='exposed' else (219,120,105)
     if boss.hit_flash:
         color=PAPER
-    if boss.era==0:
+    if getattr(boss,'variant',''):
+        from .journey_art import guardian
+        guardian(s,boss,x,y,time,core)
+    elif boss.era==0:
         polygon(s,dark,[(x-45,y-58),(x-150,y-90),(x-81,y-23)])
         pg.draw.ellipse(s,color,(int(x-69),int(y-104),135,81))
         for dx in (-38,37):
@@ -124,6 +135,10 @@ def boss_art(s,boss,camera,time):
         line(s,(238,151,111),(xx,214),(xx,580),1)
         circle(s,(238,151,111),(xx,579),22,3)
         text(s,'!',(xx,548),18,GOLD,True,'center')
+    if getattr(boss,'aim_warning',0) and boss.aim_target:
+        tx,ty=boss.aim_target;tx-=camera
+        line(s,(238,151,111),(boss.rect.centerx-camera,boss.rect.centery),(tx,ty),2)
+        circle(s,GOLD,(tx,ty),28,2);text(s,'MUÉVETE',(tx,ty-45),13,GOLD,True,'center')
 
 
 def projectiles(s,world,camera):

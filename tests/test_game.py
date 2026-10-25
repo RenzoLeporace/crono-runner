@@ -168,7 +168,7 @@ class PhysicsTests(unittest.TestCase):
 class CampaignTests(unittest.TestCase):
     def test_all_required_routes_reachable_with_real_jump_physics(self):
         from route_probe import probe_route
-        for level_id in range(27):
+        for level_id in range(36):
             world=World(*divmod(level_id,3))
             reachable,failed=probe_route(world)
             for x,y in world.data['shards']:

@@ -8,6 +8,7 @@ from pathlib import Path
 import random
 import sys
 from .education import LESSONS, SOURCES, Question, fact_for
+from .storage import atomic_replace
 
 
 def content_path():
@@ -16,10 +17,12 @@ def content_path():
 
 
 def builtin_records():
-    return [dict(id=(topic*6 if topic<30 else 10000+(topic-30)*6 if topic<48 else 2000000+(topic-48)*6)+variant,topic=topic,band=variant//2,prompt=q[0],
+    base=[dict(id=(topic*6 if topic<30 else 10000+(topic-30)*6 if topic<48 else 2000000+(topic-48)*6)+variant,topic=topic,band=variant//2,prompt=q[0],
                  options=list(q[1:]),correct=0,explanation=fact_for(topic,variant//2),
                  source=SOURCES[lesson.source][1])
             for topic,lesson in enumerate(LESSONS) for variant,q in enumerate(lesson.questions)]
+    from .application_questions import records
+    return base+records()
 
 
 def validate_record(value):
@@ -43,6 +46,7 @@ def validate_record(value):
     if len({o.strip().casefold() for o in options})!=3:
         raise ValueError('Las tres respuestas deben ser diferentes.')
     record['options']=[o.strip() for o in options]
+    record['kind']=value.get('kind','choice') if value.get('kind','choice') in ('choice','source','image','reason','chronology') else 'choice'
     return record
 
 
@@ -52,16 +56,19 @@ class QuestionBank:
         self.records=builtin_records()
         self.warning=''
         try:
+            from .mobile import ensure_file
+            ensure_file(self.path)
             document=json.loads(self.path.read_text(encoding='utf-8-sig'))
-            if not isinstance(document,dict) or document.get('version') not in (1,2,3) or not isinstance(document.get('questions'),list):
+            if not isinstance(document,dict) or document.get('version') not in (1,2,3,4) or not isinstance(document.get('questions'),list):
                 raise ValueError('Formato de banco desconocido.')
             records=[validate_record(q) for q in document['questions']]
-            if document['version']<3:
+            if document['version']<4:
                 # Add new curriculum without replacing an existing teacher record.
-                first=30 if document['version']==1 else 48
+                first=30 if document['version']==1 else 48 if document['version']==2 else 54
                 used={q['id'] for q in records}
                 for q in builtin_records():
-                    if q['topic']>=first:
+                    if q['topic']>=first or q['id']>=5000000:
+                        if q['id'] in used and q['id']>=5000000:continue
                         if q['id'] in used:
                             q['id']=max(used)+1
                         used.add(q['id']);records.append(q)
@@ -100,7 +107,7 @@ class QuestionBank:
         order=list(range(3))
         rng.shuffle(order)
         return Question(record['id'],topic,record['prompt'],tuple(record['options'][i] for i in order),
-                        order.index(record['correct']),record['explanation'],record['source'])
+                        order.index(record['correct']),record['explanation'],record['source'],record.get('kind','choice'))
 
     def backup(self):
         folder=self.path.parent/'respaldos'
@@ -108,11 +115,13 @@ class QuestionBank:
         target=folder/f'preguntas-{datetime.now():%Y%m%d-%H%M%S-%f}.json'
         content=self.path.read_bytes() if self.path.exists() else self.serialise(self.records).encode('utf-8')
         target.write_bytes(content)
+        from .mobile import persist
+        persist(target)
         return target
 
     @staticmethod
     def serialise(records):
-        return json.dumps(dict(version=3,questions=records),ensure_ascii=False,indent=2)+'\n'
+        return json.dumps(dict(version=4,questions=records),ensure_ascii=False,indent=2)+'\n'
 
     def upsert(self,draft):
         candidate=deepcopy(draft)
@@ -126,7 +135,9 @@ class QuestionBank:
             self.backup()
         temporary=self.path.with_suffix('.tmp')
         temporary.write_text(self.serialise(records),encoding='utf-8')
-        os.replace(temporary,self.path)
+        atomic_replace(temporary,self.path)
+        from .mobile import persist
+        persist(self.path)
         self.records=records
         self.warning=''
         return candidate['id']

@@ -10,7 +10,9 @@ ROLE_NAMES={'walker':'Fusilero realista','hopper':'Granadero realista','sentry':
             'charger':'Oficial realista','armored':'Coracero realista'}
 
 def role_for(enemy):
-    if enemy.stage<2:return ROLE_NAMES.get(enemy.kind,'Realista')
+    if enemy.faction=='naval_raider':return 'Marinero · eco anglofrancés'
+    if enemy.faction=='imperial_brazil':return 'Marinero · Imperio del Brasil'
+    if enemy.stage<2:return ROLE_NAMES.get(enemy.kind,'Realista')+' · Corona española'
     return 'Militar · eco del pasado' if enemy.faction=='state_force' else 'Célula terrorista · eco del pasado'
 
 def annotate_roster(specs,stage):

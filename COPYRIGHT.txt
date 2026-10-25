@@ -1,0 +1,13 @@
+CRONO · Ecos del tiempo
+© 2026 Renzo Leporace. Todos los derechos reservados.
+
+Proyecto, concepto del juego y dirección: Renzo Leporace.
+Titular de los derechos de autor del proyecto: Renzo Leporace.
+
+Este aviso se aplica al contenido original del proyecto en la medida en que
+sea susceptible de protección por derechos de autor. Las bibliotecas,
+herramientas y materiales de terceros conservan sus licencias y atribuciones.
+Consultar LICENCIAS.txt y FUENTES.md.
+
+No se concede una licencia general para redistribuir, vender o modificar el
+proyecto. Cualquier autorización adicional debe solicitarse a Renzo Leporace.

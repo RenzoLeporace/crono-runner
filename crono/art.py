@@ -149,9 +149,12 @@ class Artist:
         elif index==7:
             from .argentina_art import background
             background(surface,stage,camera,time)
-        else:
+        elif index==8:
             from .egypt_art import background
             background(surface,stage,camera,time)
+        else:
+            from .journey_art import background
+            background(surface,index,stage,camera,time)
 
     def platform_image(self,p,index,stage=0):
         args=(stage,int(p.rect.w),int(p.rect.h),int(p.origin),p.moving)
@@ -161,8 +164,11 @@ class Artist:
         if index==7:
             from .argentina_art import platform_tile
             return platform_tile(*args)
-        from .egypt_art import tile
-        return tile(*args)
+        if index==8:
+            from .egypt_art import tile
+            return tile(*args)
+        from .journey_art import tile
+        return tile(index,*args)
 
     def scenery(self, surface, world, camera, time):
         era = palette_for(world.index,world.stage)
@@ -172,6 +178,7 @@ class Artist:
                     text(surface,label,(wx-camera,351),11,mix(era.accent,PAPER,.3),True,'center')
         # Landmarks live in world space, and never obscure hazards or pickups.
         for p in world.platforms:
+            if not p.active:continue
             r=p.rect
             if r.right < camera-20 or r.left > camera+W+20:
                 continue
@@ -263,7 +270,8 @@ class Artist:
         jump=not player.grounded
         y=22+bob
         dark=(30,42,53)
-        coat=(222,218,189)
+        from .skins import SKINS
+        coat=next((item['color'] for item in SKINS if item['id']==getattr(player,'skin','crono')),(222,218,189))
         shadow=(156,168,155)
         if ghost:
             coat=CYAN
@@ -303,6 +311,8 @@ class Artist:
         rect(s,(40,87,91),(handx-3,y+30,9,8),2)
         rect(s,CYAN,(handx-2,y+31,7,4),1)
         rect(s,(225,180,137),(handx,y+38,6,6),2)
+        from .skins import details
+        details(s,player,y)
         if player.facing<0:
             s=pg.transform.flip(s,True,False)
         if ghost:
@@ -322,7 +332,7 @@ class Artist:
 
     def enemy(self,surface,enemy,camera,time,index,stage=0):
         from .enemy_art import draw_enemy
-        draw_enemy(surface,enemy,camera,time,index,stage)
+        draw_enemy(surface,enemy,camera,time,enemy.era,enemy.stage if index>=9 else stage)
 
     def foreground(self,surface,world,camera):
         surface.blit(self.vignette,(0,0))
@@ -344,6 +354,9 @@ class Artist:
         learning_objects(surface,world,camera,time)
         from .heritage import draw_sites
         draw_sites(surface,world,camera,time)
+        world.mechanic.draw(surface,camera,time)
+        from .expansion_ui import draw_missions
+        draw_missions(surface,world,camera,time)
         for enemy in world.enemies:
             if world.index==7:
                 enemy.show_label=abs(world.player.rect.centerx-enemy.rect.centerx)<240

@@ -17,3 +17,10 @@ contenido/respaldos/
 .env
 .env.*
 !.env.example
+Entrega/
+docente/
+.android-build/
+.web-build/
+*.apk
+*.keystore
+android/app/src/main/assets/

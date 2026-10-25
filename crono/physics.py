@@ -34,12 +34,16 @@ class Platform:
         self.amplitude = spec.get('amplitude', 0)
         self.speed = spec.get('speed', 0)
         self.dx = 0
+        self.dy=0.;self.active=True;self.axis=spec.get('axis','x');self.origin_y=self.rect.y
 
     def update(self, time):
         old = self.rect.x
+        old_y=self.rect.y
         if self.moving:
-            self.rect.x = self.origin + math.sin(time * self.speed) * self.amplitude
+            if self.axis=='y':self.rect.y=self.origin_y+math.sin(time*self.speed)*self.amplitude
+            else:self.rect.x = self.origin + math.sin(time * self.speed) * self.amplitude
         self.dx = self.rect.x - old
+        self.dy=self.rect.y-old_y
 
 
 class Player:
@@ -66,7 +70,7 @@ class Player:
 
     def configure(self,upgrades,heal=False):
         self.upgrades=set(upgrades)
-        self.max_hp=3+('vitality' in self.upgrades)+('vitality2' in self.upgrades)
+        self.max_hp=3+('vitality' in self.upgrades)+('vitality2' in self.upgrades)+('chronista' in self.upgrades)
         self.hp=self.max_hp if heal else min(self.max_hp,self.hp)
         if 'shield' in self.upgrades and heal:
             self.shield=1
@@ -88,6 +92,7 @@ class Player:
         self.buffer = .14 if controls.jump and not self.drop_time else max(0, self.buffer - dt)
         if self.support and self.grounded:
             self.rect.x += self.support.dx
+            self.rect.y += self.support.dy
         if abs(controls.axis) > .1:
             self.facing = 1 if controls.axis > 0 else -1
         if controls.dash and self.dash_ready and self.cooldown <= 0:
@@ -106,7 +111,7 @@ class Player:
             if 'boots' in self.upgrades and not self.grounded:
                 accel=2100
             if self.hurt_time<=0:
-                self.vx = approach(self.vx, controls.axis * (355 if 'boots' in self.upgrades else RUN), accel * dt)
+                self.vx = approach(self.vx, controls.axis * (355 if 'boots' in self.upgrades else RUN)*getattr(getattr(world,'mechanic',None),'speed',1.), accel * dt)
             if self.buffer > 0 and self.coyote > 0:
                 self.vy = JUMP
                 self.buffer = self.coyote = 0
@@ -119,10 +124,12 @@ class Player:
                 events.append('jump')
             if not controls.held and self.vy < -250:
                 self.vy = approach(self.vy, -250, 4200 * dt)
-            self.vy = min(950, self.vy + GRAVITY * dt)
+            self.vy = min(950, self.vy + GRAVITY * getattr(getattr(world,'mechanic',None),'gravity',1.) * dt)
+            self.vx+=getattr(getattr(world,'mechanic',None),'wind',0.)*dt
         # Axis-separated collisions; float positions avoid low-speed quantisation.
         self.rect.x += self.vx * dt
         for p in world.platforms:
+            if not p.active:continue
             if p.oneway:  # Branch galleries and ferries can be entered from below.
                 continue
             if self.rect.colliderect(p.rect):
@@ -138,6 +145,7 @@ class Player:
         self.grounded = False
         self.support = None
         for p in world.platforms:
+            if not p.active:continue
             if p.oneway and self.drop_time>0:
                 continue
             if self.rect.colliderect(p.rect):
@@ -159,17 +167,27 @@ class World:
     def __init__(self, index,stage=0,upgrades=None,answered=None,difficulty=0):
         self.index = index
         self.stage=stage
+        from .journeys import combat_era
+        self.combat_era=combat_era(index,stage)
         self.difficulty=max(0,min(2,difficulty))
+        self.lowest_difficulty=self.difficulty
         self.level_id=index*3+stage
         self.upgrades=set(upgrades or ())
         self.answered=set(answered or ())
+        self.metrics={}
+        self.persisted_metrics={}
+        self.curiosities_this_run=set()
+        self.rescues_this_run=set()
         self.data = level_data(index,stage)
         self.checkpoint_ids=self.selected_checkpoints(self.difficulty)
         self.width = self.data['width']
         self.platforms = [Platform(p) for p in self.data['platforms']]
         self.player = Player(self.data['spawn'])
         self.player.configure(self.upgrades,True)
-        self.enemies = [Enemy(s, index,self.difficulty) for s in self.data['enemies']]
+        self.enemies = [Enemy(s,self.combat_era,self.difficulty) for s in self.data['enemies']]
+        for enemy in self.enemies:
+            enemy.variant='roman' if self.level_id==34 else 'malvinas' if self.level_id==33 else ''
+            if self.level_id==33:enemy.stage=2
         self.hazards = [pg.FRect(s) for s in self.data['hazards']]
         self.shards = set()
         self.echoes = set()
@@ -177,17 +195,32 @@ class World:
         self.spawn = self.data['spawn']
         self.time = 0.
         self.deaths = 0
+        self.boss_deaths_start=None
         self.complete = False
         self.message = ''
         self.message_time = 0.
         self.portal_lock = 0.
         self.projectiles=[]
-        self.boss=Boss(index,self.difficulty,self.data['arena_left'],self.data['arena_right']) if self.data['boss'] else None
+        self.boss=self.make_boss() if self.data['boss'] else None
+        from .expansion_ui import prepare_world
+        prepare_world(self)
+        from .mechanics import Mechanic
+        self.mechanic=Mechanic(self)
+
+    def make_boss(self):
+        b=Boss(self.combat_era,self.difficulty,self.data['arena_left'],self.data['arena_right'])
+        if self.level_id>=27:
+            from .journeys import BOSSES,VARIANTS
+            b.name=BOSSES[self.level_id-27];b.variant=VARIANTS[self.level_id-27]
+            from .journey_encounters import HINTS
+            b.hint=HINTS[b.variant]
+        return b
 
     def set_difficulty(self,band):
         """Apply a profile immediately without resurrecting defeated opponents."""
         band=max(0,min(2,band))
         self.difficulty=band
+        self.lowest_difficulty=min(self.lowest_difficulty,band)
         self.checkpoint_ids=self.selected_checkpoints(band)
         self.select_checkpoint(self.checkpoint)
         for enemy in self.enemies:
@@ -219,13 +252,16 @@ class World:
         self.message, self.message_time = text, 3.5
 
     def respawn(self):
+        skin=getattr(self.player,'skin','crono')
         self.player = Player(self.spawn)
+        self.player.skin=skin
+        self.mechanic.state['vehicle']=False
         self.player.configure(self.upgrades,True)
         self.player.invincible = 1.6
         self.deaths += 1
         self.projectiles=[]
         if self.boss and self.boss.alive:
-            self.boss=Boss(self.index,self.difficulty,self.data['arena_left'],self.data['arena_right'])
+            self.boss=self.make_boss()
         self.say('Otra oportunidad. El tiempo está de tu lado.')
 
     def damage(self, source):
@@ -255,10 +291,18 @@ class World:
             platform.update(self.time)
         p = self.player
         old_bottom = p.rect.bottom
-        events = p.update(dt, controls, self)
+        mounted=self.mechanic.update(dt,controls)
+        events = [] if mounted else p.update(dt, controls, self)
+        if mounted:
+            p.shot_cooldown=max(0,p.shot_cooldown-dt);p.invincible=max(0,p.invincible-dt)
+        previous_complete=self.mechanic.completed
+        events.extend(self.mechanic.field.update(dt,controls))
+        if not previous_complete and self.mechanic.completed:events.append('field_complete')
+        if self.player is not p:return events+['death']
+        for event in events:self.metrics[event]=self.metrics.get(event,0)+1
         if controls.attack and p.shot_cooldown<=0:
             self.projectiles.append(Projectile(p.rect.centerx+p.facing*21,p.rect.centery,p.facing*680,
-                                               owner='player',damage=2 if 'pulse' in self.upgrades else 1,kind='pulse'))
+                                               owner='player',damage=3 if mounted else 2 if 'pulse' in self.upgrades else 1,kind='pulse'))
             p.shot_cooldown=.34
             events.append('shot')
         if p.rect.top > 800:
@@ -270,7 +314,8 @@ class World:
                 events.append('shard')
                 self.say('Umbral estabilizado. Encuentra el portal.' if len(self.shards) == 3 else f'Fragmento recuperado · {len(self.shards)} de 3')
         for i, (x, y) in enumerate(self.data['echoes']):
-            if i not in self.echoes and p.rect.inflate(120 if 'magnet' in self.upgrades else 12,120 if 'magnet' in self.upgrades else 12).collidepoint(x, y):
+            radius=(120 if 'magnet' in self.upgrades else 12)+(120 if 'chronista' in self.upgrades else 0)
+            if i not in self.echoes and p.rect.inflate(radius,radius).collidepoint(x, y):
                 self.echoes.add(i)
                 events.append('echo')
         for i, (x, y) in enumerate(self.data['checkpoints']):
@@ -291,7 +336,10 @@ class World:
             enemy.update(dt,self)
             if p.rect.colliderect(enemy.rect):
                 if ((p.vy > 0 and old_bottom <= enemy.rect.top + 12) and enemy.kind!='armored') or p.dash_time > 0:
-                    enemy.hit(2 if p.dash_time>0 else 1)
+                    killed=enemy.hit(2 if p.dash_time>0 else 1)
+                    if killed:
+                        cause='dash_kills' if p.dash_time>0 else 'stomp_kills'
+                        self.metrics[cause]=self.metrics.get(cause,0)+1
                     if p.dash_time <= 0:
                         p.vy = -440
                     p.dash_ready = True
@@ -300,8 +348,9 @@ class World:
                     events += self.damage(enemy.rect.centerx)
                     if self.player is not p:
                         return events
-        if self.boss and self.boss.alive:
+        if self.boss:
             self.boss.update(dt,self)
+        if self.boss and self.boss.alive:
             if self.boss.active:
                 p.rect.left=max(self.data['arena_left']+6,p.rect.left)
                 if p.rect.colliderect(self.boss.rect):
@@ -323,6 +372,7 @@ class World:
                 for enemy in self.enemies:
                     if enemy.alive and shot.rect.colliderect(enemy.rect):
                         defeated=enemy.hit(shot.damage)
+                        if defeated:self.metrics['shot_kills']=self.metrics.get('shot_kills',0)+1
                         shot.alive=False
                         events.append('stomp' if defeated else 'block')
                         break

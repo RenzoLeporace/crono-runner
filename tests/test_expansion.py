@@ -90,13 +90,13 @@ class ExpansionTests(unittest.TestCase):
         self.path.write_text(json.dumps(dict(version=1,questions=records)),encoding='utf-8')
         bank=QuestionBank(self.path)
         self.assertFalse(bank.warning)
-        self.assertEqual(len(bank.records),325)
+        self.assertEqual(len(bank.records),1297)
         self.assertEqual(bank.get(180)['prompt'],custom['prompt'])
         self.assertEqual(bank.get(0)['prompt'],records[0]['prompt'])
         self.assertTrue(bank.choose(47,2,random.Random(4)))
         bank.upsert(bank.get(0))
         loaded=QuestionBank(self.path)
-        self.assertEqual(len(loaded.records),325)
+        self.assertEqual(len(loaded.records),1297)
 
     def test_enemy_age_changes_speed_health_and_attack_pattern(self):
         counts=[]
@@ -199,6 +199,6 @@ class ExpansionUITests(unittest.TestCase):
         for state in ('chapters','settings','notebook','bestiary'):
             g.state=state;g.render()
         g.edit_question(10000);g.teacher_picker=True;g.render()
-        self.assertEqual(len(g.buttons),28)
+        self.assertEqual(len(g.buttons),37)
 
 if __name__=='__main__':unittest.main(verbosity=2)

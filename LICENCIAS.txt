@@ -1,10 +1,14 @@
-CRONO · Ecos del tiempo — Beta educativa 0.6
+CRONO · Ecos del tiempo — Beta educativa 0.7
+
+Creado por Renzo Leporace.
+© 2026 Renzo Leporace. Todos los derechos reservados.
+El aviso COPYRIGHT.txt detalla los derechos del contenido original.
 
 El código, los mapas, el arte procedural y los sonidos nuevos están incluidos
 en este proyecto para que puedas modificarlos. Los recursos del prototipo
 original permanecen en Sprite/ y no se utilizan en el ejecutable nuevo.
 
-El ejecutable incluye componentes de terceros sin modificaciones:
+La distribución incluye componentes de terceros:
 
 - Python 3.12: Python Software Foundation. Texto en licencias/Python.txt.
 - pygame-ce 2.5.7: autores de pygame y pygame-ce, LGPL.
@@ -21,4 +25,24 @@ https://github.com/libsdl-org/SDL_ttf
 
 Las fuentes de la interfaz se cargan desde el sistema operativo.
 No se distribuyen fuentes comerciales de Windows.
+
+En Android el motor es CPython 3.12 WebAssembly con pygame-ce 2.5.7,
+empaquetado mediante pygbag 0.9.3 y alojado offline en Android WebView.
+El contenedor Java y el juego original tienen el aviso COPYRIGHT.txt.
+pygbag y python-wasm-sdk: MIT, textos en licencias/pygbag-MIT.txt
+y licencias/python-wasm-sdk-MIT.txt. Fuentes correspondientes:
+https://github.com/pygame-web/pygbag
+https://github.com/pygame-web/python-wasm-sdk
+https://github.com/pygame-web/pygame-web.github.io/tree/main/cdn
+El cambio local a cpythonrc.py dirige PYGPI al runtime incluido para
+evitar descargas al jugar; se conserva el resto del motor distribuido.
+
+El motor Android y pygame incluyen fuentes GNU FreeFont sin modificar.
+Aviso y excepción tipográfica en licencias/FreeFont.txt y texto GPLv3
+en licencias/GNU-GPL-3.txt; fuentes originales en
+https://ftp.gnu.org/gnu/freefont/ . Esos componentes conservan su licencia
+independientemente de los derechos del contenido original de Crono.
+
+Los avisos SDL, SDL_image, SDL_mixer y SDL_ttf se adjuntan en licencias/.
+El APK beta usa una firma local de pruebas, no una firma de Google Play.
 

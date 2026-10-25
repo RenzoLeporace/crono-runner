@@ -18,6 +18,7 @@ class AtlasUI:
         scale=1140/w.width
         def point(x,y):return (60+x*scale,262+(y-130)*.57)
         for p in w.platforms:
+            if not p.active:continue
             x,y=point(p.rect.x,p.rect.y)
             line(s,(67,100,114) if p.oneway else (157,184,184),(x,y),(x+max(3,p.rect.w*scale),y),3 if p.oneway else 5)
         for n,(x,y) in enumerate(w.data['shards']):diamond(s,point(x,y-16),8,CYAN if n in w.shards else GOLD,n in w.shards)

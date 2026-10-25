@@ -6,7 +6,7 @@ from .education import STAGES,LESSONS,AGE_BANDS
 from .learning_ui import wrapped
 from .question_bank import QuestionBank,builtin_records
 from .text_field import TextField
-from .campaign import ERA_LABELS,TOTAL_ERAS,TOTAL_LEVELS,DIFFICULTIES,level_label,CHAPTER_ORDER
+from .campaign import ERA_LABELS,TOTAL_ERAS,TOTAL_LEVELS,DIFFICULTIES,level_label,CHAPTER_ORDER,DISPLAY_LEVEL_IDS
 
 
 def shortened(value,width,size=16):
@@ -55,6 +55,7 @@ class TeacherUI:
         self.dim(230)
 
     def settings(self):
+        if self.touch_enabled():self.mobile_settings();return
         s=self.canvas
         self.settings_background()
         tracked(s,'PERSONALIZA EL VIAJE',(65,38),12,CYAN,3)
@@ -68,10 +69,12 @@ class TeacherUI:
         rect(s,(19,35,45),(627,160,588,445),8)
         text(s,'Zona docente',(650,184),26,PAPER,True)
         wrapped(s,f'{len(self.bank.records)} preguntas con sus respuestas. Puedes consultar todo el banco, editar contenidos y agregar preguntas para cada mapa y edad.',(650,239),532,19,PAPER,leading=30)
-        self.button('Ver y editar preguntas',(650,371,542,58),lambda:self.set_state('teacher'),True)
-        self.button('Ver los 27 escenarios',(650,448,542,49),self.open_scenarios,small=True)
+        self.button('Ver y editar preguntas',(650,371,542,58),lambda:self.need_teacher(lambda:self.set_state('teacher')),True)
+        self.button('Ver los 36 escenarios',(650,448,542,49),self.open_scenarios,small=True)
         text(s,'Las respuestas son visibles en la zona docente.',(650,524),14,GOLD)
         self.button('Volver',(65,628,249,49),self.close_settings,True,small=True)
+        self.button('Accesibilidad',(335,628,265,49),lambda:self.set_state('accessibility'),small=True)
+        self.button('Aula y salas',(620,628,265,49),lambda:self.open_community('rooms'),small=True)
         if self.bank.warning:
             wrapped(s,self.bank.warning,(345,615),860,13,GOLD,leading=20)
         else:
@@ -206,6 +209,8 @@ class TeacherUI:
     def save_question(self):
         try:
             key=self.bank.upsert(self.current_draft())
+            if self.room:
+                with self.room.lock:self.room.bank=list(self.bank.records)
         except (ValueError,OSError) as error:
             self.teacher_message=str(error) if isinstance(error,ValueError) else 'No se pudo guardar. Revisa el permiso de escritura de la carpeta del juego.'
             return
@@ -264,11 +269,11 @@ class TeacherUI:
             self.buttons=[]
             rect(s,(20,36,47),(42,57,1196,605),8)
             text(s,'Elegir mapa para esta pregunta',(66,77),30,PAPER,True,serif=True)
-            for row,n in enumerate(e*3+s for e in CHAPTER_ORDER for s in range(3)):
+            for row,n in enumerate(DISPLAY_LEVEL_IDS):
                 meta=STAGES[n]
-                x=66+row%3*391
-                y=128+row//3*50
-                self.button(f'{level_label(n)} · {meta.name}',(x,y,368,45),lambda value=n:self.pick_teacher_map(value),
+                x=66+row%4*294
+                y=128+row//4*50
+                self.button(f'{level_label(n)} · {meta.name}',(x,y,280,45),lambda value=n:self.pick_teacher_map(value),
                             primary=n==level_id,small=True,arrow=False,wrap=True)
             self.button('Volver',(66,602,218,42),lambda:setattr(self,'teacher_picker',False),small=True)
         if self.teacher_discard:

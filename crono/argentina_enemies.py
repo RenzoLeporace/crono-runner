@@ -12,9 +12,11 @@ def soldier_image(stage,faction,kind,frame,warning):
     skin=(195,148,110);shade=(119,91,72);metal=(154,159,150)
     gait=math.sin(frame*math.tau/8)*5
     old=stage<2
+    naval=faction in ('naval_raider','imperial_brazil')
     covert=faction=='armed_cell'
-    coat=(40,65,87) if old else (66,83,63) if not covert else (67,65,64)
-    trouser=(204,198,173) if old else (71,82,63) if not covert else (104,98,79)
+    coat=(211,204,179) if old else (66,83,63) if not covert else (67,65,64)
+    if naval:coat=(51,76,102) if faction=='naval_raider' else (48,92,70)
+    trouser=(52,65,79) if old else (71,82,63) if not covert else (104,98,79)
     boots=(34,37,37);red=(151,56,43);brass=(198,164,94)
     # Shadow, separate knees and boots make the walk cycle readable.
     p.e((14,23,29,75),(22,y-3,54,7))
@@ -36,7 +38,21 @@ def soldier_image(stage,faction,kind,frame,warning):
     p.p(skin,[(x+9,y-80),(x+15,y-74),(x+10,y-72)])
     p.r((47,43,38),(x+6,y-79,3,2))
     p.l(shade,(x+4,y-68),(x+10,y-69),1)
-    if old:
+    if naval:
+        p.r((223,212,176),(x-12,y-95,26,12),3);p.r((30,43,52),(x-14,y-85,31,5))
+        p.p((209,205,170),[(x-13,y-61),(x,y-49),(x+14,y-61),(x+10,y-45),(x-9,y-45)])
+        for yy in (y-55,y-47):p.l((201,175,109),(x-10,yy),(x+11,yy),2)
+        p.r((39,44,44),(x-17,y-37,35,6));p.c(brass,(x,y-34),3)
+    elif old:
+        # White Bourbon-style field sign with red Burgundian saltire.
+        # It is a readable faction emblem, not a claim of a specific regiment.
+        if kind in ('walker','charger'):
+            p.l((130,103,66),(17,y-108),(17,y-23),3)
+            p.p((235,224,190),[(18,y-106),(48,y-101),(47,y-72),(18,y-77)])
+            p.l(red,(22,y-102),(43,y-77),4);p.l(red,(43,y-98),(22,y-81),4)
+            for j in range(4):
+                p.l(red,(23+j*5,y-100+j*6),(28+j*5,y-101+j*6),2)
+                p.l(red,(41-j*5,y-97+j*5),(44-j*5,y-93+j*5),2)
         # Shako/bicorn, collar, crossed white straps, brass buttons and cartridge box.
         if kind=='charger':
             p.p((31,36,38),[(x-21,y-84),(x-12,y-97),(x+6,y-94),(x+21,y-85)])
@@ -55,6 +71,8 @@ def soldier_image(stage,faction,kind,frame,warning):
         p.r((42,37,31),(x-19,y-38,11,12),2)
         p.l(brass,(x-18,y-37),(x-10,y-37),1)
         for side in (-1,1):p.r(red,(x+side*13-3,y-61,8,5))
+        p.r((231,223,187),(x-20,y-58,11,14),2)
+        p.l(red,(x-18,y-55),(x-11,y-47),2);p.l(red,(x-11,y-55),(x-18,y-47),2)
     elif covert:
         # Armed clandestine figure: civilian jacket, scarf and ammunition pouch.
         p.p((40,43,42),[(x-13,y-83),(x-10,y-94),(x+7,y-95),(x+14,y-85)])
