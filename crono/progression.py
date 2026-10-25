@@ -1,3 +1,4 @@
+from .campaign import TOTAL_LEVELS
 """Local evidence, fair best-per-map scores and persistent exploration rewards."""
 from copy import deepcopy
 from datetime import datetime,timezone
@@ -25,13 +26,13 @@ def load_extra(raw):
     result['reading_size']=result['reading_size'] if result['reading_size'] in (19,22,25) else 19
     for key in ('banked_echoes','curiosities_seen','rescued_ids','achievements','purchased_skins','skin_cards_seen'):
         result[key]=sorted({v for v in result[key] if isinstance(v,str) and len(v)<100})
-    for key,allowed in (('bonus_unlocked',BONUS_LEVEL_IDS),('rifts_completed',RIFT_LEVEL_IDS),('mechanics_completed',range(36))):
+    for key,allowed in (('bonus_unlocked',BONUS_LEVEL_IDS),('rifts_completed',RIFT_LEVEL_IDS),('mechanics_completed',range(TOTAL_LEVELS))):
         result[key]=sorted({v for v in result[key] if type(v) is int and v in allowed})
     result['attempts']=[v for v in result['attempts'][-10000:] if isinstance(v,dict)]
     for key in ('bonus_progress','rift_progress','voyage_progress'):
         result[key]={str(k):v for k,v in result[key].items() if str(k).isdigit() and isinstance(v,dict)}
     for key in ('voyages_completed','story_seals'):
-        result[key]=sorted({v for v in result[key] if type(v) is int and 0<=v<36})
+        result[key]=sorted({v for v in result[key] if type(v) is int and 0<=v<TOTAL_LEVELS})
     result['fragments_by_level']={str(k):[i for i in v if type(i) is int and 0<=i<3] for k,v in result['fragments_by_level'].items() if str(k).isdigit() and isinstance(v,list)}
     metrics={}
     for k,v in result['metrics'].items():
@@ -80,6 +81,8 @@ class Progression:
 
     def can_enter(self,level):
         if self.data.get('practice'):return True
+        if level==36:return True
+        if level==37:return '22' in self.data['records']
         if is_bonus(level):return level in self.data['bonus_unlocked']
         if is_rift(level):return level==self.data.get('active_rift') or level in self.data['rifts_completed']
         return unlocked(level,self.data['dlc_unlocked'] if level in DLC_LEVEL_IDS else self.data['unlocked'])

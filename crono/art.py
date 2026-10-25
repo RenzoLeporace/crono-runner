@@ -367,6 +367,7 @@ class Artist:
         from .heritage import draw_sites
         draw_sites(surface,world,camera,time)
         world.mechanic.draw(surface,camera,time)
+        world.traits.draw(surface,camera,time)
         from .expansion_ui import draw_missions
         draw_missions(surface,world,camera,time)
         # The walkable rim always remains visible in front of exhibits/tools.
@@ -379,6 +380,8 @@ class Artist:
                 enemy.show_label=abs(world.player.rect.centerx-enemy.rect.centerx)<240
             self.enemy(surface,enemy,camera,time,world.index,world.stage)
         p=world.player
+        original_skin=getattr(p,'skin','crono')
+        if world.level_id==44:p.skin='astronauta'
         boss_art(surface,world.boss,camera,time)
         projectiles(surface,world,camera)
         if p.dash_time>0:
@@ -388,4 +391,6 @@ class Artist:
         if p.shield:
             circle(surface,CYAN,(p.rect.centerx-camera,p.rect.centery),39,1)
             glow(surface,(p.rect.centerx-camera,p.rect.centery),43,CYAN)
+        if world.level_id==44:p.skin=original_skin
+        world.traits.lighting(surface,camera)
         self.foreground(surface,world,camera)

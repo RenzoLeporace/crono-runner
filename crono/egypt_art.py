@@ -37,7 +37,7 @@ def background(s,stage,camera,t):
     s.blit(sky(stage),(0,0))
     for layer in range(3):
         factor=.035+layer*.035;off=camera*factor
-        for n in range(int(off//650)-1,int(off//650)+4):
+        for n in range(int(off//650)-1,int(off//650)+math.ceil(W/650)+1):
             x=n*650-off;base=509+layer*29
             col=((168,146,126),(194,156,106),(206,168,113))[layer] if stage<2 else ((71,76,106),(77,80,106),(92,91,108))[layer]
             polygon(s,col,[(x-100,base),(x+110,base-92+layer*14),(x+330,base-59),(x+670,base+21),(x+670,584),(x-100,584)])
@@ -110,11 +110,27 @@ def palm(s,x,y,size=1):
         for j in range(3):
             polygon(s,(48+j*10,101+j*11,83),[(x+9*size,y-106*size),(x+direction*(57+j*12)*size,y-(86-j*12)*size),(x+direction*37*size,y-(112-j*9)*size)])
 
+@lru_cache(maxsize=1)
+def riverbank():
+    image=pg.Surface((280,40),pg.SRCALPHA)
+    polygon(image,(92,132,83),[(24,0),(231,0),(279,38),(0,38)])
+    for j in range(18):
+        x=24+j*12;line(image,(182,178,95),(x,29),(x+4,6),2)
+    return image
+
+
+@lru_cache(maxsize=1)
+def riverside_palm():
+    image=pg.Surface((210,145),pg.SRCALPHA);palm(image,90,140,1.15)
+    return image
+
+
 def landscape(s,world,camera,t):
     stage=world.stage;off=camera*.37
     if stage==0:
-        for n in range(int(off//300)-1,int(off//300)+7):
-            x=n*300-off;s.blit(village(n%9),(int(x),350));palm(s,x+255,553,1.15)
+        for n in range(int(off//300)-1,int(off//300)+math.ceil(W/300)+1):
+            x=n*300-off;s.blit(village(n%9),(int(x),350))
+            s.blit(riverside_palm(),(int(x+165),413))
         # Sailboats move slowly along the background channel.
         for n in range(3):
             x=(n*470-camera*.23+t*8)%1550-120
@@ -123,18 +139,16 @@ def landscape(s,world,camera,t):
             polygon(s,(233,214,164),[(x+43,430),(x+6,499),(x+43,499)])
             polygon(s,(212,191,141),[(x+48,430),(x+85,491),(x+48,499)])
         # Cultivation on raised riverbanks.
-        for n in range(int(camera*.58//340)-1,int(camera*.58//340)+6):
+        for n in range(int(camera*.58//340)-1,int(camera*.58//340)+math.ceil(W/340)+1):
             x=n*340-camera*.58
-            polygon(s,(92,132,83),[(x,545),(x+207,545),(x+255,583),(x-24,583)])
-            for j in range(18):
-                xx=x+j*12;line(s,(182,178,95),(xx,574),(xx+4,551),2)
+            s.blit(riverbank(),(int(x-24),545))
     elif stage==1:
         # One recognisable cluster at the Guiza district, varied scale behind it.
         anchor=world.data['zones'][2][0]*.37+580
         for dx,size,shade in ((-370,330,1),(0,490,0),(490,260,2)):
             img=pyramid(size,shade);x=anchor+dx-off-size*.5
             if -size<x<W:s.blit(img,(int(x),557-img.get_height()))
-        for n in range(int(off//290)-1,int(off//290)+7):
+        for n in range(int(off//290)-1,int(off//290)+math.ceil(W/290)+1):
             x=n*290-off
             for row in range(3):
                 rect(s,(173+row*11,137+row*9,90+row*5),(x+row*14,553-row*22,155-row*25,22),2)
@@ -143,7 +157,7 @@ def landscape(s,world,camera,t):
         anchor=world.data['zones'][2][0]*.42+640;off=camera*.42
         img=temple();x=anchor-off-550
         if -1100<x<W:s.blit(img,(int(x),564-img.get_height()))
-        for n in range(int(off//195)-1,int(off//195)+9):
+        for n in range(int(off//195)-1,int(off//195)+math.ceil(W/195)+1):
             xx=n*195-off
             if abs(xx-(anchor-off))<560:continue
             rect(s,(130,120,107),(xx,290,35,270));rect(s,(195,163,119),(xx+5,292,25,263))

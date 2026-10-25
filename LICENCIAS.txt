@@ -1,12 +1,11 @@
-CRONO · Ecos del tiempo — Beta educativa 0.8
+CRONO · Ecos del tiempo — Beta educativa 0.9
 
 Creado por Renzo Leporace.
 © 2026 Renzo Leporace. Todos los derechos reservados.
 El aviso COPYRIGHT.txt detalla los derechos del contenido original.
 
 El código, los mapas, el arte procedural y los sonidos nuevos están incluidos
-en este proyecto para que puedas modificarlos. Los recursos del prototipo
-original permanecen en Sprite/ y no se utilizan en el ejecutable nuevo.
+en este proyecto para que puedas modificarlos. Los recursos del prototipo original se retiraron por no utilizarse en la versión actual.
 
 La distribución incluye componentes de terceros:
 
@@ -49,4 +48,3 @@ El APK beta usa una firma local de pruebas, no una firma de Google Play.
 
 Las nueve composiciones y 17 efectos WAV de assets/audio son originales.
 © 2026 Renzo Leporace. No incorporan grabaciones de terceros.
-La versión web para iOS utiliza el mismo runtime y conserva sus licencias.

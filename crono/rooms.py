@@ -1,3 +1,4 @@
+from .campaign import TOTAL_LEVELS
 """Teacher-hosted LAN rooms. No cloud, outbound discovery or firewall changes."""
 import json
 from pathlib import Path
@@ -45,10 +46,10 @@ class Room:
             if route=='/results':
                 if body.get('practice') or member.get('role')=='teacher':return dict(accepted=False,reason='Las pruebas docentes no cuentan.')
                 records=body.get('records',{})
-                if not isinstance(records,dict) or len(records)>36:raise ValueError('Resultados inválidos.')
+                if not isinstance(records,dict) or len(records)>TOTAL_LEVELS:raise ValueError('Resultados inválidos.')
                 normalized={}
                 for key,record in records.items():
-                    if not str(key).isdigit() or not 0<=int(key)<36 or not isinstance(record,dict):raise ValueError('Mapa inválido.')
+                    if not str(key).isdigit() or not 0<=int(key)<TOTAL_LEVELS or not isinstance(record,dict):raise ValueError('Mapa inválido.')
                     score=record.get('score')
                     if type(score) is not int or not 0<=score<=100000:raise ValueError('Puntuación inválida.')
                     canonical=str(int(key))

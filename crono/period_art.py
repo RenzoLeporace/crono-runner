@@ -389,7 +389,7 @@ def background(s,era,stage,camera,t):
     s.blit(sky(era,stage),(0,0));pal=palette_for(era,stage)
     for layer in range(2):
         off=camera*(.035+layer*.04)
-        for n in range(int(off//620)-1,int(off//620)+4):
+        for n in range(int(off//620)-1,int(off//620)+math.ceil(W/620)+1):
             x=n*620-off;h=90+(n*47)%100
             col=mix(pal.far,pal.horizon,.22) if not layer else pal.far
             polygon(s,col,[(x-50,560),(x+61,480-h*.3),(x+182,460-h),(x+328,480-h*.6),(x+500,509),(x+670,560),(x+670,584),(x-50,584)])
@@ -409,7 +409,7 @@ def landscape(s,world,camera,t):
     off=camera*.35
     focal=world.data['zones'][2][0]*.35+640
     first=int(off//311)-1
-    for n in range(first,first+7):
+    for n in range(first,first+math.ceil(W/311)+2):
         x=n*311-off
         if abs(n*311-focal)<470:continue
         img=module(era,stage,n%6)

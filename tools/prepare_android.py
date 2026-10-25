@@ -31,7 +31,11 @@ def prepare():
     download('index-0.9.3-cp312.json','https://pygame-web.github.io/cdn/index-0.9.3-cp312.json')
     download('cp312/'+WHEEL,'https://pygame-web.github.io/cdn/cp312/'+WHEEL)
     shutil.copy2(ROOT/'android'/'main.py',APP/'main.py')
-    shutil.copytree(ROOT/'crono',APP/'crono',dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
+    staged=APP/'crono'
+    if staged.exists():
+        for old in staged.rglob('*.py'):
+            if not (ROOT/'crono'/old.relative_to(staged)).is_file():old.unlink()
+    shutil.copytree(ROOT/'crono',staged,dirs_exist_ok=True,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
     shutil.copytree(ROOT/'licencias',APP/'licencias',dirs_exist_ok=True)
     shutil.copytree(ROOT/'assets',APP/'assets',dirs_exist_ok=True)
     for filename in ('COPYRIGHT.txt','LICENCIAS.txt','FUENTES.md'):shutil.copy2(ROOT/filename,APP/filename)
@@ -39,8 +43,19 @@ def prepare():
     subprocess.run([sys.executable,'-m','pygbag','--build','--no_opt','--disable-sound-format-error','--ume_block','0','--title','CRONO · Ecos del tiempo',str(APP)],env=env,cwd=ROOT,check=True)
     output=APP/'build'/'web';assets=ROOT/'android'/'app'/'src'/'main'/'assets'
     assets.mkdir(parents=True,exist_ok=True)
-    for filename in ('webapp.tar.gz','webapp.apk','favicon.png'):shutil.copy2(output/filename,assets/filename)
+    for filename in ('webapp.tar.gz','favicon.png'):shutil.copy2(output/filename,assets/filename)
+    unused=assets/'webapp.apk'
+    if unused.exists():unused.unlink()
     html=(output/'index.html').read_text(encoding='utf-8')
+    start=html.index("    if platform.window.location.host.find('.itch.zone')>0:")
+    end=html.index('    # preloader',start)
+    html=html[:start]+'''    import tarfile
+    async with platform.fopen("webapp.tar.gz", "rb") as archive:
+        tar = tarfile.open(fileobj=archive, mode="r:gz")
+        tar.extractall(path=appdir.as_posix(), filter='tar')
+        tar.close()
+
+'''+html[end:]
     html=html.replace('https://pygame-web.github.io/cdn/0.9.3/','./runtime/').replace('data-os="vtx,snd,gui"','data-os="snd,gui"')
     html='\n'.join(row for row in html.splitlines() if 'browserfs.min.js' not in row)
     html=html.replace('Ready to start ! Please click/touch page','CRONO · Toca para comenzar')

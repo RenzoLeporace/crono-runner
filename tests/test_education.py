@@ -27,9 +27,9 @@ class EducationTests(unittest.TestCase):
         self.folder.cleanup()
 
     def test_324_authored_questions_cover_every_age_and_map(self):
-        self.assertEqual(len(STAGES),36)
-        self.assertEqual(len(LESSONS),72)
-        self.assertEqual(sum(len(l.questions) for l in LESSONS),432)
+        self.assertEqual(len(STAGES),46)
+        self.assertEqual(len(LESSONS),92)
+        self.assertEqual(sum(len(l.questions) for l in LESSONS),552)
         positions=set()
         for topic,lesson in enumerate(LESSONS):
             for band in range(3):

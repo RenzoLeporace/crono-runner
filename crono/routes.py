@@ -36,8 +36,17 @@ ROUTE_NAMES=(
  ('Costa y memoria','Puesto de radio','Ruta de ayuda'),('Calles romanas','Refugios bajo ceniza','Camino de salida'),('Módulo lunar','Campo de muestras','Regreso a la órbita'),
 )
 
+ITINERARIES+=('000121232101001210','012343210121232100','001212343210012100','000121012323210100','012343232101212100','001232121001232100','000101232123210010')
+ROUTE_NAMES+=(('Estancias','Paso de los suministros','Campamento farroupilha'),('Valle de Lerma','Quebradas y postas','Campamento de Güemes'),('Pórticos de estudio','Galería de rollos','Escritorio del catálogo'),('Calles de Maguncia','Taller de composición','La prensa'),('Puerto de Siracusa','Patio del equilibrio','Taller de palancas'),('Rutas de intercambio','Bibliotecas familiares','Depósito de manuscritos'),('Casas de trabajo','Sala de señales','Red de cooperación'))
+
+ITINERARIES+=('000121232101232100','000000000000000000','001232101212321000')
+ROUTE_NAMES+=(('La ciudad dividida','Mensajes entre barrios','Antenas de encuentro'),('Cráteres','Baja gravedad','Reparación del módulo'),('Documentos','Perspectivas','La mesa del diálogo'))
+
 def build_route(index,stage,meta):
     level=index*3+stage
+    if level==44:
+        from .moon_route import build
+        return build(meta)
     rng=random.Random(5100+level*307)
     itinerary=ITINERARIES[level]
     platforms=[]; main=[]; branches=[]; ferries=[]; links=[]
@@ -111,6 +120,10 @@ def build_route(index,stage,meta):
         for spec in enemies:
             if spec['kind']=='flyer':spec['kind']='sentry'
             spec.update(stage=1,faction=('naval_raider','royalist','imperial_brazil')[stage])
+    if level>=36:
+        for spec in enemies:
+            if spec['kind']=='flyer' and level in (36,37,38,39,40,41):spec['kind']='sentry'
+            spec.update(stage=1 if level in (36,37) else 0,faction='imperial_brazil' if level==36 else 'royalist')
     # Exactly 48 echoes: each upper route contributes, the remainder marks travel.
     echoes=[(platforms[b]['x']+78,platforms[b]['y']-36) for _,a,b,c in branches]
     for xx,yy,ww,k in main:

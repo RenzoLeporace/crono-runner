@@ -5,7 +5,17 @@ from .art import rect,text,line,polygon,CYAN,PAPER
 
 DEFAULT_KEYS=dict(left=pg.K_a,right=pg.K_d,jump=pg.K_SPACE,dash=pg.K_LSHIFT,attack=pg.K_f,interact=pg.K_e,drop=pg.K_s,pause=pg.K_ESCAPE)
 KEY_LABELS=dict(left='Izquierda',right='Derecha',jump='Saltar',dash='Impulso',attack='Disparar',interact='Interactuar',drop='Descender',pause='Pausa')
-TOUCH_BOXES=dict(left=(22,568,78,78),right=(112,568,78,78),drop=(68,482,66,66),jump=(1178,604,78,78),dash=(1084,604,72,72),attack=(1178,510,72,72),interact=(1084,510,72,72))
+
+
+def boxes_for_width(width):
+    # Anchor to the real viewport, with breathing room for thumbs and screen edges.
+    pad=32;right=width-pad-112
+    return dict(left=(pad,552,112,112),right=(pad+126,552,112,112),drop=(pad+71,442,96,96),
+                jump=(right,576,112,112),dash=(right-124,580,104,104),
+                attack=(right+4,456,104,104),interact=(right-124,456,104,104))
+
+
+TOUCH_BOXES=boxes_for_width(1280)
 
 @lru_cache(maxsize=8)
 def touch_panel(width,height,active):
@@ -31,7 +41,8 @@ class TouchUI:
             if event.type==pg.FINGERDOWN:
                 for box,action,enabled in self.buttons[:]:
                     if enabled and box.collidepoint(pos):action();return True
-            action=next((name for name,box in TOUCH_BOXES.items() if pg.Rect(box).collidepoint(pos)),None)
+            control_pos=(pos[0]*self.ui_scale+self.ui_offset[0],pos[1]*self.ui_scale+self.ui_offset[1])
+            action=next((name for name,box in boxes_for_width(self.viewport_width).items() if pg.Rect(box).collidepoint(control_pos)),None)
             previous=self.fingers.get(key);self.fingers[key]=action
             if event.type==pg.FINGERDOWN or action!=previous:
                 if action=='jump':self.jump_pending=True
@@ -57,24 +68,25 @@ class TouchUI:
             self.heritage_scroll=max(0,min(max(0,self.heritage_height-295),self.heritage_scroll+previous_pos[1]-pos[1]))
         return True
     def draw_touch(self):
-        for name,box in TOUCH_BOXES.items():
+        s=self.world_canvas
+        for name,box in boxes_for_width(self.viewport_width).items():
             active=self.touch_down(name)
             if self.state=='voyage' and name in ('dash','interact'):continue
             panel=touch_panel(box[2],box[3],active)
-            self.canvas.blit(panel,box[:2]);pg.draw.circle(self.canvas,CYAN if active else (166,191,190),pg.Rect(box).center,min(box[2],box[3])//2-2,2 if active else 1)
+            s.blit(panel,box[:2]);pg.draw.circle(s,CYAN if active else (166,191,190),pg.Rect(box).center,min(box[2],box[3])//2-2,2 if active else 1)
             label=dict(left='◀',right='▶',drop='↓',jump='SALTO',dash='IMPULSO',attack='PULSO',interact='USAR')[name]
             cx,cy=box[0]+box[2]/2,box[1]+box[3]/2
             if name in ('left','right'):
                 sign=-1 if name=='left' else 1
-                polygon(self.canvas,PAPER,[(cx+sign*18,cy),(cx-sign*10,cy-18),(cx-sign*10,cy+18)])
-            elif name=='drop':polygon(self.canvas,PAPER,[(cx-17,cy-9),(cx+17,cy-9),(cx,cy+17)])
+                polygon(s,PAPER,[(cx+sign*25,cy),(cx-sign*14,cy-25),(cx-sign*14,cy+25)])
+            elif name=='drop':polygon(s,PAPER,[(cx-23,cy-12),(cx+23,cy-12),(cx,cy+23)])
             elif name=='attack':
-                pg.draw.circle(self.canvas,PAPER,(cx,cy),11,2)
-                line(self.canvas,PAPER,(cx-17,cy),(cx+17,cy),2);line(self.canvas,PAPER,(cx,cy-17),(cx,cy+17),2)
+                pg.draw.circle(s,PAPER,(cx,cy),16,2)
+                line(s,PAPER,(cx-24,cy),(cx+24,cy),3);line(s,PAPER,(cx,cy-24),(cx,cy+24),3)
             elif name=='jump':
-                line(self.canvas,PAPER,(cx,cy+15),(cx,cy-13),3);polygon(self.canvas,PAPER,[(cx,cy-18),(cx-10,cy-4),(cx+10,cy-4)])
-            elif name=='dash':polygon(self.canvas,PAPER,[(cx+4,cy-20),(cx-13,cy+3),(cx-1,cy+3),(cx-5,cy+20),(cx+14,cy-5),(cx+3,cy-5)])
-            else:text(self.canvas,'E',(cx,cy),23,PAPER,True,'center')
+                line(s,PAPER,(cx,cy+22),(cx,cy-18),4);polygon(s,PAPER,[(cx,cy-26),(cx-14,cy-6),(cx+14,cy-6)])
+            elif name=='dash':polygon(s,PAPER,[(cx+6,cy-28),(cx-18,cy+4),(cx-1,cy+4),(cx-7,cy+28),(cx+20,cy-7),(cx+4,cy-7)])
+            else:text(s,'E',(cx,cy),32,PAPER,True,'center')
     def binding_event(self,event):
         if self.state!='accessibility' or not self.rebind_action or event.type!=pg.KEYDOWN:return False
         if event.key==pg.K_ESCAPE:self.rebind_action=None;return True

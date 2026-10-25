@@ -8,6 +8,17 @@ from .art import text,circle,glow,GOLD,PAPER
 
 @lru_cache(maxsize=512)
 def figure(era,kind,stage,frame,warning=False,variant=''):
+    if variant=='timbuktu':
+        p=Painter(112,112);step=math.sin(frame*math.tau/8)*5;ink=(37,47,55);cloth=(72,103,129);trim=(206,177,115)
+        for dx in (-7,7):p.l(ink,(54+dx,79),(54+dx+step*(1 if dx>0 else -1),103),8)
+        p.p(ink,[(38,39),(67,39),(79,95),(31,95)]);p.p(cloth,[(40,42),(65,42),(74,92),(36,92)])
+        for xx in (43,57):p.l(trim,(xx,49),(xx-2,82),2)
+        p.e((133,90,62),(44,17,23,29));p.e((223,212,175),(37,9,36,24));p.r((213,197,153),(37,27,36,7),3)
+        p.l(ink,(58,29),(63,29),2);p.l(trim,(45,46),(47,71),6)
+        if kind=='sentry':p.a(trim,(69,33,21,55),-.9,1.1,3);p.l(ink,(75,37),(75,84),1)
+        else:p.l((113,82,53),(80,30),(80,105),4);p.p((191,194,176),[(80,13),(74,34),(86,34)])
+        if kind=='armored':p.e(ink,(18,53,37,39));p.e((154,117,68),(21,56,31,33));p.c(trim,(37,72),5)
+        return p.image()
     p=Painter(112,112)
     step=math.sin(frame*math.tau/8)*6
     skin=(173,123,84);ink=(30,37,42);steel=(159,176,184);gold=(207,163,77)

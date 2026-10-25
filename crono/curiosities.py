@@ -44,6 +44,10 @@ ROWS=(
  ('Una muestra de otro mundo','Recoger, registrar y estudiar muestras forma parte de la investigación; los planes e imágenes de Apolo 11 son fuentes de su misión.',71),
 )
 
+from .new_histories import NEW_MAPS
+MAP_CURIOSITIES+=tuple(row['curiosity'][0] for row in NEW_MAPS)
+ROWS+=tuple((row['curiosity'][1],row['curiosity'][2],72+i*2) for i,row in enumerate(NEW_MAPS))
+
 def extend_entries(entries):
     from .education import LESSONS,SOURCES,STAGES
     from .campaign import DISPLAY_LEVEL_IDS,level_label

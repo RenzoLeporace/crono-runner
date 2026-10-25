@@ -17,6 +17,18 @@ RESCUES={
 }
 RIFTS={23:33,11:34,20:35}
 
+from .new_histories import NEW_MAPS
+COMBAT_ERAS+=tuple(row['combat'] for row in NEW_MAPS)
+DATES+=tuple(row['date'] for row in NEW_MAPS)
+BOSSES+=('El cerco de los suministros','El eco de la quebrada','El desorden del archivo','La prensa desajustada','El coloso del equilibrio','El guardián del polvo','El ruido de las señales','La interferencia entre barrios','El módulo averiado','El nudo del desencuentro')
+VARIANTS+=('frontier','frontier','archive','press','lever','manuscript','cipher','cipher','moonrepair','archive')
+RESCUES.update({
+ 'bibliotecaria':dict(level=26,bonus=38,name='La bibliotecaria viajera',date='Personaje ficticio · Alejandría helenística',text='Una guardiana de los textos abre una ruta a la Alejandría helenística, posterior al Egipto de los templos. El reloj enlaza épocas distintas; su rescate es ficticio.'),
+ 'impresor':dict(level=10,bonus=39,name='El aprendiz de impresor',date='Personaje ficticio · Maguncia, hacia 1450',text='El reloj conecta la ciudad medieval con un taller del siglo XV. Rescatar al aprendiz abre otra época: no sitúa la imprenta de Gutenberg en 1380.'),
+ 'mecanico':dict(level=8,bonus=40,name='La aprendiz del equilibrio',date='Personaje ficticio · Siracusa, siglo III a. C.',text='Su modelo abre una ruta a la ingeniería de Siracusa. El viaje temporal enlaza un contexto posterior al de la Atenas clásica.'),
+ 'guardiana':dict(level=9,bonus=41,name='La guardiana del manuscrito',date='Personaje ficticio · Tombuctú',text='Una biblioteca viajera invita a estudiar redes de conocimiento de África occidental. El rescate no representa un hecho histórico documentado.'),
+ 'analista':dict(level=16,bonus=42,name='La analista de señales',date='Personaje ficticio · Bletchley Park, década de 1940',text='Su cuaderno abre una historia sobre el trabajo colectivo de descifrado. Los paneles del reloj son ejercicios de observación, no una reproducción de Enigma.')})
+
 def combat_era(index,stage=0):return COMBAT_ERAS[index*3+stage-27] if index>=9 else index
 def date_for(level):
     if level>=27:return DATES[level-27]

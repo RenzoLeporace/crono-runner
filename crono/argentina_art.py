@@ -256,6 +256,8 @@ def sky(stage):
         glow(s,(1060,161),106,(246,216,154));circle(s,(239,213,158),(1060,161),28)
     elif stage==2:
         for j in range(19):circle(s,(173,176,176),(rng.randrange(W),rng.randrange(105,230)),1)
+    for yy in range(584,H):
+        line(s,mix((50,65,65),(19,31,39),(yy-584)/(H-584)),(0,yy),(W,yy))
     return s
 
 def background(s,stage,camera,t):
@@ -264,7 +266,7 @@ def background(s,stage,camera,t):
     if stage==1:
         for layer in range(2):
             offset=camera*(.035+layer*.025)
-            for n in range(int(offset//600)-1,int(offset//600)+4):
+            for n in range(int(offset//600)-1,int(offset//600)+math.ceil(W/600)+1):
                 x=n*600-offset;col=(111,147,131) if not layer else (88,130,117)
                 polygon(s,col,[(x-100,490),(x+90,394-layer*8),(x+270,374+layer*13),(x+570,462),(x+640,610)])
     else:
@@ -279,7 +281,7 @@ def background(s,stage,camera,t):
                 line(s,(84,103,103),(x+35,439),(x+35,381),2)
                 polygon(s,(186,183,153),[(x+33,385),(x+7,432),(x+33,432)])
     offset=camera*.15
-    for n in range(int(offset//140)-1,int(offset//140)+12):
+    for n in range(int(offset//140)-1,int(offset//140)+math.ceil(W/140)+1):
         x=n*140-offset;h=48+(n*37)%72 if stage<2 else 100+(n*47)%110
         col=(105,126,121) if stage<2 else (65,83,99)
         rect(s,col,(x,484-h,136,h+47))
@@ -288,8 +290,6 @@ def background(s,stage,camera,t):
             for xx in range(12,128,23):
                 for yy in range(int(495-h),481,25):rect(s,(130,132,120),(x+xx,yy,6,9))
     rect(s,(105,104,87) if stage<2 else (67,75,81),(0,539,W,45))
-    for yy in range(584,H):
-        line(s,mix((50,65,65),(19,31,39),(yy-584)/(H-584)),(0,yy),(W,yy))
     for j in range(6):
         yy=547+j*7
         line(s,(136,125,99) if stage<2 else (88,87,83),(0,yy),(W,yy),1)
@@ -304,7 +304,7 @@ def street(s,world,camera,t):
     first=int(offset//267)-2
     landmark_camera=world.data['zones'][2][0] if stage<2 else world.width-W
     landmark_x=landmark_camera*.55+620
-    for n in range(first,first+9):
+    for n in range(first,first+math.ceil(W/267)+3):
         wx=n*267
         if abs(wx-landmark_x)<(540 if stage!=1 else 395):continue
         img=house(stage,n)
@@ -329,7 +329,7 @@ def street(s,world,camera,t):
         _place(s,congress(),landmark_x-offset-525,566)
     # Street lamps and period furniture are at a nearer depth.
     off=camera*.72
-    for n in range(int(off//430)-1,int(off//430)+5):
+    for n in range(int(off//430)-1,int(off//430)+math.ceil(W/430)+1):
         x=n*430-off+90
         lamp(s,x,566,stage,t)
         if n%2==0 and stage==2:
@@ -341,6 +341,10 @@ def street(s,world,camera,t):
         for j in range(24):
             x=(j*93-camera*.25-t*30)%W;y=130+(j*63+t*110)%420
             line(s,(156,169,161),(x,y),(x-3,y+8),1)
+    if stage==2:
+        from .flags import argentina
+        fx=landmark_x-offset+20
+        line(s,(171,163,126),(fx,401),(fx,513),3);argentina(s,(fx+2,401,57,36))
     era=('BUENOS AIRES · MAYO DE 1810','TUCUMÁN · JULIO DE 1816','BUENOS AIRES · MEMORIA Y DEMOCRACIA')[stage]
     text(s,era,(W-26,121),11,(242,211,158),True,'topright')
 

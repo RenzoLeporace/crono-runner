@@ -59,19 +59,10 @@ class QuestionBank:
             from .mobile import ensure_file
             ensure_file(self.path)
             document=json.loads(self.path.read_text(encoding='utf-8-sig'))
-            if not isinstance(document,dict) or document.get('version') not in (1,2,3,4) or not isinstance(document.get('questions'),list):
+            if not isinstance(document,dict) or document.get('version') not in (1,2,3,4,5) or not isinstance(document.get('questions'),list):
                 raise ValueError('Formato de banco desconocido.')
             records=[validate_record(q) for q in document['questions']]
-            if document['version']<4:
-                # Add new curriculum without replacing an existing teacher record.
-                first=30 if document['version']==1 else 48 if document['version']==2 else 54
-                used={q['id'] for q in records}
-                for q in builtin_records():
-                    if q['topic']>=first or q['id']>=5000000:
-                        if q['id'] in used and q['id']>=5000000:continue
-                        if q['id'] in used:
-                            q['id']=max(used)+1
-                        used.add(q['id']);records.append(q)
+            records=self.migrate(records,document['version'])
             if len({r['id'] for r in records})!=len(records):
                 raise ValueError('Hay identificadores de pregunta repetidos.')
             self.validate_pools(records)
@@ -80,6 +71,19 @@ class QuestionBank:
             pass
         except (OSError,ValueError,TypeError) as error:
             self.warning=f'No se pudo cargar el banco local: {error} Se usan las preguntas originales; el archivo se conserva.'
+
+    @staticmethod
+    def migrate(records,version):
+        if version not in (1,2,3,4):return records
+        first={1:30,2:48,3:54,4:72}[version]
+        records=deepcopy(records);used={q['id']:q for q in records}
+        for q in builtin_records():
+            if q['topic']<first and not (version<4 and q['id']>=5000000):continue
+            if q['id'] in used:
+                if used[q['id']]['topic']==q['topic']:continue
+                q['id']=max(used)+1
+            used[q['id']]=q;records.append(q)
+        return records
 
     @staticmethod
     def validate_pools(records):
@@ -92,9 +96,10 @@ class QuestionBank:
 
     def filtered(self,era=-1,stage=-1,band=-1,query=''):
         query=query.casefold().strip()
+        from .campaign import chapter_for_level,chapter_levels
         return [deepcopy(q) for q in sorted(self.records,key=lambda r:(r['topic'],r['band'],r['id']))
-                if (era<0 or q['topic']//6==era)
-                and (stage<0 or q['topic']//2%3==stage)
+                if (era<0 or chapter_for_level(q['topic']//2)==era)
+                and (stage<0 or chapter_levels(chapter_for_level(q['topic']//2)).index(q['topic']//2)==stage)
                 and (band<0 or q['band']==band)
                 and (not query or query in ' '.join([q['prompt'],*q['options'],q['explanation']]).casefold())]
 
@@ -121,7 +126,7 @@ class QuestionBank:
 
     @staticmethod
     def serialise(records):
-        return json.dumps(dict(version=4,questions=records),ensure_ascii=False,indent=2)+'\n'
+        return json.dumps(dict(version=5,questions=records),ensure_ascii=False,indent=2)+'\n'
 
     def upsert(self,draft):
         candidate=deepcopy(draft)

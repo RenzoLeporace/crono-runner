@@ -1,1 +1,0 @@
-"""CRONO · Ecos del tiempo."""

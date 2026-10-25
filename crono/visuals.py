@@ -55,12 +55,19 @@ MOODS=(
 )
 
 
-@lru_cache(maxsize=36)
+from .new_histories import NEW_MAPS
+MOODS+=tuple(Mood(row['focus'],row['landmark'],sky,horizon,'journey') for row,sky,horizon in zip(NEW_MAPS,((43,75,76),(57,68,96),(49,85,111),(65,53,77),(44,89,111),(108,74,63),(24,37,55)),((210,197,133),(204,173,133),(219,200,144),(188,159,125),(211,205,159),(226,188,128),(118,151,155))))
+
+MOODS+=(Mood('Berlín: voces, fronteras y señales','berlin',(33,48,76),(163,173,173),'journey'),Mood('Cráteres, regolito y baja gravedad','moonrepair',(5,11,29),(58,69,85),'journey'),Mood('Documentos y espacios de diálogo','detente',(44,75,93),(190,201,182),'journey'))
+
+@lru_cache(maxsize=46)
 def palette_for(era,stage=0):
     base=ERAS[era]
     mood=MOODS[era*3+stage]
     changes=dict(sky=mood.sky,horizon=mood.horizon,kind=mood.kind)
-    if mood.kind=='ash':
+    if mood.weather=='moonrepair':
+        changes.update(far=(108,116,126),near=(49,57,71),rock=(68,77,90),top=(163,170,169),accent=(219,190,120))
+    elif mood.kind=='ash':
         changes.update(far=(103,44,43),near=(48,31,36),rock=(43,35,39),top=(173,92,66),accent=(255,166,78))
     elif mood.kind=='desert':
         changes.update(far=(143,93,73),near=(94,66,61),rock=(76,55,51),top=(198,155,103),accent=(255,205,132))

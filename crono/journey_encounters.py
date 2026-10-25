@@ -6,14 +6,24 @@ HINTS=dict(battery='Salta la onda y abandona las columnas marcadas.',andes='Busc
     train='Salta las ondas y evita la locomotora en marcha.',hospital='Protege el recorrido y evita las marcas de la sirena.',
     malvinas='Alterna altura y movimiento entre las ráfagas.',volcano='Busca los huecos entre las columnas de ceniza.',
     lunar='Aprovecha la gravedad menor entre proyectiles radiales.')
+HINTS.update(frontier='Salta las salvas y usa la cobertura entre ataques.',archive='Evita las columnas marcadas y devuelve los pulsos al núcleo.',
+             press='Cruza entre los golpes de la prensa y ataca al detenerse.',lever='Salta la onda y busca el núcleo durante el equilibrio.',
+             manuscript='Alterna movimiento y refugio; protege el recorrido.',cipher='Observa las marcas antes de moverte hacia el núcleo.')
 
 def begin(b,w):
     variant=getattr(b,'variant','')
     if not variant:return False
-    b.phase='attack';b.attack_time=0.;b.timer=dict(battery=1.1,andes=1.,naval=1.3,lighthouse=1.1,train=1.25,hospital=1.2,malvinas=1.3,volcano=1.25,lunar=1.4)[variant]
+    b.phase='attack';b.attack_time=0.;b.timer=dict(battery=1.1,andes=1.,naval=1.3,lighthouse=1.1,train=1.25,hospital=1.2,malvinas=1.3,volcano=1.25,lunar=1.4).get(variant,1.2)
     x,y=b.rect.center;rate=(1.,1.15,1.3)[b.difficulty];p=w.player.rect
     b.direction=1 if p.centerx>x else -1
-    if variant=='battery':
+    if variant in ('frontier','press','lever','archive','manuscript','cipher'):
+        if variant in ('frontier','press','lever'):
+            for side in (-1,1):w.projectiles.append(Projectile(x,570,side*240*rate,kind='wave'))
+        if variant in ('archive','press','manuscript','cipher'):
+            offsets=(-160,160) if variant=='manuscript' else (-140,0,140)
+            for dx in offsets:b.telegraphs.append([max(b.left+70,min(b.right-70,p.centerx+dx)),1.2])
+        if variant=='frontier':w.projectiles.append(Projectile(x,520,b.direction*270*rate,kind='musket'))
+    elif variant=='battery':
         for dx in (-190,0,190):b.telegraphs.append([max(b.left+70,min(b.right-70,p.centerx+dx)),1.05])
         for side in (-1,1):w.projectiles.append(Projectile(x,570,side*220*rate,kind='wave'))
     elif variant=='andes':

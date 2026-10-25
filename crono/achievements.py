@@ -1,6 +1,7 @@
 """Explicit predicates, no executable conditions read from saves or content."""
 from collections import Counter
 from .achievement_catalog import CATALOG
+from .campaign import chapter_levels
 from .campaign import MAIN_LEVEL_IDS,DLC_LEVEL_IDS,MAIN_ERA_IDS
 from .curiosities import MAP_CURIOSITIES
 from .education import UPGRADES
@@ -29,11 +30,11 @@ def earned(data):
         bool(bosses),{0,1,8,2,3,4,5,6,7}<=bosses,bool(m.get('boss_with_lesson')),bool(m.get('boss_with_two_lessons')),
         bool(m.get('level_without_death')),bool(m.get('boss_without_death')),
         bool(solved),len(solved)>=10,len(solved)>=30,{i*2+s for i in MAIN_LEVEL_IDS for s in (0,1)}<=solved,
-        all(any(i in solved for i in range(e*6,e*6+6)) for e in MAIN_ERA_IDS),
+        all(any(level*2+s in solved for level in chapter_levels(e) for s in (0,1)) for e in MAIN_ERA_IDS),
         bool(upgrades),len(upgrades)>=4,{u['id'] for u in UPGRADES}<=upgrades,
         bool(rescues),'san_martin' in rescues and 28 in data.get('bonus_unlocked',[]),
         'brown' in rescues and 29 in data.get('bonus_unlocked',[]),28 in levels,29 in levels,len(rescues)>=3,
         bool(rifts),33 in rifts,len(rifts)>=3,len(mechanics)>=8,bool(skins),len(skins&set(data.get('skin_cards_seen',[])))>=3,
-        all(any(i in mechanics for i in range(e*3,e*3+3)) for e in MAIN_ERA_IDS)]
+        all(any(i in mechanics for i in chapter_levels(e)) for e in MAIN_ERA_IDS)]
     assert len(checks)==len(CATALOG)==60
     return {row['id'] for row,ok in zip(CATALOG,checks) if ok}

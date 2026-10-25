@@ -67,7 +67,7 @@ class StoryAndWaterTests(unittest.TestCase):
             e.update(STEP,w);self.assertEqual(w.projectiles[0].kind,kind)
 
     def test_ground_enemy_models_start_on_actual_surfaces(self):
-        for level in range(36):
+        for level in range(46):
             w=World(*divmod(level,3))
             for e in w.enemies:
                 if e.kind!='flyer':self.assertTrue(any(abs(e.rect.bottom-p.rect.top)<1 and p.rect.left<=e.rect.centerx<=p.rect.right for p in w.platforms),f'{level}: {e.kind}')

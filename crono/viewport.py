@@ -1,17 +1,22 @@
-"""A wider camera, never an anamorphic stretch; bounded mobile scenery cache."""
+"""A wider camera and continuous parallax, with cached individual art assets."""
 import importlib
-import math
 import pygame as pg
 
 RENDER_MODULES=('art','period_art','argentina_art','egypt_art','journey_art','educational_art','enemy_art','heritage','humanoid_art')
 
+def width_for_aspect(aspect):
+    return max(960,min(2560,round(720*aspect)))
+
+
 def set_render_width(width,clear=False):
     for name in RENDER_MODULES:
         module=importlib.import_module('crono.'+name)
+        changed=getattr(module,'W',None)!=width
         if hasattr(module,'W'):module.W=width
-        for name in ('sky','sky_image','gradient','backdrop'):
-            value=getattr(module,name,None)
-            if hasattr(value,'cache_clear'):value.cache_clear()
+        if changed:
+            for name in ('sky','sky_image','gradient','backdrop'):
+                value=getattr(module,name,None)
+                if hasattr(value,'cache_clear'):value.cache_clear()
         if clear:
             for value in vars(module).values():
                 if callable(value) and hasattr(value,'cache_clear'):value.cache_clear()
@@ -20,7 +25,8 @@ class ViewportUI:
     def configure_viewport(self,aspect=None):
         if aspect is None:
             w,h=self.display.get_size();aspect=w/max(1,h)
-        width=max(960,min(2560,round(720*aspect)))
+        width=width_for_aspect(aspect)
+        if getattr(self,'viewport_width',None)==width:return
         self.viewport_width=width;self.ui_scale=min(1,width/1280)
         self.ui_offset=((width-1280*self.ui_scale)/2,(720-720*self.ui_scale)/2)
         self.ui_canvas=pg.Surface((1280,720),pg.SRCALPHA);self.canvas=self.ui_canvas
@@ -50,20 +56,18 @@ class ViewportUI:
         self.display.blit(picture,((dw-size[0])//2,(dh-size[1])//2));pg.display.flip()
 
 def mobile_backdrop(artist,s,world,camera):
-    width=s.get_width();cached=getattr(artist,'mobile_layer',None)
-    if cached is None or cached[0]!=world.level_id or cached[1]!=width or not cached[2]<=camera<=cached[2]+640:
-        origin=max(0,math.floor(camera/320)*320-160);layer=pg.Surface((width+960,720))
-        set_render_width(width+960)
-        try:
-            artist.background(layer,world.index,origin,0,world.stage)
-            from .educational_art import map_features
-            map_features(layer,world,origin,0)
-            if world.index==7:
-                from .argentina_art import props
-                props(layer,world,origin,0)
-            elif world.index<7:
-                from .period_art import props
-                props(layer,world,origin,0)
-        finally:set_render_width(width)
-        cached=(world.level_id,width,origin,layer);artist.mobile_layer=cached
-    s.blit(cached[3],(round(cached[2]-camera),0))
+    # Keep sky and landmarks in their own coordinate spaces. Flattening them
+    # into one scrolling screenshot made every buffer rebuild snap the scenery.
+    # Art modules cache their skies and building images without resizing or
+    # flushing those caches as the camera moves.
+    key=(world.level_id,s.get_width())
+    if getattr(artist,'mobile_layer',None)!=key:artist.mobile_layer=key
+    artist.background(s,world.index,camera,0,world.stage)
+    from .educational_art import map_features
+    map_features(s,world,camera,0)
+    if world.index==7:
+        from .argentina_art import props
+        props(s,world,camera,0)
+    elif world.index<7:
+        from .period_art import props
+        props(s,world,camera,0)

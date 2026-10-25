@@ -111,15 +111,16 @@ class Player:
             accel = 2400 if self.grounded else 1650
             if 'boots' in self.upgrades and not self.grounded:
                 accel=2100
+            accel*=getattr(getattr(world,'mechanic',None),'air_control',1.) if not self.grounded else 1.
             if self.hurt_time<=0:
                 self.vx = approach(self.vx, controls.axis * (355 if 'boots' in self.upgrades else RUN)*getattr(getattr(world,'mechanic',None),'speed',1.), accel * dt)
             if self.buffer > 0 and self.coyote > 0:
-                self.vy = JUMP
+                self.vy = JUMP*getattr(getattr(world,'mechanic',None),'jump_scale',1.)
                 self.buffer = self.coyote = 0
                 self.grounded = False
                 events.append('jump')
             elif controls.jump and 'double_jump' in self.upgrades and self.air_jump and not self.grounded:
-                self.vy=JUMP*.93
+                self.vy=JUMP*.93*getattr(getattr(world,'mechanic',None),'jump_scale',1.)
                 self.air_jump=False
                 self.buffer=0
                 events.append('jump')
@@ -194,7 +195,7 @@ class World:
                     floor=min(floors,key=lambda p:abs(p.rect.top-enemy.rect.bottom))
                     enemy.rect.bottom=floor.rect.top;enemy.base_y=enemy.rect.y
                     enemy.left=max(enemy.left,floor.rect.left);enemy.right=min(enemy.right,floor.rect.right)
-            enemy.variant='roman' if self.level_id==34 else 'malvinas' if self.level_id==33 else ''
+            enemy.variant='timbuktu' if self.level_id==41 else 'roman' if self.level_id==34 else 'malvinas' if self.level_id==33 else ''
             if self.level_id==33:enemy.stage=2
         self.hazards = [pg.FRect(s) for s in self.data['hazards']]
         self.shards = set()
@@ -214,6 +215,8 @@ class World:
         prepare_world(self)
         from .mechanics import Mechanic
         self.mechanic=Mechanic(self)
+        from .era_traits import EraTraits
+        self.traits=EraTraits(self)
 
     def make_boss(self):
         b=Boss(self.combat_era,self.difficulty,self.data['arena_left'],self.data['arena_right'])
@@ -266,6 +269,7 @@ class World:
         self.mechanic.state['vehicle']=False
         self.player.configure(self.upgrades,True)
         self.player.invincible = 1.6
+        if hasattr(self,'traits'):self.traits.respawn()
         self.deaths += 1
         self.projectiles=[]
         if self.boss and self.boss.alive:
@@ -302,7 +306,9 @@ class World:
         p = self.player
         old_bottom = p.rect.bottom
         mounted=self.mechanic.update(dt,controls)
-        events = [] if mounted else p.update(dt, controls, self)
+        events=self.traits.update(dt,controls)
+        if self.player is not p:return events
+        if not mounted:events+=p.update(dt,controls,self)
         if mounted:
             p.shot_cooldown=max(0,p.shot_cooldown-dt);p.invincible=max(0,p.invincible-dt)
         previous_complete=self.mechanic.completed
@@ -313,6 +319,8 @@ class World:
         if controls.attack and p.shot_cooldown<=0:
             self.projectiles.append(Projectile(p.rect.centerx+p.facing*21,p.rect.centery,p.facing*680,
                                                owner='player',damage=3 if mounted else 2 if 'pulse' in self.upgrades else 1,kind='pulse'))
+            if 'long_pulse' in self.upgrades:
+                self.projectiles[-1].range=500;self.projectiles[-1].ttl=.76
             p.shot_cooldown=.22 if 'rapid_pulse' in self.upgrades else .34
             events.append('shot')
         if p.rect.top > 800:

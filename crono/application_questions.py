@@ -20,7 +20,8 @@ def records():
     }
     for topic,lesson in enumerate(LESSONS):
         level=topic//2;entry=ENTRIES[MAP_CURIOSITIES[level]]
-        others=[i for i in range(level//3*3,level//3*3+3) if i!=level]
+        others=[i for i in range(level//3*3,min(len(STAGES),level//3*3+3)) if i!=level]
+        others=(others+[i for i in range(len(STAGES)) if i!=level and i not in others])[:2]
         image_options=[entry['title']]+[ENTRIES[MAP_CURIOSITIES[i]]['title'] for i in others]
         source_label=SOURCES[lesson.source][0]
         other_sources=list(dict.fromkeys(label for label,url in SOURCES if label!=source_label))
@@ -36,7 +37,7 @@ def records():
                 ('reason',reason_prompt,reason_options,'Una conclusión debe sostenerse en evidencias situadas en su contexto. El juego combina aprendizaje y ficción; consultar y comparar fuentes ayuda a distinguirlos.'),
             )):
                 result.append(dict(id=5000000+topic*9+band*3+variant,topic=topic,band=band,kind=kind,prompt=prompt,options=list(options),correct=0,explanation=explanation[:700],source=SOURCES[lesson.source][1]))
-            title,sequence,explanation=sequences[level//3]
+            title,sequence,explanation=sequences.get(level//3,('La historia de una fuente','Creación del documento → conservación → investigación actual','Un documento y el momento en que lo estudiamos pertenecen a contextos distintos.'))
             parts=sequence.split(' → ')
             result.append(dict(id=6000000+topic*3+band,topic=topic,band=band,kind='chronology',
                 prompt=('Ordena los pasos: ' if band==0 else '¿Qué secuencia temporal es coherente? ' if band==1 else 'Distingue creación, contexto e investigación. Identifica el orden correcto: ')+title+'.',

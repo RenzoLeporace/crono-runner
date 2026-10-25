@@ -1,3 +1,4 @@
+from .campaign import TOTAL_LEVELS
 """Offline aliases, isolated progress, optional teacher PIN and fair rankings."""
 import hashlib
 import hmac
@@ -23,7 +24,7 @@ def valid_records(records):
     result={}
     if not isinstance(records,dict):return result
     for key,value in records.items():
-        if str(key).isdigit() and 0<=int(key)<36 and isinstance(value,dict) and type(value.get('score')) is int and 0<=value['score']<=100000:
+        if str(key).isdigit() and 0<=int(key)<TOTAL_LEVELS and isinstance(value,dict) and type(value.get('score')) is int and 0<=value['score']<=100000:
             canonical=str(int(key))
             if value['score']>result.get(canonical,{}).get('score',-1):result[canonical]=dict(value)
     return result
@@ -38,7 +39,7 @@ def rankings(rows,classroom=None,institution=None):
         records=valid_records(row.get('records',{}))
         normalized={}
         for key,r in records.items():
-            if str(key).isdigit() and 0<=int(key)<36 and isinstance(r,dict) and type(r.get('score')) is int and 0<=r['score']<=100000:
+            if str(key).isdigit() and 0<=int(key)<TOTAL_LEVELS and isinstance(r,dict) and type(r.get('score')) is int and 0<=r['score']<=100000:
                 normalized[str(int(key))]=max(normalized.get(str(int(key)),0),r['score'])
         scores=list(normalized.values())
         result.append(dict(alias=clean_label(row.get('alias','Explorador')),classroom=clean_label(row.get('classroom','')),

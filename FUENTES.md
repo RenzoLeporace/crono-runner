@@ -1,9 +1,9 @@
-# Contenidos y fuentes de la beta educativa 0.7
+# Contenidos y fuentes de la beta educativa 0.9
 
 Las explicaciones son paráfrasis originales. Cada archivo del juego enlaza su fuente en el cuaderno.
 Los mapas son escenarios de ficción inspirados en temas concretos, no reconstrucciones exactas ni una historia universal. Los jefes y los enemigos son ficticios.
 
-El banco inicial contiene 1296 registros para 72 temas y tres edades: 432 preguntas factuales y 864 tareas de aplicación sobre fuentes, imágenes, razones y cronología. Cada tema y edad tiene seis alternativas; no equivalen a 1296 hechos históricos distintos. Desde Configuración, los docentes pueden consultar todas las respuestas, agregar preguntas y modificar las existentes, incluida su explicación y referencia. Las referencias de esta página corresponden al contenido original; las incorporaciones del docente usan la referencia que este indique. Al abrir un archivo se elige una pregunta al azar y se mezclan las respuestas. Si hay varias, no se repite inmediatamente la anterior del mismo perfil.
+El banco inicial contiene 1656 registros para 92 temas y tres edades: 552 preguntas y 1104 tareas de aplicación sobre fuentes, imágenes, razones y cronología. Cada tema y edad tiene seis alternativas; no equivalen a 1656 hechos históricos distintos. Desde Configuración, los docentes pueden consultar todas las respuestas, agregar preguntas y modificar las existentes, incluida su explicación y referencia. Las referencias de esta página corresponden al contenido original; las incorporaciones del docente usan la referencia que este indique. Al abrir un archivo se elige una pregunta al azar y se mezclan las respuestas. Si hay varias, no se repite inmediatamente la anterior del mismo perfil.
 
 Las preguntas de 6–9 años se centran en reconocer; las de 10–14, en relacionar y explicar; las de 15 en adelante, en inferir y valorar los límites de las evidencias. Son perfiles orientativos, no una evaluación curricular certificada.
 
@@ -154,21 +154,42 @@ Segunda Guerra Mundial: población civil y protección.
 - **Cooperar después de la guerra**. Fuente: [ONU · Historia de las Naciones Unidas](https://www.un.org/en/about-us/history-of-the-un).
 - **Derechos para todas las personas**. Fuente: [ONU · Declaración Universal de Derechos Humanos](https://www.un.org/en/about-us/universal-declaration-of-human-rights).
 
-## 8.1 · La ciudad de las redes
+## 8.1 · Guerra Fría · una ciudad dividida
+
+Berlín: fronteras, experiencias civiles y contraste de fuentes.
+
+- **Un mundo en tensión**. Fuente: [Berlín · historia del muro](https://www.berlin.de/sehenswuerdigkeiten/3561866-3558930-berliner-mauer.html).
+- **Berlín y sus habitantes**. Fuente: [Berlín · historia del muro](https://www.berlin.de/sehenswuerdigkeiten/3561866-3558930-berliner-mauer.html).
+
+## 8.2 · La Luna · reparar para regresar
+
+Baja gravedad, carrera espacial y reparación del módulo ficticio de Crono.
+
+- **La gravedad no desaparece**. Fuente: [NASA Science · preguntas sobre la Luna](https://science.nasa.gov/moon/top-moon-questions/).
+- **Explorar requiere preparación**. Fuente: [NASA Science · preguntas sobre la Luna](https://science.nasa.gov/moon/top-moon-questions/).
+
+## 8.3 · Guerra Fría · abrir caminos al diálogo
+
+Distensión, cambios de 1989–1991 y cooperación.
+
+- **Cambios que no ocurren en un solo día**. Fuente: [Office of the Historian · Berlín y la URSS](https://history.state.gov/departmenthistory/short-history/berlinwall).
+- **Investigar también exige escuchar**. Fuente: [Office of the Historian · Berlín y la URSS](https://history.state.gov/departmenthistory/short-history/berlinwall).
+
+## 9.1 · La ciudad de las redes
 
 Conectividad, acceso y cooperación digital.
 
 - **Conectarse también es acceder**. Fuente: [ONU · Cooperación digital](https://www.un.org/en/content/digital-cooperation-roadmap/).
 - **Compartir conocimiento digital**. Fuente: [ONU · Cooperación digital](https://www.un.org/en/content/digital-cooperation-roadmap/).
 
-## 8.2 · La energía del mañana
+## 9.2 · La energía del mañana
 
 Fuentes renovables y transformación de energía.
 
 - **Energía del Sol y del viento**. Fuente: [ONU · Energía renovable](https://www.un.org/en/climatechange/what-is-renewable-energy).
 - **Elegir fuentes de energía**. Fuente: [ONU · Energía renovable](https://www.un.org/en/climatechange/what-is-renewable-energy).
 
-## 8.3 · El observatorio del presente
+## 9.3 · El observatorio del presente
 
 Cooperación científica y salud mundial.
 
@@ -238,6 +259,55 @@ Protección, atención y experiencias durante la guerra.
 - **Proteger vidas**. Fuente: [Imperial War Museums · Segunda Guerra Mundial](https://www.iwm.org.uk/history/second-world-war).
 - **Escuchar experiencias**. Fuente: [Imperial War Museums · Segunda Guerra Mundial](https://www.iwm.org.uk/history/second-world-war).
 
+## BR.1 · Brasil · la Guerra de los Farrapos
+
+Rio Grande do Sul, 1835–1845: conflicto, recursos y desigualdades.
+
+- **Un conflicto del Brasil imperial**. Fuente: [Marinha do Brasil · Revoltas](https://www.marinha.mil.br/comemch/revoltas).
+- **No todos vivieron la misma guerra**. Fuente: [Senado Federal · Lanceiros Negros](https://www12.senado.leg.br/noticias/materias/2023/03/15/paim-fala-sobre-aprovacao-de-lanceiros-negros-no-livro-dos-herois-da-patria).
+
+## AR.B3 · Güemes · la Guerra Gaucha
+
+Salta y Jujuy: territorio, redes de apoyo y defensa del norte.
+
+- **La defensa del norte**. Fuente: [Argentina · Güemes y el Plan Continental](https://www.argentina.gob.ar/noticias/el-general-guemes-y-el-plan-continental-sanmartiniano).
+- **Una estrategia continental**. Fuente: [Argentina · Güemes y el Plan Continental](https://www.argentina.gob.ar/noticias/el-general-guemes-y-el-plan-continental-sanmartiniano).
+
+## B.8 · Alejandría · custodiar el conocimiento
+
+Bibliotecas, copias y transmisión de textos en el mundo antiguo.
+
+- **Una biblioteca también trabaja**. Fuente: [Bibliotheca Alexandrina · preguntas frecuentes](https://www.bibalex.org/fr/page/faq).
+- **La memoria no desaparece en un solo dibujo**. Fuente: [Bibliotheca Alexandrina · preguntas frecuentes](https://www.bibalex.org/fr/page/faq).
+
+## B.9 · Maguncia · la imprenta transforma los textos
+
+Hacia 1450: tipos móviles, corrección y circulación de libros.
+
+- **Letras que pueden volver a usarse**. Fuente: [Biblioteca Nacional Alemana · Gutenberg](https://mediengeschichte.dnb.de/DBSMZBN/Content/EN/Printing/04-gutenberg-johannes-en.html).
+- **Innovar tiene una historia**. Fuente: [Biblioteca Nacional Alemana · Gutenberg](https://mediengeschichte.dnb.de/DBSMZBN/Content/EN/Printing/04-gutenberg-johannes-en.html).
+
+## B.10 · Siracusa · el taller de las palancas
+
+Arquímedes, equilibrio e investigación mediante modelos.
+
+- **Una palanca cambia el esfuerzo**. Fuente: [Museo Galileo · ciencia del equilibrio](https://catalogue.museogalileo.it/section/ScienceOfEquilibrium.html).
+- **Un modelo no es una prueba de todo**. Fuente: [Museo Galileo · ciencia del equilibrio](https://catalogue.museogalileo.it/section/ScienceOfEquilibrium.html).
+
+## B.11 · Tombuctú · las rutas del manuscrito
+
+África occidental: comercio, estudio y conservación de documentos.
+
+- **Una ciudad de intercambio y estudio**. Fuente: [Library of Congress · manuscritos de Mali](https://www.loc.gov/exhibits/mali/mali-overview.html).
+- **Custodiar también es producir historia**. Fuente: [Library of Congress · manuscritos de Mali](https://www.loc.gov/exhibits/mali/mali-overview.html).
+
+## B.12 · Bletchley Park · mensajes y cooperación
+
+Segunda Guerra Mundial: criptografía y trabajo colectivo.
+
+- **Leer un mensaje cifrado**. Fuente: [The National Museum of Computing · Bombe](https://www.tnmoc.org/bombe).
+- **No fue una persona trabajando sola**. Fuente: [The National Museum of Computing · Bombe](https://www.tnmoc.org/bombe).
+
 ## G.1 · Malvinas · memoria de 1982
 
 Conflicto, experiencias y memoria de quienes lo vivieron.
@@ -261,7 +331,7 @@ Exploración lunar, cooperación y evidencias de una misión.
 
 ## Campaña y expansión argentina
 
-La campaña general tiene 24 mapas. Las dos guerras mundiales se tratan en una época con tres mapas: 1914, 1939 y reconstrucción desde 1945. La actualidad añade redes, renovables y cooperación científica. Argentina incluye cuatro mapas normales: 1810, 1816, Obligado 1845 y 1983. Hay cinco bonus por rescates y tres grietas, para un total de 36 mapas. Los rescates son ficción del reloj y las grietas devuelven al origen; no alteran los desenlaces históricos. Los adversarios son anomalías ficticias, no poblaciones ni países reales.
+La campaña general tiene 27 mapas. Las dos guerras mundiales se tratan en una época con tres mapas: 1914, 1939 y reconstrucción desde 1945. La Guerra Fría añade Berlín, Luna sin combate y diálogo; la actualidad añade redes, renovables y cooperación científica. Argentina incluye cuatro mapas normales: 1810, 1816, Obligado 1845 y 1983. Hay diez bonus por rescates, Güemes y Farrapos, además de tres grietas, para un total de 46 mapas. Los rescates son ficción del reloj y las grietas devuelven al origen; no alteran los desenlaces históricos. Los adversarios son anomalías ficticias, no poblaciones ni países reales.
 
 ## Cómo funciona el aprendizaje
 
@@ -439,6 +509,30 @@ La Declaración Universal de Derechos Humanos fue proclamada en 1948. Afirma der
 
 Fuente: [ONU · Declaración Universal de Derechos Humanos](https://www.un.org/en/about-us/universal-declaration-of-human-rights).
 
+### Cartas a través de una frontera
+
+Una carta permite investigar vínculos familiares sin reducir la historia de una ciudad a un muro.
+
+La Guerra Fría fue una rivalidad política, económica, militar e ideológica entre bloques encabezados por Estados Unidos y la Unión Soviética. No fue una guerra directa continua entre ambos países: hubo amenazas nucleares, propaganda, conflictos regionales y experiencias diferentes.
+
+Fuente: [Berlín · historia del muro](https://www.berlin.de/sehenswuerdigkeiten/3561866-3558930-berliner-mauer.html).
+
+### Una huella en el regolito
+
+La superficie lunar permite estudiar materiales y condiciones distintas de las terrestres. La gravedad sigue actuando.
+
+En la superficie lunar la gravedad es aproximadamente una sexta parte de la terrestre. Los objetos siguen teniendo masa y peso, pero su peso es menor. La misión del juego ajusta el impulso del traje para permitir saltos largos controlables; no es una simulación física completa.
+
+Fuente: [NASA Science · preguntas sobre la Luna](https://science.nasa.gov/moon/top-moon-questions/).
+
+### Una mesa, distintas perspectivas
+
+Sentarse a dialogar no elimina desacuerdos: registrar qué propone cada parte ayuda a comprender un proceso.
+
+La apertura del muro de Berlín en 1989 y la disolución de la Unión Soviética en 1991 fueron acontecimientos distintos vinculados con el final de la Guerra Fría. Sus causas y efectos requieren estudiar decisiones, crisis y experiencias de múltiples sociedades.
+
+Fuente: [Office of the Historian · Berlín y la URSS](https://history.state.gov/departmenthistory/short-history/berlinwall).
+
 ### Conectar es más que tender cables
 
 Una red puede unir equipos; para que las personas la aprovechen también necesitan acceso y conocimientos.
@@ -495,13 +589,15 @@ El 10 de diciembre de 1983, Raúl Alfonsín asumió la presidencia tras las elec
 
 Fuente: [Dirección Nacional Electoral · 1983](https://www.argentina.gob.ar/dine/elecciones-1983).
 
-### La ruta antes de la montaña
+### Carmen de Cuyo y Nuestra Señora del Rosario
 
-Reconocer caminos y reunir provisiones formaba parte de la preparación de la expedición.
+El 5 de enero de 1817, antes del Cruce de los Andes, se proclamó a la Virgen del Carmen de Cuyo como Patrona y Generala del Ejército de los Andes. San Martín le entregó su bastón de mando. Esa es la advocación directamente vinculada con este ejército.
 
-El Cruce de los Andes requirió preparación, recursos y reconocimiento de pasos. No fue un salto directo de Tucumán a Chile: las rutas, provisiones y condiciones del terreno importaban.
+Nuestra Señora del Rosario de Río Blanco y Paypaya es patrona de Jujuy. Se incluye aquí como una referencia cultural diferente, sin atribuirle el título de la Virgen del Carmen ni situar su santuario en el paso cordillerano.
 
-Fuente: [Instituto Nacional Sanmartiniano · Cronología](https://sanmartiniano.cultura.gob.ar/noticia/cronologia-sanmartiniana/).
+El reloj reúne ambas ilustraciones para distinguir tradiciones, lugares y fuentes. No representa una aparición documentada durante el cruce. La preparación de rutas y provisiones sigue siendo indispensable para comprender la expedición.
+
+Fuente: [Gobierno de Mendoza · Bandera y Patrona del Ejército de los Andes](https://www.mendoza.gov.ar/prensa/se-conmemoro-el-dia-de-la-bandera-provincial/).
 
 ### Una brújula no decide sola
 
@@ -534,6 +630,62 @@ Los objetos y testimonios de atención médica permiten estudiar experiencias de
 Los testimonios y objetos conservados ayudan a estudiar experiencias de la guerra. Un testimonio aporta una perspectiva; compararlo con otras evidencias mejora la investigación.
 
 Fuente: [Imperial War Museums · Segunda Guerra Mundial](https://www.iwm.org.uk/history/second-world-war).
+
+### Los Lanceiros Negros
+
+Un regimiento permite preguntar quién luchó, bajo qué condiciones y qué significaba la libertad.
+
+La Guerra de los Farrapos o Revolución Farroupilha ocurrió entre 1835 y 1845, principalmente en Rio Grande do Sul y también en Santa Catarina. Enfrentó a rebeldes y fuerzas del Imperio del Brasil. No fue la guerra naval de Brown de 1825–1828.
+
+Fuente: [Marinha do Brasil · Revoltas](https://www.marinha.mil.br/comemch/revoltas).
+
+### Un poncho y muchas historias
+
+El poncho salteño remite a identidad y memoria; no reemplaza el estudio de las personas y redes que sostuvieron la campaña.
+
+Martín Miguel de Güemes organizó la resistencia en Salta y Jujuy durante las guerras de independencia. La Guerra Gaucha combinó conocimiento del terreno, movilidad, milicias y apoyo de la población. Güemes murió el 17 de junio de 1821.
+
+Fuente: [Argentina · Güemes y el Plan Continental](https://www.argentina.gob.ar/noticias/el-general-guemes-y-el-plan-continental-sanmartiniano).
+
+### Las pistas de un catálogo
+
+Un catálogo registra y organiza: también permite investigar qué se conserva y qué falta.
+
+La antigua biblioteca de Alejandría reunió textos y personas dedicadas al estudio en el mundo helenístico. Copiar, ordenar y comparar escritos ayudaba a transmitir conocimientos. Un rollo conservado y su interpretación actual no son la misma cosa.
+
+Fuente: [Bibliotheca Alexandrina · preguntas frecuentes](https://www.bibalex.org/fr/page/faq).
+
+### Una letra puede volver a imprimirse
+
+Un tipo móvil es una pieza reutilizable: la tecnología también necesita trabajo y revisión.
+
+Hacia mediados del siglo XV, Gutenberg desarrolló en Maguncia un sistema europeo de impresión con tipos móviles metálicos. Componer, entintar y prensar permitía reproducir páginas. Gutenberg no inventó la escritura ni fue la primera persona de la historia en imprimir.
+
+Fuente: [Biblioteca Nacional Alemana · Gutenberg](https://mediengeschichte.dnb.de/DBSMZBN/Content/EN/Printing/04-gutenberg-johannes-en.html).
+
+### El punto de apoyo importa
+
+Mover el apoyo cambia las distancias y el esfuerzo necesario: experimenta antes de concluir.
+
+Arquímedes estudió problemas de equilibrio y geometría. Una palanca permite relacionar fuerza, distancia y punto de apoyo: no produce energía de la nada. Los modelos del mapa son herramientas de aprendizaje y no réplicas exactas de su taller.
+
+Fuente: [Museo Galileo · ciencia del equilibrio](https://catalogue.museogalileo.it/section/ScienceOfEquilibrium.html).
+
+### Una biblioteca también puede ser familiar
+
+Las colecciones familiares ayudan a comprender redes de aprendizaje y memoria en África occidental.
+
+Tombuctú, en el actual Mali, fue un importante centro de comercio y aprendizaje. Sus manuscritos tratan temas como derecho, astronomía, medicina e historia. El conocimiento del pasado no se produjo únicamente en Europa.
+
+Fuente: [Library of Congress · manuscritos de Mali](https://www.loc.gov/exhibits/mali/mali-overview.html).
+
+### Un rotor no trabaja solo
+
+Personas, máquinas y procedimientos formaban una red de trabajo: una cifra no se interpreta sin contexto.
+
+En Bletchley Park se trabajó para descifrar comunicaciones durante la Segunda Guerra Mundial. La Bombe ayudó en el análisis de Enigma. Matemáticas, ingeniería, personal de operación e información previa participaron en ese trabajo colectivo.
+
+Fuente: [The National Museum of Computing · Bombe](https://www.tnmoc.org/bombe).
 
 ### La voz que busca contacto
 
@@ -573,14 +725,3 @@ En 1983, los militares evocan represión y terrorismo de Estado durante la dicta
 - [Biblioteca Nacional · documentos de la recuperación democrática](https://www.bn.gov.ar/micrositios/admin_assets/issues/files/c6f186381e146bb659027f121d3198f3.pdf).
 
 Egipto tiene tres mapas que evocan distintos períodos y temas: Nilo, Guiza y templos. Los signos pintados son decorativos, no transcripciones de inscripciones auténticas. La referencia a Moisés se presenta como tradición bíblica y cultural; no se le asigna una fecha arqueológica segura ni un faraón concreto.
-
-
-## Advocaciones en el Cruce de los Andes · beta 0.8
-
-La ficha distingue Carmen de Cuyo, patrona y generala del Ejército de los Andes, de Nuestra Señora del Rosario de Río Blanco y Paypaya, patrona de Jujuy. No se atribuye el mismo patronazgo a ambas. La aparición del objeto en el mapa es una invitación cultural a consultar fuentes, no evidencia de un encuentro de Crono.
-
-- [Gobierno de Mendoza · Bandera provincial y Virgen del Carmen de Cuyo](https://www.mendoza.gov.ar/prensa/se-conmemoro-el-dia-de-la-bandera-provincial/).
-- [Turismo de Jujuy · Virgen del Rosario de Río Blanco y Paypaya](https://www.turismo.jujuy.gob.ar/event/peregrinacion-a-la-virgen-del-rosario/).
-- [Argentina · Nuestra Señora del Carmen](https://www.argentina.gob.ar/noticias/dia-de-nuestra-senora-del-carmen).
-
-Las nuevas apariencias llevan referencias a museos, bibliotecas e instituciones científicas en su ficha de juego; las siluetas son ilustrativas. Las travesías marítimas son ficción interactiva: en el Cretácico, el esquife y Crono son viajeros temporales, nunca habitantes humanos de esa época.

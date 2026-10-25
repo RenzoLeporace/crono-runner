@@ -47,6 +47,9 @@ ROWS=(
 ('Un salto pequeño en la Luna','lunar','Aprovecha menor gravedad y registra muestras de superficie.',('Registrar el lugar de la muestra','Sellar el recipiente','Transmitir la identificación'),'Apolo 11 alunizó el 20 de julio de 1969. Collins permaneció en órbita mientras Armstrong y Aldrin descendían.'),
 )
 
+from .new_histories import NEW_MAPS
+ROWS+=tuple(row['mechanic'] for row in NEW_MAPS)
+
 class Mechanic:
     def __init__(self,world):
         self.world=world;self.title,self.kind,self.objective,self.operations,self.note=ROWS[world.level_id]
@@ -65,7 +68,7 @@ class Mechanic:
             self.devices.append((platform.rect.centerx,platform.rect.top))
         self.vehicle_kind=False
         self.state['vehicle_x']=self.devices[1][0];self.state['vehicle_y']=self.devices[1][1]-32
-        self.wind=0.;self.gravity=1.;self.speed=1.;self.sheltered=False
+        self.wind=0.;self.gravity=world.data.get('gravity',1.);self.jump_scale=world.data.get('jump_scale',1.);self.air_control=.42 if world.level_id==44 else 1.;self.speed=1.;self.sheltered=False
         from .field_systems import FieldSystem
         self.field=FieldSystem(self)
         # First contact teaches the device on safe ground.
@@ -109,7 +112,7 @@ class Mechanic:
     def update(self,dt,controls):
         w=self.world;p=w.player;t=w.time;step=self.state['step']
         self.state['vehicle']=False
-        self.gravity=.48 if self.kind=='lunar' else 1.
+        self.gravity=1/6 if self.kind=='moonrepair' else .48 if self.kind=='lunar' else 1.
         self.wind=(math.sin(t*.55)*38 if self.kind in ('wind','provisions','radio') else 0.)
         self.speed=.85 if self.kind=='plaza' and step<2 else 1.
         nearest=min((abs(p.rect.centerx-x) for x,y in self.devices),default=9999)
@@ -142,6 +145,9 @@ class Mechanic:
 
     def draw(self,s,camera,t):
         self.field.draw(s,camera,t)
+        if self.kind=='moonrepair':
+            from .moon_art import draw_lander
+            x,y=self.world.data['repair_ship'];draw_lander(s,x-camera,y,t,bool(self.field.goal))
         for i,(wx,y) in enumerate(self.devices):
             x=wx-camera
             if not -160<x<s.get_width()+160:continue
@@ -163,14 +169,24 @@ class Mechanic:
                 line(s,c,(x,y-95),(x,y-12),2)
                 rect(s,(22,35,41),(x-19,y-39,38,35),2)
             elif self.kind in ('naval','canal','tide'):
-                for radius in (22,29):pg.draw.ellipse(s,c,pg.Rect(x-radius,y-76,radius*2,70),2)
-                polygon(s,(194,167,113),[(x-12,y-31),(x+12,y-31),(x+7,y-20),(x-8,y-20)])
+                if i==1:
+                    c=(192,161,242)
+                    for radius in (22,29):pg.draw.ellipse(s,c,pg.Rect(x-radius,y-86,radius*2,80),2)
+                    polygon(s,(194,167,113),[(x-12,y-31),(x+12,y-31),(x+7,y-20),(x-8,y-20)])
+                elif i==0:
+                    rect(s,(175,128,70),(x-21,y-64,42,40),3)
+                    for dx in (-13,0,13):line(s,(232,196,126),(x+dx,y-62),(x+dx,y-26),2)
+                    line(s,(232,196,126),(x-21,y-45),(x+21,y-45),2)
+                else:
+                    rect(s,(225,214,174),(x-20,y-73,40,43),3)
+                    for dy in (0,9,18):line(s,(92,111,103),(x-12,y-62+dy),(x+12,y-62+dy),2)
             else:
                 polygon(s,c,[(x-19,y-60),(x,y-67),(x+19,y-60),(x+19,y-27),(x,y-21),(x-19,y-27)],2)
                 line(s,c,(x,y-61),(x,y-28),2)
             diamond(s,(x,y-119),6,c,active)
             if abs(wx-self.world.player.rect.centerx)<160:
-                text(s,f'E · Puesto {i+1}'+(' · LISTO' if active else ''),(x,y-139),12,c,True,'center')
+                label=('Preparación','GRIETA MARÍTIMA','Registro del viaje')[i] if self.kind in ('naval','canal','tide') else f'Puesto {i+1}'
+                text(s,'E · '+label+(' · LISTO' if active else ''),(x,y-139),12,c,True,'center')
         if self.state['vehicle']:
             x=self.state['vehicle_x']-camera;y=self.state['vehicle_y']
             polygon(s,(90,69,56),[(x-80,y+4),(x+85,y+4),(x+55,y+35),(x-55,y+35)])

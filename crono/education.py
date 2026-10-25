@@ -347,6 +347,7 @@ UPGRADES=[
  dict(id='rapid_pulse',name='Ritmo del explorador',cost=8,description='Reduce la recarga del pulso de 0,34 a 0,22 segundos. Conserva su alcance corto.',requires='pulse'),
  dict(id='regeneration',name='Memoria reparadora',cost=9,description='Recupera una energía después de 30 segundos sin recibir daño.',requires='vitality'),
  dict(id='insight',name='Mirada del historiador',cost=5,description='Amplía el alcance para interactuar con archivos de 85 a 135 píxeles.',requires=None),
+ dict(id='long_pulse',name='Horizonte temporal',cost=5,description='Más alcance: Crono pasa de 330 a 500 píxeles; la nave, de 540 a 800. Los disparos conservan un límite.',requires=None),
 ]
 
 
@@ -404,4 +405,6 @@ extend_egypt(Stage,lesson,STAGES,LESSONS,SOURCES)
 from .journey_content import extend_journeys
 extend_journeys(Stage,lesson,STAGES,LESSONS,SOURCES)
 
-assert len(STAGES)==36 and len(LESSONS)==72
+from .new_histories import extend_new
+extend_new(Stage,lesson,STAGES,LESSONS,SOURCES)
+assert len(STAGES)==46 and len(LESSONS)==92

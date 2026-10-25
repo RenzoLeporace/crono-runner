@@ -1,3 +1,4 @@
+from .campaign import TOTAL_LEVELS
 """Separate water-only excursions. Boats never participate in platform physics."""
 import math
 import pygame as pg
@@ -11,7 +12,7 @@ def number(data,key,default,low,high):
     return max(low,min(high,value)) if type(value) in (int,float) and math.isfinite(value) else default
 
 class SeaJourney:
-    def __init__(self,level,kind,difficulty=0,state=None):
+    def __init__(self,level,kind,difficulty=0,state=None,upgrades=()):
         self.level=level;self.kind=kind;self.difficulty=difficulty;self.time=0.;self.width=6800
         self.x=120.;self.y=420.;self.hp=6;self.phase=0;self.collected=set();self.defeated=set()
         self.boss_hp=12;self.shots=[];self.cooldown=0.;self.invincible=0.;self.enemy_clock=1.8
@@ -24,7 +25,7 @@ class SeaJourney:
             self.boss_hp=int(number(state,'boss_hp',12,0,12));self.deaths=int(number(state,'deaths',0,0,100000))
             self.collected={i for i in state.get('collected',[]) if type(i) is int and 0<=i<3} if isinstance(state.get('collected'),list) else set()
             self.defeated={i for i in state.get('defeated',[]) if type(i) is int and 0<=i<6} if isinstance(state.get('defeated'),list) else set()
-        self.checkpoint=self.phase
+        self.checkpoint=self.phase;self.hit_reaction=0.;self.boss_hit=0.;self.upgrades=set(upgrades)
 
     def payload(self):
         return dict(x=self.x,y=self.y,hp=self.hp,phase=self.phase,boss_hp=self.boss_hp,deaths=self.deaths,
@@ -34,15 +35,22 @@ class SeaJourney:
         if index!=0:self.quiz_error=True;return False
         self.phase+=1;self.quiz=False;self.quiz_error=False;self.hp=min(6,self.hp+1);return True
 
+    def damage(self):
+        if self.invincible:return False
+        self.hp-=1;self.invincible=1.5;self.hit_reaction=.45
+        self.x=max(80,self.x-22)
+        return True
+
     def update(self,dt,axis,vertical,attack):
         if self.paused or self.quiz or self.finished:return []
+        self.hit_reaction=max(0,self.hit_reaction-dt);self.boss_hit=max(0,self.boss_hit-dt)
         self.time+=dt;self.cooldown=max(0,self.cooldown-dt);self.invincible=max(0,self.invincible-dt)
         self.x=max(80,min(6600,self.x+axis*260*dt));self.y=max(300,min(565,self.y+vertical*175*dt))
         self.x=min(self.x,(2250,4400,5500,6600)[self.phase])
         events=[];body=pg.FRect(self.x-40,self.y-20,80,40)
         if attack and self.cooldown<=0:
             shot=Projectile(self.x+58,self.y-12,600,owner='player',damage=2,kind='cannonball')
-            shot.range=540;shot.ttl=.95;self.shots.append(shot);self.cooldown=.4;events.append('cannon')
+            shot.range=800 if 'long_pulse' in self.upgrades else 540;shot.ttl=shot.range/600+.03;self.shots.append(shot);self.cooldown=.4;events.append('cannon')
         for i,(x,y) in enumerate(self.cargo):
             if body.inflate(45,40).collidepoint(x,y) and i not in self.collected:self.collected.add(i);events.append('echo')
         self.enemy_clock-=dt
@@ -59,12 +67,13 @@ class SeaJourney:
                 for i,e in enumerate(self.enemies):
                     if i not in self.defeated and e.colliderect(shot.rect):self.defeated.add(i);shot.alive=False;events.append('stomp');break
                 if self.phase==3 and self.boss_hp and pg.FRect(5960,365,185,150).colliderect(shot.rect):
-                    self.boss_hp=max(0,self.boss_hp-shot.damage);shot.alive=False;events.append('block')
+                    self.boss_hp=max(0,self.boss_hp-shot.damage);self.boss_hit=.3;shot.alive=False;events.append('block')
             elif body.colliderect(shot.rect) and not self.invincible:
-                self.hp-=1;self.invincible=1.5;shot.alive=False;events.append('hurt')
+                if self.damage():events.append('hurt')
+                shot.alive=False
         self.shots=[s for s in self.shots if s.alive]
         for i,e in enumerate(self.enemies):
-            if i not in self.defeated and body.colliderect(e) and not self.invincible:self.hp-=1;self.invincible=1.5;events.append('hurt')
+            if i not in self.defeated and body.colliderect(e) and self.damage():events.append('hurt')
         if self.hp<=0:
             self.deaths+=1;self.hp=6;self.x=(120,2300,4450,5500)[self.phase];self.y=420;self.shots=[];self.invincible=2;events.append('death')
         if (self.phase==0 and len(self.collected)==3 and self.x>=2100 or
@@ -74,34 +83,10 @@ class SeaJourney:
         return events
 
     def boat(self,s,x,y,enemy=False,boss=False):
-        scale=1.6 if boss else 1.;wood=(111,73,49) if enemy else (151,104,58)
-        if self.kind=='tide':
-            if enemy:
-                pg.draw.ellipse(s,(83,140,129),pg.Rect(x-50*scale,y-19*scale,100*scale,37*scale))
-                polygon(s,(97,161,142),[(x-15,y-14),(x+8,y-56*scale),(x+25,y-12)])
-                polygon(s,(77,122,115),[(x+43,y),(x+82,y-21),(x+75,y+23)])
-                circle(s,GOLD,(x-30*scale,y-9),4)
-            else:
-                pg.draw.ellipse(s,(37,71,82),pg.Rect(x-47,y-18,94,39));line(s,CYAN,(x-38,y-4),(x+45,y-4),3)
-                rect(s,(198,205,178),(x-16,y-37,31,24),5);circle(s,CYAN,(x,y-25),6)
-            return
-        polygon(s,wood,[(x-52*scale,y-8),(x+59*scale,y-8),(x+35*scale,y+23*scale),(x-37*scale,y+23*scale)])
-        for n in range(5):line(s,(193,148,86),(x-32*scale+n*15*scale,y-5),(x-25*scale+n*12*scale,y+15*scale),2)
-        line(s,(194,164,109),(x,y-7),(x,y-91*scale),3)
-        polygon(s,(225,208,157) if not enemy else (177,175,143),[(x+4,y-87*scale),(x+4,y-17),(x+47*scale,y-22)])
-        if self.kind=='naval':rect(s,(38,48,51),(x+23,y-17,48*scale,9),3)
-        else:line(s,(133,109,75),(x+23,y-17),(x+53,y-32),3)
-        for n in range(3):rect(s,(55,52,44),(x-27+n*22,y+2,10,8),1)
-        line(s,(136,119,78),(x-42,y-7),(x,y-91*scale),1)
-        line(s,(136,119,78),(x+46,y-7),(x,y-91*scale),1)
-        if not enemy:
-            circle(s,(203,163,120),(x-24,y-43),7)
-            rect(s,(211,212,180),(x-31,y-36,15,23),3)
-            polygon(s,(188,87,65),[(x-30,y-34),(x-51,y-29),(x-32,y-25)])
-        elif self.kind=='naval':
-            rect(s,(42,101,64),(x+4,y-91*scale,30,20))
-            polygon(s,(216,178,76),[(x+19,y-89*scale),(x+31,y-81*scale),(x+19,y-73*scale),(x+7,y-81*scale)])
-        for n in range(3):line(s,(119,179,181),(x-45+n*16,y+29+n*4),(x+25+n*13,y+29+n*4),1)
+        from .naval_art import draw_vessel
+        draw_vessel(s,self.kind,x,y,self.time,enemy,boss,
+                    self.boss_hit if boss else 0 if enemy else self.hit_reaction,
+                    0 if enemy else self.invincible,self.hp)
 
     def draw(self,game):
         s=game.world_canvas;view=game.viewport_width;cam=max(0,min(self.width-view,self.x-320));s.fill((50,92,112))
@@ -112,7 +97,9 @@ class SeaJourney:
                 x=(n*170-cam*.35+self.time*13+y)%(view+140)-100;line(s,(80,145,157),(x,y),(x+55,y),2)
         for i,(x,y) in enumerate(self.cargo):
             if i not in self.collected:
-                rect(s,(181,142,78),(x-cam-15,y-20,30,30),4);text(s,'VÍVERES',(x-cam,y-40),11,GOLD,True,'center')
+                from .naval_art import cargo_image
+                s.blit(cargo_image(),(round(x-cam-33),round(y-35)))
+                text(s,'VÍVERES',(x-cam,y-48),11,GOLD,True,'center')
         for i,e in enumerate(self.enemies):
             if i not in self.defeated and -150<e.centerx-cam<view+150:self.boat(s,e.centerx-cam,e.centery,True)
         if self.boss_hp and 5800-cam<view+120:
@@ -132,6 +119,7 @@ class SeaJourney:
         text(s,title,(35,20),26,PAPER,True)
         objectives=('Recupera 3 cargas y llega a la primera boya','Despeja 2 ecos acuáticos y alcanza la segunda boya','Alcanza el faro y prepara el paso del convoy','Libera el guardián naval y llega al muelle')
         text(s,objectives[self.phase],(35,61),18,CYAN)
+        if self.hit_reaction:text(s,'IMPACTO · −1 CASCO',(640,124),22,(255,158,127),True,'center')
         text(s,f'CASCO {self.hp}/6 · HISTORIA {self.phase}/3',(1205,121),16,GOLD,True,'topright')
         game.button('II',(1200,20,55,53),lambda:setattr(self,'paused',True),small=True)
         if game.touch_enabled() and not self.quiz and not self.paused:game.draw_touch()
@@ -168,7 +156,7 @@ class SeaUI:
         self.save.capture(w)
         if not resume:self.sea_origin=dict(level=w.level_id,x=w.player.rect.x,y=w.player.rect.y,hp=w.player.hp)
         state=self.save.data['voyage_progress'].get(str(w.level_id),{})
-        self.voyage=SeaJourney(w.level_id,w.mechanic.kind,w.difficulty,state)
+        self.voyage=SeaJourney(w.level_id,w.mechanic.kind,w.difficulty,state,self.save.effective_upgrades())
         self.set_state('voyage');self.persist_voyage();self.audio.play('portal')
 
     def persist_voyage(self):
@@ -178,7 +166,7 @@ class SeaUI:
 
     def resume_voyage(self):
         origin=self.save.data.get('sea_session')
-        if not isinstance(origin,dict) or type(origin.get('level')) is not int or not 0<=origin['level']<36:return False
+        if not isinstance(origin,dict) or type(origin.get('level')) is not int or not 0<=origin['level']<TOTAL_LEVELS:return False
         self.sea_origin=origin;self.load(*divmod(origin['level'],3),restore=True)
         if self.world.mechanic.kind not in SEA_KINDS:self.save.data['sea_session']=None;return False
         self.start_voyage(True);return True

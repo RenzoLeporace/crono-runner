@@ -39,6 +39,12 @@ El panel Historia lista tres fragmentos, tres puestos de decisión, aplicación 
 
 Obligado exige mantener abajo en dos baterías señaladas para coordinar la defensa. Sus cadenas no son puentes transitables. En Nilo, mareas y Brown, el puesto del barco abre un nivel acuático independiente; su progreso se conserva y vuelve al origen al terminar. Estos niveles contienen tres decisiones contextualizadas. Las recompensas de saber, mejora de puntuación y sello histórico hacen que aprender también ayude a jugar.
 
-Las primeras respuestas a archivos dan saber para 12 habilidades. El primer sello de misión da 20 ecos y la primera travesía marítima 25. Las repeticiones no duplican esos premios. La práctica docente permite recorrer todo sin alterar premios ni clasificación reales.
+Las primeras respuestas a archivos dan saber para 13 habilidades. El primer sello de misión da 20 ecos y la primera travesía marítima 25. Las repeticiones no duplican esos premios. La práctica docente permite recorrer todo sin alterar premios ni clasificación reales.
 
-Para un grupo que necesite ayuda con controles usa Tutorial y asistencia mínima. En iPhone, la edición web es individual y experimental; para salas de aula utiliza Windows/Android. El contenido y la actividad deben revisarse previamente con el criterio curricular del docente.
+Para un grupo que necesite ayuda con controles usa Tutorial y asistencia mínima. La entrega actual es Windows/Android; la versión iOS se retiró. El contenido y la actividad deben revisarse previamente con el criterio curricular del docente.
+
+## Guerra Fría y misión lunar
+
+La nueva época va después de las guerras mundiales y antes de Actualidad. Compara fronteras, experiencias civiles, carrera espacial y cambios de 1989–1991. En la Luna no hay enemigos ni jefe: el alumnado necesita planificar saltos con gravedad reducida y menor control aéreo, reunir tres componentes y reparar el módulo de Crono. Esa avería es ficción, no un fallo atribuido a Apolo 11. El traje del nivel es equipo de misión; la skin permanente sigue requiriendo su desbloqueo.
+
+Pide anticipar un salto, comprobar el resultado y explicar la diferencia entre masa y peso. La aceleración lunar se aproxima a 1/6 de la terrestre; el impulso del traje se ajusta para mantener una experiencia jugable. El simulador no representa todas las condiciones de la superficie lunar.

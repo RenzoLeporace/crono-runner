@@ -48,20 +48,21 @@ class SchoolSettingsUI:
     def preview_import(self):
         from .mobile import import_bank
         if import_bank(self.preview_native_bank):return
-        from .question_bank import validate_record
+        from .question_bank import validate_record,QuestionBank
         try:
             path=Path(self.exchange_path.value.strip())
             if path.stat().st_size>4_000_000:raise ValueError('El archivo supera 4 MB.')
             document=json.loads(path.read_text(encoding='utf-8-sig'))
             if not isinstance(document,dict) or not isinstance(document.get('questions'),list):raise ValueError('Falta una lista questions en el JSON.')
             records=[validate_record(r) for r in document['questions']]
+            records=QuestionBank.migrate(records,document.get('version',5))
             if len(records)>10000 or len({r['id'] for r in records})!=len(records):raise ValueError('Hay IDs duplicados o demasiadas preguntas.')
             self.bank.validate_pools(records);self.exchange_preview=records
             self.exchange_message=f'Vista previa válida: {len(records)} preguntas, {len({r["topic"] for r in records})} temas. Aplicar reemplazará el banco local y creará un respaldo.'
         except (OSError,ValueError,TypeError,KeyError) as error:
             self.exchange_preview=None;self.exchange_message=str(error)
     def preview_native_bank(self,result):
-        from .question_bank import validate_record
+        from .question_bank import validate_record,QuestionBank
         self.exchange_preview=None
         if 'text' not in result:
             self.exchange_message=result.get('error','Importación cancelada.');return
@@ -70,6 +71,7 @@ class SchoolSettingsUI:
             if not isinstance(document,dict) or not isinstance(document.get('questions'),list):raise ValueError('Falta una lista questions en el JSON.')
             if len(document['questions'])>10000:raise ValueError('Demasiadas preguntas: máximo 10000.')
             records=[validate_record(r) for r in document['questions']]
+            records=QuestionBank.migrate(records,document.get('version',5))
             self.bank.validate_pools(records)
             if len({r['id'] for r in records})!=len(records):raise ValueError('IDs repetidos.')
             self.exchange_preview=records;self.exchange_message=f'Archivo Android válido: {len(records)} preguntas. Aplicar crea un respaldo.'
@@ -175,7 +177,7 @@ class SchoolSettingsUI:
         self.school.delete(self.school.active['id']);self.activate_profile(self.school.data['active'])
         self.teacher_authenticated=False;self.delete_field.set_value('');self.set_state('menu')
     def preview_shared_bank(self):
-        from .question_bank import validate_record
+        from .question_bank import validate_record,QuestionBank
         try:
             records=[validate_record(r) for r in self.shared_activity['bank']]
             self.bank.validate_pools(records)

@@ -86,6 +86,10 @@ class LearningUI:
         self.open_panel('heritage')
 
     def interact(self):
+        if self.tutorial_active and self.tutorial_step==4:
+            target=self.tutorial_target();nearby=self.world.near_station()
+            if target and nearby and nearby[2]==target[2]:
+                self.open_lesson(target[2]);return
         if self.expansion_interact():return
         from .heritage import near_site
         site=near_site(self.world)
@@ -122,6 +126,8 @@ class LearningUI:
         if choice==self.question.correct:
             self.quiz_reward=self.save.answer(self.quiz_topic)
             self.world.answered.add(self.quiz_topic)
+            if self.tutorial_active and self.tutorial_step==4 and self.quiz_topic==self.tutorial_topic:
+                self.tutorial_lesson_answered=True
             self.quiz_mode='correct'
             self.audio.play('shard')
         else:

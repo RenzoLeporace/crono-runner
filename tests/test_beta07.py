@@ -48,26 +48,26 @@ class Beta07Tests(unittest.TestCase):
     def test_curriculum_complete_valid_random_and_teacher_migration(self):
         from collections import Counter
         rows=builtin_records();counts=Counter((q['topic'],q['band']) for q in rows)
-        self.assertEqual(len(rows),1296);self.assertEqual(len(counts),216);self.assertEqual(set(counts.values()),{6})
-        self.assertEqual(len({q['id'] for q in rows}),1296)
+        self.assertEqual(len(rows),1656);self.assertEqual(len(counts),276);self.assertEqual(set(counts.values()),{6})
+        self.assertEqual(len({q['id'] for q in rows}),1656)
         for row in rows:validate_record(row)
         self.assertTrue({'choice','source','image','reason','chronology'}<={q.get('kind','choice') for q in rows})
         old=[deepcopy(q) for q in rows if q['topic']<54 and q['id']<5000000]
         old[0]['prompt']='Pregunta personalizada conservada'
         path=self.root/'bank.json';path.write_text(json.dumps(dict(version=3,questions=old)),encoding='utf-8')
         bank=QuestionBank(path);self.assertFalse(bank.warning);self.assertEqual(bank.get(0)['prompt'],old[0]['prompt'])
-        self.assertEqual(len(bank.records),1296)
+        self.assertEqual(len(bank.records),1656)
 
     def test_map_order_and_every_curiosity_unique(self):
         from crono.curiosities import MAP_CURIOSITIES
-        self.assertEqual(len(set(DISPLAY_LEVEL_IDS)),36);self.assertEqual(chapter_levels(7),DLC_LEVEL_IDS)
+        self.assertEqual(len(set(DISPLAY_LEVEL_IDS)),46);self.assertEqual(chapter_levels(7),DLC_LEVEL_IDS)
         self.assertEqual(successor(22),27);self.assertEqual(successor(27),23)
         seen=[]
         for level in DISPLAY_LEVEL_IDS:
             w=World(*divmod(level,3));self.assertEqual(len(w.data['cultural_sites']),1)
             seen.append(w.data['cultural_sites'][0][2]);self.assertEqual(seen[-1],MAP_CURIOSITIES[level])
             self.assertEqual(len(set(w.mechanic.devices)),3)
-        self.assertEqual(len(set(seen)),36)
+        self.assertEqual(len(set(seen)),46)
 
     def test_practice_cannot_consume_real_progress_or_currency(self):
         w=World(7,1);w.echoes={0,1,2};w.shards={0,1};self.save.data['practice']=True
@@ -95,10 +95,10 @@ class Beta07Tests(unittest.TestCase):
         from crono.journeys import RESCUES
         self.assertEqual(len(CATALOG),60);self.assertFalse(earned(self.save.data))
         d=self.save.data
-        d.update(records={str(i):{'score':1000} for i in range(36)},fragments_by_level={str(i):[0,1,2] for i in range(36)},
-            curiosities_seen=list(MAP_CURIOSITIES),banked_echoes=[f'{i}:{n}' for i in range(36) for n in range(48)],
-            solved=list(range(72)),upgrades=[u['id'] for u in UPGRADES],rescued_ids=list(RESCUES),bonus_unlocked=list(range(28,33)),
-            rifts_completed=[33,34,35],mechanics_completed=list(range(36)),purchased_skins=['granadero','marinero','escriba'],
+        d.update(records={str(i):{'score':1000} for i in range(46)},fragments_by_level={str(i):[0,1,2] for i in range(46)},
+            curiosities_seen=list(MAP_CURIOSITIES),banked_echoes=[f'{i}:{n}' for i in range(46) for n in range(48)],
+            solved=list(range(92)),upgrades=[u['id'] for u in UPGRADES],rescued_ids=list(RESCUES),bonus_unlocked=list(range(28,33)),
+            rifts_completed=[33,34,35],mechanics_completed=list(range(46)),purchased_skins=['granadero','marinero','escriba'],
             skin_cards_seen=['granadero','marinero','escriba'],metrics=dict(stomp_kills=5,dash_kills=5,shot_kills=10,
                 defeated_kinds=['walker','hopper','flyer','sentry','charger','armored'],defeated_boss_eras=list(range(9)),
                 boss_with_lesson=True,boss_with_two_lessons=True,level_without_death=True,boss_without_death=True))
@@ -108,6 +108,7 @@ class Beta07Tests(unittest.TestCase):
         self.assertEqual(active,without+1);self.assertTrue(available(self.save,'cronista'))
 
     def test_all_field_challenges_apply_physics_and_persist(self):
+        # New delivery, catalogue and lunar challenges have their own 0.9 tests.
         for level in range(36):
             with self.subTest(level=level):
                 w=World(*divmod(level,3));w.enemies=[];w.hazards=[];m=w.mechanic;f=m.field
@@ -224,7 +225,7 @@ class Beta07InterfaceTests(unittest.TestCase):
 
     def test_teacher_practice_unlocks_master_and_returns_from_locked_bonus(self):
         g=self.g;g.teacher_authenticated=True;g.toggle_practice();g.load(9,2);g.equip_skin('astronauta')
-        self.assertIn('chronista',g.world.upgrades);self.assertTrue(all(g.save.can_enter(i) for i in range(36)))
+        self.assertIn('chronista',g.world.upgrades);self.assertTrue(all(g.save.can_enter(i) for i in range(46)))
         g.toggle_practice();self.assertEqual(g.world.level_id,0);self.assertEqual(g.save.data['skin'],'crono');self.assertFalse(g.save.data['records'])
 
     def test_first_attempt_and_reflection_csv_are_reconstructible(self):
@@ -252,7 +253,7 @@ class Beta07InterfaceTests(unittest.TestCase):
     def test_android_import_bom_invalid_preview_and_record_limit(self):
         g=self.g;records=builtin_records()
         g.preview_native_bank(dict(text='\ufeff'+g.bank.serialise(records)))
-        self.assertEqual(len(g.exchange_preview),1296)
+        self.assertEqual(len(g.exchange_preview),1656)
         g.preview_native_bank(dict(text='[]'));self.assertIsNone(g.exchange_preview)
         g.preview_native_bank(dict(text=json.dumps(dict(questions=[{}]*10001))))
         self.assertIsNone(g.exchange_preview);self.assertIn('10000',g.exchange_message)

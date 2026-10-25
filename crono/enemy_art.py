@@ -1,5 +1,6 @@
 """Eight silhouette families; historical creatures/objects transformed by the clock."""
 import math
+from copy import copy
 import pygame as pg
 from .art import rect,line,circle,polygon,glow,text,mix,PAPER,INK,GOLD,W
 from .visuals import palette_for
@@ -8,7 +9,7 @@ FAMILY_NAMES=('Reptiles del Cretácico','Fauna de la estepa','Hoplitas y bronce'
               'Autómatas y máquinas de vapor','Infantería y blindajes','Robots bípedos y drones','Argentina · figuras históricas',
               'Guardias del Nilo y criaturas de ficción')
 
-def draw_enemy(s,e,camera,t,era,stage=0):
+def _draw_enemy(s,e,camera,t,era,stage=0):
     if not e.alive:
         return
     x,y=e.rect.centerx-camera,e.rect.bottom
@@ -38,6 +39,7 @@ def draw_enemy(s,e,camera,t,era,stage=0):
             line(s,PAPER,(x-12,y-42),(x+13,y-42),2);circle(s,(48,63,66),(x,y-28),5)
         return
     if era==0:
+        body=((194,117,67),(97,120,169),(91,154,170))[stage%3];accent=(249,210,134);dark=(44,35,44)
         # Raptors stand on two legs; armored animals have low shells.
         if e.kind=='flyer':
             for side in (-1,1):
@@ -169,3 +171,21 @@ def draw_enemy(s,e,camera,t,era,stage=0):
     if e.max_hp>1:
         for n in range(e.max_hp):circle(s,accent if n<e.hp else dark,(x+(n-(e.max_hp-1)/2)*8,y-78),2)
     if e.hit_flash:circle(s,PAPER,(x,y-26),26,2)
+
+
+def draw_enemy(s,e,camera,t,era,stage=0):
+    if not e.alive or not -110<e.rect.centerx-camera<s.get_width()+110:return
+    # Cache animation frames on the enemy: one blit per frame even on mobile.
+    key=(int(t*12),e.hp,e.max_hp,e.direction,e.mode,e.timer<.5,bool(e.hit_flash),getattr(e,'show_label',False),era,stage)
+    if getattr(e,'_contrast_key',None)!=key:
+        proxy=copy(e);proxy.rect=e.rect.copy();proxy.rect.centerx=105;proxy.rect.bottom=150
+        picture=pg.Surface((210,180),pg.SRCALPHA)
+        _draw_enemy(picture,proxy,0,int(t*12)/12,era,stage)
+        mask=pg.mask.from_surface(picture,120)
+        dark=mask.to_surface(setcolor=(20,30,38,255),unsetcolor=(0,0,0,0))
+        light=mask.to_surface(setcolor=(245,218,160,255),unsetcolor=(0,0,0,0))
+        outlined=pg.Surface(picture.get_size(),pg.SRCALPHA)
+        for dx,dy in ((-2,0),(2,0),(0,-2),(0,2),(-2,-2),(2,2),(-2,2),(2,-2)):outlined.blit(dark,(dx,dy))
+        for dx,dy in ((-1,0),(1,0),(0,-1),(0,1)):outlined.blit(light,(dx,dy))
+        outlined.blit(picture,(0,0));e._contrast_picture=outlined;e._contrast_key=key
+    s.blit(e._contrast_picture,(round(e.rect.centerx-camera-105),round(e.rect.bottom-150)))

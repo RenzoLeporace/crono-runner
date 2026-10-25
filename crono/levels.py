@@ -65,9 +65,15 @@ ERAS.extend([
 ])
 
 
+for title in ('PAÍSES Y MEMORIAS','EL SABER EN MOVIMIENTO','REDES DE COOPERACIÓN','GUERRA FRÍA'):
+    ERAS.append(Era(title,'Nuevas rutas históricas','Historias para investigar',
+        'Recupera fuentes, contrasta relatos y completa una misión contextual.',
+        (41,62,79),(198,185,146),(108,130,122),(54,82,86),(66,74,69),(191,177,135),(239,195,111),'journey'))
+
+
 def level_data(index,stage=0):
     from .education import STAGES
     from .routes import build_route
-    if not 0<=index<len(ERAS) or not 0<=stage<3:
+    if not 0<=index<len(ERAS) or not 0<=stage<3 or index*3+stage>=len(STAGES):
         raise ValueError('Época o mapa fuera de rango')
     return build_route(index,stage,STAGES[index*3+stage])

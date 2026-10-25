@@ -6,6 +6,7 @@ from .education import STAGES,LESSONS,AGE_BANDS
 from .learning_ui import wrapped
 from .question_bank import QuestionBank,builtin_records
 from .text_field import TextField
+from .campaign import chapter_levels
 from .campaign import ERA_LABELS,TOTAL_ERAS,TOTAL_LEVELS,DIFFICULTIES,level_label,CHAPTER_ORDER,DISPLAY_LEVEL_IDS
 
 
@@ -100,7 +101,7 @@ class TeacherUI:
         self.button('Época: '+('todas' if self.teacher_era<0 else eras[self.teacher_era]),(65,126,222,41),
                     lambda:self.cycle_teacher_filter('teacher_era',TOTAL_ERAS),small=True,arrow=False)
         self.button('Mapa: '+('todos' if self.teacher_stage<0 else str(self.teacher_stage+1)),(301,126,192,41),
-                    lambda:self.cycle_teacher_filter('teacher_stage',3),small=True,arrow=False)
+                    lambda:self.cycle_teacher_filter('teacher_stage',len(chapter_levels(self.teacher_era)) if self.teacher_era>=0 else 4),small=True,arrow=False)
         self.button('Edad: '+('todas' if self.teacher_band<0 else ('6–9','10–14','15+')[self.teacher_band]),(507,126,251,41),
                     lambda:self.cycle_teacher_filter('teacher_band',3),small=True,arrow=False)
         self.teacher_query.draw(s,(65,182,693,43),'Buscar en preguntas, respuestas o explicaciones…',16)
@@ -158,7 +159,7 @@ class TeacherUI:
         if question_id is None:
             era=max(0,self.teacher_era)
             stage=max(0,self.teacher_stage)
-            draft=dict(id=None,topic=(era*3+stage)*2,band=max(0,self.teacher_band) if self.teacher_band>=0 else self.save.data['age_band'],
+            draft=dict(id=None,topic=chapter_levels(era)[stage%len(chapter_levels(era))]*2,band=max(0,self.teacher_band) if self.teacher_band>=0 else self.save.data['age_band'],
                        prompt='',options=['','',''],correct=0,explanation='',source='')
         else:
             draft=self.bank.get(question_id)
@@ -271,9 +272,9 @@ class TeacherUI:
             text(s,'Elegir mapa para esta pregunta',(66,77),30,PAPER,True,serif=True)
             for row,n in enumerate(DISPLAY_LEVEL_IDS):
                 meta=STAGES[n]
-                x=66+row%4*294
-                y=128+row//4*50
-                self.button(f'{level_label(n)} · {meta.name}',(x,y,280,45),lambda value=n:self.pick_teacher_map(value),
+                x=66+row%5*236
+                y=128+row//5*45
+                self.button(f'{level_label(n)} · {meta.name}',(x,y,224,40),lambda value=n:self.pick_teacher_map(value),
                             primary=n==level_id,small=True,arrow=False,wrap=True)
             self.button('Volver',(66,602,218,42),lambda:setattr(self,'teacher_picker',False),small=True)
         if self.teacher_discard:

@@ -1,3 +1,4 @@
+from .campaign import TOTAL_LEVELS
 """Exploration missions, reversible rift excursions and persistent rewards."""
 import pygame as pg
 from .art import text,tracked,rect,line,circle,diamond,polygon,PAPER,CYAN,GOLD,MUTED
@@ -114,9 +115,22 @@ class ExpansionUI:
         wrapped(s,m.objective,(65,150),1110,24,GOLD,leading=34)
         wrapped(s,m.note,(65,231),1110,self.save.data['reading_size'],PAPER,leading=31)
         wrapped(s,m.field.description(),(65,310),1110,16,GOLD)
-        text(s,'Elige la operación que corresponde a este paso:',(65,347),24,CYAN,True)
-        for i,operation in enumerate(m.operations):
-            self.button(operation,(65,401+i*65,1140,55),lambda n=i:self.activity_answer(n),small=True)
+        maritime=m.kind in ('naval','canal','tide')
+        resolved=self.activity_index in m.state['activated']
+        if resolved:
+            text(s,'Este puesto ya está resuelto.',(65,347),24,CYAN,True)
+            wrapped(s,m.operations[self.activity_index],(65,401),1110,23,PAPER)
+            if maritime and self.activity_index==1:
+                label='Repetir travesía · sin otro premio' if m.state.get('sea_complete') else 'Retomar la travesía marítima'
+                self.button(label,(65,480,1140,65),self.start_voyage,True,small=True)
+        else:
+            if maritime:
+                from .sea_fieldwork import shore_question
+                prompt,operations=shore_question(m.kind,self.activity_index)
+            else:prompt,operations='Elige la operación que corresponde a este paso:',m.operations
+            wrapped(s,prompt,(65,347),1120,22,CYAN,True,leading=26)
+            for i,operation in enumerate(operations):
+                self.button(operation,(65,415+i*62,1140,54),lambda n=i:self.activity_answer(n),small=True,wrap=True)
         wrapped(s,self.activity_message,(65,608),1100,17,GOLD)
         self.button('Volver a explorar',(65,655,320,48),lambda:self.set_state('play'),small=True)
 
@@ -144,7 +158,7 @@ class ExpansionUI:
         if not self.save.data['practice']:
             self.save.data['active_rift']=None;self.save.data['rift_return']=None;self.save.data['rift_finished']=False;self.save.write()
         self.rift_return_memory=None
-        if not isinstance(origin,dict) or type(origin.get('level')) is not int or not 0<=origin['level']<36:
+        if not isinstance(origin,dict) or type(origin.get('level')) is not int or not 0<=origin['level']<TOTAL_LEVELS:
             self.set_state('chapters');return
         self.load(*divmod(origin['level'],3),restore=True)
         p=self.world.player
@@ -184,7 +198,7 @@ class ExpansionUI:
         self.world.upgrades=self.save.effective_upgrades();self.world.player.configure(self.world.upgrades)
 
     def skins(self):
-        from .skins import SKINS,available
+        from .skins import SKINS,available,unlocked_for_purchase,SKIN_MAPS
         s=self.canvas;s.fill((13,27,37));text(s,'El guardarropa del tiempo',(62,40),41,PAPER,True,serif=True)
         text(s,f'{self.save.data["coins"]} ecos disponibles',(1210,96),24,GOLD,True,'topright')
         text(s,'Cada eco pequeño se guarda una sola vez. Explorar compra historia y nuevas apariencias.',(65,117),19,MUTED)
@@ -196,8 +210,8 @@ class ExpansionUI:
             old=getattr(self.world.player,'skin','crono');self.world.player.skin=item['id']
             self.artist.player(s,self.world.player,0,self.time,1,(x+39,y+113));self.world.player.skin=old
             wrapped(s,item['name'],(x+83,y+15),173,19,PAPER,True,leading=25)
-            label='Equipar' if available(self.save,item['id']) else '60 logros' if item['id']=='cronista' else f'{item["cost"]} ecos'
-            self.button(label,(x+82,y+83,171,50),lambda k=item['id']:self.skin_action(k),enabled=available(self.save,item['id']) or item['id']!='cronista',small=True,arrow=False)
+            label='Equipar' if available(self.save,item['id']) else '60 logros' if item['id']=='cronista' else 'Completa su mapa' if not unlocked_for_purchase(self.save,item['id']) else f'{item["cost"]} ecos'
+            self.button(label,(x+82,y+83,171,50),lambda k=item['id']:self.skin_action(k),enabled=available(self.save,item['id']) or item['id']!='cronista' and unlocked_for_purchase(self.save,item['id']),small=True,arrow=False)
             self.button('Ficha',(x+10,y+118,65,30),lambda k=item['id']:self.open_skin_card(k),small=True,arrow=False)
         self.button('Volver',(65,638,240,50),lambda:self.set_state(self.reward_return),True,small=True)
         self.button('Logros',(330,638,240,50),lambda:self.open_rewards('achievements'),small=True)
@@ -225,5 +239,9 @@ class ExpansionUI:
         old=getattr(self.world.player,'skin','crono');self.world.player.skin=item['id']
         self.artist.player(s,self.world.player,0,self.time,3,(230,466));self.world.player.skin=old
         wrapped(s,item['history'],(430,220),760,self.save.data['reading_size']+2,PAPER,leading=35)
+        from .skins import SKIN_MAPS,unlocked_for_purchase
+        if item['id'] in SKIN_MAPS:
+            from .education import STAGES
+            wrapped(s,'Se habilita al completar: '+STAGES[SKIN_MAPS[item['id']]].name,(430,155),760,18,CYAN)
         if item['url']:self.button('Fuente de la ficha',(430,533,430,54),lambda:webbrowser.open(item['url']),small=True)
         self.button('Volver al guardarropa',(65,635,420,53),lambda:self.set_state('skins'),True)

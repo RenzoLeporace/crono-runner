@@ -31,6 +31,9 @@ def vessel(side='rio'):
 
 @lru_cache(maxsize=9)
 def scene_image(level):
+    if level>=36:
+        from .country_art import scene
+        return scene(level)
     p=Painter(1080,430);n=level-27
     if n in (0,2):
         ship(p,125,327,.95,'rio' if n==0 else 'imperial');ship(p,630,351,.8,'neutral' if n==0 else 'imperial')
@@ -103,17 +106,26 @@ def scene_image(level):
         p.l(PAPER,(699,416),(699,226),3);p.r((148,172,178),(700,227,66,41),2)
     return p.image()
 
+@lru_cache(maxsize=12)
+def sky(index,stage):
+    from .visuals import palette_for
+    pal=palette_for(index,stage);level=index*3+stage;s=pg.Surface((W,H))
+    for y in range(H):line(s,mix(pal.sky,pal.horizon,min(1,y/590)),(0,y),(W,y))
+    if level in (35,44):
+        for n in range(65):circle(s,(186,195,196),((n*143)%W,107+(n*67)%270),1)
+        circle(s,(91,151,183),(1020,176),39);polygon(s,(154,184,154),[(1001,151),(1022,148),(1040,169),(1027,191),(1008,183)])
+    for y in range(584,H):line(s,mix(pal.near,(13,24,38),(y-584)/136),(0,y),(W,y))
+    return s
+
+
 def background(s,index,stage,camera,t):
     from .visuals import palette_for
     pal=palette_for(index,stage);level=index*3+stage
-    for y in range(H):line(s,mix(pal.sky,pal.horizon,min(1,y/590)),(0,y),(W,y))
-    if level==35:
-        for n in range(65):circle(s,(186,195,196),((n*143)%W,107+(n*67)%270),1)
-        circle(s,(91,151,183),(1020,176),39);polygon(s,(154,184,154),[(1001,151),(1022,148),(1040,169),(1027,191),(1008,183)])
-    else:
+    s.blit(sky(index,stage),(0,0))
+    if level not in (35,44):
         for layer in range(2):
             off=camera*(.035+layer*.04)
-            for n in range(int(off//510)-1,int(off//510)+4):
+            for n in range(int(off//510)-1,int(off//510)+math.ceil(W/510)+1):
                 x=n*510-off;h=80+(n*47)%125
                 if level in (27,29,30,33):
                     polygon(s,pal.far if not layer else pal.near,[(x-80,488),(x+140,469-(n%3)*6),(x+310,480),(x+560,488),(x+560,584),(x-80,584)])
@@ -123,21 +135,24 @@ def background(s,index,stage,camera,t):
         rect(s,mix(pal.near,(39,111,133),.4),(0,472,W,112))
         for n in range(30):
             x=(n*97-camera*.11+t*13)%W;y=482+n%10*10;line(s,mix(pal.horizon,pal.far,.4),(x,y),(x+48,y),1)
-    for y in range(584,H):line(s,mix(pal.near,(13,24,38),(y-584)/136),(0,y),(W,y))
 
 def landscape(s,world,camera,t):
+    if world.level_id>=36:
+        from .country_art import landscape as new_landscape
+        new_landscape(s,world,camera,t)
+        text(s,DATES[world.level_id-27].upper(),(s.get_width()-25,119),12,GOLD,True,'topright');return
     level=world.level_id;off=camera*.4;focal=world.data['zones'][2][0]*.4+640
     img=scene_image(level);x=focal-off-540
     if -1080<x<W:s.blit(img,(int(x),143))
     if level in (27,29,30):
-        for n in range(int(off//600)-1,int(off//600)+4):
+        for n in range(int(off//600)-1,int(off//600)+math.ceil(W/600)+1):
             wx=n*600-off
             if abs(wx-(focal-off))<520:continue
             side='rio' if n%2 else 'imperial' if level==29 else 'neutral'
             s.blit(vessel(side),(int(wx),266))
     elif level not in (28,33,34,35):
         from .period_art import module
-        for n in range(int(off//311)-1,int(off//311)+7):
+        for n in range(int(off//311)-1,int(off//311)+math.ceil(W/311)+1):
             wx=n*311-off
             if abs(wx-(focal-off))<510:continue
             s.blit(module(combat_era(world.index,world.stage),0,n%6),(int(wx),206))
@@ -151,6 +166,9 @@ def landscape(s,world,camera,t):
 def tile(index,stage,w,h,seed,moving):
     from .period_art import tile as base_tile
     level=index*3+stage
+    if level==44:
+        from .moon_art import rock
+        return rock(w,h,seed,moving)
     base=1 if level==28 else combat_era(index,stage)
     if base==7:
         from .argentina_art import platform_tile

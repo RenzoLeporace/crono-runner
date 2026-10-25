@@ -75,7 +75,7 @@ class Save(Progression):
                 self.data['records']={str(int(k)*3 if legacy else int(k)):v for k,v in records.items()
                                       if str(k).isdigit() and 0<=int(k)<(5 if legacy else TOTAL_LEVELS) and isinstance(v,dict)}
             p=raw.get('progress')
-            if isinstance(p,dict) and type(p.get('index')) is int and p['index'] in (0,1,2,3,4,5,6,8):
+            if isinstance(p,dict) and type(p.get('index')) is int and type(p.get('stage',0)) is int and p['index']*3+p.get('stage',0) in MAIN_LEVEL_IDS:
                 self.data['progress']=dict(p)
                 stage=p.get('stage',0)
                 self.data['progress']['stage']=stage if type(stage) is int and 0<=stage<3 else 0
@@ -149,7 +149,7 @@ class Save(Progression):
             echoes=sorted(world.echoes),checkpoint=world.checkpoint,time=world.time,
             deaths=world.deaths,boss_deaths_start=world.boss_deaths_start,defeated=[i for i,e in enumerate(world.enemies) if not e.alive],
             enemy_hp=[e.hp if e.alive else 0 for e in world.enemies],boss_hp=world.boss.hp if world.boss else None,
-            mechanics=getattr(getattr(world,'mechanic',None),'state',{}),
+            traits=world.traits.payload(),mechanics=getattr(getattr(world,'mechanic',None),'state',{}),
             curiosities=sorted(getattr(world,'curiosities_this_run',set())),
             rescues=sorted(getattr(world,'rescues_this_run',set())),lowest_difficulty=getattr(world,'lowest_difficulty',world.difficulty))
         slot=progress_slot(world.level_id)
@@ -171,6 +171,7 @@ class Save(Progression):
         lowest=p.get('lowest_difficulty',world.difficulty)
         world.lowest_difficulty=min(world.difficulty,lowest) if type(lowest) is int and 0<=lowest<=2 else world.difficulty
         if hasattr(world,'mechanic') and isinstance(p.get('mechanics'),dict):world.mechanic.restore(p['mechanics'])
+        world.traits.restore(p.get('traits'))
         if p.get('layout_version')!=world.data['layout_version']:
             # Checkpoint/enemy IDs belonged to a different route. Keep learning,
             # upgrades and the three already collected fragments, restart safely.

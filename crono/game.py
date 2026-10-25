@@ -22,7 +22,8 @@ from .mobile_ui import MobileUI
 from .sea_journey import SeaUI
 from .story_ui import StoryUI
 from .viewport import ViewportUI
-from .campaign import MAIN_ERAS,MAIN_LEVELS,TOTAL_LEVELS,DLC_START,ERA_LABELS,DIFFICULTIES,MAIN_ERA_IDS,CHAPTER_ORDER,rank,successor,final_level,unlocked,level_label,chapter_levels,is_rift,is_bonus,DLC_LEVEL_IDS
+from .campaign import chapter_for_level
+from .campaign import MAIN_LEVEL_IDS,MAIN_ERAS,MAIN_LEVELS,TOTAL_LEVELS,DLC_START,ERA_LABELS,DIFFICULTIES,MAIN_ERA_IDS,CHAPTER_ORDER,rank,successor,final_level,unlocked,level_label,chapter_levels,is_rift,is_bonus,DLC_LEVEL_IDS
 
 
 def duration(seconds):
@@ -46,7 +47,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.init_school_settings()
         self.fullscreen=self.save.data['fullscreen'] and not headless
         self.display=pg.display.set_mode((W,H),pg.FULLSCREEN if self.fullscreen else pg.RESIZABLE)
-        pg.display.set_caption('CRONO · Ecos del tiempo | Beta educativa 0.8')
+        pg.display.set_caption('CRONO · Ecos del tiempo | Beta educativa 0.9.1')
         icon=pg.Surface((48,48),pg.SRCALPHA)
         clock_icon(icon,24,24,19,CYAN)
         pg.display.set_icon(icon)
@@ -103,7 +104,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             pg.key.set_repeat()
 
     def load(self,index,stage=0,restore=False):
-        self.chapter_era=index
+        self.chapter_era=chapter_for_level(index*3+stage)
         self.world=World(index,stage,self.save.effective_upgrades(),self.save.data['solved'],self.save.combat_band())
         self.world.player.skin=self.save.data['skin']
         self.world.practice_mode=self.save.data['practice']
@@ -443,8 +444,9 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         clock_icon(s,48,41,19,CYAN,self.world.time*.4)
         tracked(s,'CRONO',(80,19),13,PAPER,3)
         text(s,f'{level_label(self.world.level_id)}  /  {self.world.data["meta"].name}',(80,43),13,MUTED)
-        count=4 if self.world.level_id in DLC_LEVEL_IDS else 3 if self.world.index>=9 else MAIN_ERAS
-        progress=DLC_LEVEL_IDS.index(self.world.level_id) if self.world.level_id in DLC_LEVEL_IDS else self.world.stage if self.world.index>=9 else MAIN_ERA_IDS.index(self.world.index)
+        chapter=chapter_for_level(self.world.level_id)
+        count=MAIN_ERAS if self.world.level_id in MAIN_LEVEL_IDS else 4 if self.world.level_id in DLC_LEVEL_IDS else 3
+        progress=MAIN_ERA_IDS.index(chapter) if self.world.level_id in MAIN_LEVEL_IDS else DLC_LEVEL_IDS.index(self.world.level_id) if self.world.level_id in DLC_LEVEL_IDS else self.world.stage
         for i in range(count):
             color=CYAN if i<=progress else (63,80,88)
             x=(557 if count==3 else 507)+i*25
@@ -498,6 +500,8 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         if not self.touch_enabled():
             self.button('U  Mejoras',(846,H-51,180,35),lambda:self.open_panel('workshop'),small=True,arrow=False)
             self.button('C  Cuaderno',(1040,H-51,206,35),lambda:self.open_panel('notebook'),small=True,arrow=False)
+        if self.world.message_time<=0 and not fighting:
+            text(s,self.world.traits.description(),(36,138),13,CYAN)
         station=self.world.near_station()
         from .heritage import near_site
         site=near_site(self.world)
@@ -535,7 +539,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         text(s,'CRONO',(58,100),116,PAPER,True,serif=True)
         tracked(s,'E C O S  D E L  T I E M P O',(66,229),17,GOLD,3)
         text(s,'El pasado te separa de tu hogar.',(66,284),22,PAPER)
-        text(s,'36 mapas · rescates, grietas y memorias para descubrir.',(66,318),16,MUTED)
+        text(s,'46 mapas · rescates, grietas y memorias para descubrir.',(66,318),16,MUTED)
         started=self.save.data['started']
         self.button('Continuar el viaje' if started else 'Comenzar el viaje',(66,411,350,52),
                     self.continue_game if started else lambda:self.load(0),True)
@@ -552,14 +556,14 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.age_switch(66,363)
         self.button('Expansiones · Argentina y Brasil',(850,549,360,49),lambda:self.set_state('dlc_menu'),True,small=True)
         line(s,(62,83,83),(66,640),(1214,640))
-        for i,label in enumerate(('ORÍGENES','DESHIELO','EGIPTO','GRECIA','MEDIEVO','INDUSTRIA','GUERRAS','PRESENTE')):
-            x=66+i*148
-            color=CYAN if unlocked(MAIN_ERA_IDS[i]*3,self.save.data['unlocked']) else (112,129,133)
+        for i,label in enumerate(('ORÍGENES','DESHIELO','EGIPTO','GRECIA','MEDIEVO','INDUSTRIA','GUERRAS','G. FRÍA','PRESENTE')):
+            x=66+i*130
+            color=CYAN if unlocked(chapter_levels(MAIN_ERA_IDS[i])[0],self.save.data['unlocked']) else (112,129,133)
             diamond(s,(x,669),5,color)
             tracked(s,label,(x+18,660),10,color,2)
             if i<MAIN_ERAS-1:
                 line(s,(57,77,78),(x+116,669),(x+132,669))
-        text(s,f'BETA EDUCATIVA 0.8   /   {len(self.bank.records)} preguntas   ·   F11 pantalla completa',(1212,32),11,MUTED,False,'topright')
+        text(s,f'BETA EDUCATIVA 0.9   /   {len(self.bank.records)} preguntas   ·   F11 pantalla completa',(1212,32),11,MUTED,False,'topright')
         text(s,'EL MUNDO PRIMIGENIO',(1045,604),11,CYAN,True,'center')
         text(s,'© 2026 Renzo Leporace · Todos los derechos reservados',(1212,699),11,MUTED,False,'bottomright')
         if self.confirm_new:
@@ -579,14 +583,15 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
     def intro(self):
         self.artist.scene(self.canvas,self.world,self.camera,self.time)
         self.dim(195)
-        era=ERAS[self.world.index]
-        tracked(self.canvas,f'{ERA_LABELS[self.world.index]} · MAPA {level_label(self.world.level_id)}',(88,118),13,CYAN,3)
+        era=ERAS[chapter_for_level(self.world.level_id)]
+        tracked(self.canvas,f'{ERA_LABELS[chapter_for_level(self.world.level_id)]} · MAPA {level_label(self.world.level_id)}',(88,118),13,CYAN,3)
         text(self.canvas,self.world.data['meta'].name,(85,164),43,PAPER,True,serif=True)
         from .journeys import date_for
         text(self.canvas,era.name+' · '+date_for(self.world.level_id),(88,233),14,GOLD,True)
         line(self.canvas,(66,92,95),(88,285),(710,285))
         wrapped(self.canvas,self.world.data['meta'].focus,(88,317),770,24,PAPER,True,leading=35)
         wrapped(self.canvas,self.world.data['route_name']+'. V abre el plano. E permite aprender; U abre las mejoras.',(88,390),770,16,MUTED,leading=25)
+        text(self.canvas,self.world.traits.description(),(88,450),13,GOLD)
         text(self.canvas,'Completa la misión histórica, comprende un archivo y reúne 3 fragmentos.',(88,478),16,CYAN)
         self.button('Entrar en este mapa',(88,519,344,57),self.begin,True)
         self.button('Volver',(449,519,157,57),self.to_menu,small=True)
@@ -605,14 +610,14 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         s=self.canvas
         self.artist.background(s,0,0,self.time)
         self.dim(220)
-        tracked(s,'24 MAPAS DE CAMPAÑA · 4 ARGENTINOS · 5 BONUS · 3 GRIETAS',(65,28),11,CYAN,3)
+        tracked(s,'27 MAPAS DE CAMPAÑA · ARGENTINA · BRASIL · 10 RESCATES · 3 GRIETAS',(65,28),11,CYAN,3)
         text(s,'Las huellas del tiempo',(62,61),39,PAPER,True,serif=True)
         text(s,'Cada ruta tiene desniveles, galerías y atajos. Argentina conserva su propio progreso.',(65,117),16,MUTED)
         for i,era_id in enumerate(CHAPTER_ORDER):
             label=ERA_LABELS[era_id]
             x=65+i%6*195
-            y=151+i//6*51
-            self.button(label,(x,y,185,44),lambda n=era_id:setattr(self,'chapter_era',n),primary=self.chapter_era==era_id,small=True,arrow=False)
+            y=146+i//6*40
+            self.button(label,(x,y,185,35),lambda n=era_id:setattr(self,'chapter_era',n),primary=self.chapter_era==era_id,small=True,arrow=False)
         era=self.chapter_era
         levels=chapter_levels(era)
         for position,level_id in enumerate(levels):
@@ -727,7 +732,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         tracked(s,'COORDENADAS ENCONTRADAS',(434,185),12,CYAN,3)
         text(s,'Memoria recuperada.' if self.world.index==7 else 'Estás en casa.',(640,275),76,PAPER,True,'center',True)
         text(s,'El presente ya no parece un lugar tan corriente.',(640,351),23,PAPER,False,'center')
-        text(s,f'36 mapas · {len(self.save.data["solved"])} archivos resueltos · {len(self.save.data["upgrades"])} mejoras',(640,394),17,CYAN,False,'center')
+        text(s,f'46 mapas · {len(self.save.data["solved"])} archivos resueltos · {len(self.save.data["upgrades"])} mejoras',(640,394),17,CYAN,False,'center')
         self.button('Volver a explorar',(464,483,352,55),lambda:self.set_state('chapters'),True)
         self.button('Inicio',(464,554,352,47),lambda:self.set_state('menu'),small=True)
         text(s,'CRONO · ECOS DEL TIEMPO',(640,658),13,CYAN,True,'center')
@@ -828,19 +833,14 @@ def font_width(value,size):
 def main():
     parser=argparse.ArgumentParser(description='CRONO · Ecos del tiempo')
     parser.add_argument('--headless',action='store_true',help='Render without opening a window')
-    parser.add_argument('--serve-ios',action='store_true',help='Host the packaged iPhone web version on the local network')
-    parser.add_argument('--port',type=int,default=8080)
     parser.add_argument('--capture',type=Path,help='Write a deterministic screenshot and exit')
     parser.add_argument('--scene',choices=['menu','play','intro','chapters','help','pause','complete','ending','quiz','workshop','notebook','bestiary','boss','settings','teacher','question_edit','scenarios','atlas','heritage','community','school_settings','accessibility','activity','achievements','skins','skin_card','credits','teacher_tools','story','dlc_menu','voyage'],default='menu')
     parser.add_argument('--aspect',type=float,default=16/9,help='Preview a real camera aspect ratio without stretching')
-    parser.add_argument('--era',type=int,choices=range(1,13),default=1)
+    parser.add_argument('--era',type=int,choices=range(1,17),default=1)
     parser.add_argument('--map',type=int,choices=range(1,4),default=1)
     parser.add_argument('--camera',type=float,default=0)
     parser.add_argument('--touch',action='store_true',help='Preview multitouch controls')
     args=parser.parse_args()
-    if args.serve_ios:
-        from .ios_host import run
-        run(args.port);return
     if args.headless:
         os.environ['SDL_VIDEODRIVER']='dummy'
         os.environ['SDL_AUDIODRIVER']='dummy'

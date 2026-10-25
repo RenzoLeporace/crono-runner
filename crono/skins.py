@@ -25,8 +25,25 @@ SKINS += (
  dict(id='cientifica',name='Ciencia del presente',cost=135,color=(218,225,216),history='Investigar implica registrar, comparar evidencias y revisar explicaciones. El traje reconoce el trabajo cooperativo en ciencia; su cuaderno y sus gafas son elementos ilustrativos del viaje.',url='https://www.nasa.gov/learning-resources/'),
 )
 
+SKINS+=(
+ dict(id='gaucha',name='Vestimenta gaúcha',cost=140,color=(143,93,65),history='La indumentaria tradicional gaúcha del sur de Brasil combina elementos como sombrero, pañuelo, faja y bombachas. Esta interpretación contemporánea reconoce una tradición regional diversa: no afirma que todas las personas de la Guerra de los Farrapos vistieran igual.',url='https://www.marinha.mil.br/comemch/revoltas'),
+ dict(id='infernal',name='Poncho de los Infernales',cost=140,color=(155,56,47),history='Los Infernales fueron una fuerza de línea vinculada con Güemes y la defensa del norte. El poncho salteño integra su memoria cultural. La apariencia es una interpretación, no el uniforme exacto de todos los participantes de la Guerra Gaucha.',url='https://www.argentina.gob.ar/noticias/guemes-lider-revolucionario'),
+ dict(id='arriero',name='Arriero de la cordillera',cost=115,color=(143,119,87),history='Arrieros, guías y trabajadores de transporte ayudaron a sostener rutas cordilleranas. Conocer pasos, cuidar animales y organizar cargas era parte de ese trabajo. La apariencia reconoce una labor colectiva y no representa a una persona concreta.',url='https://www.argentina.gob.ar/noticias/el-general-guemes-y-el-plan-continental-sanmartiniano'),
+ dict(id='cartografo',name='Cartógrafo del faro',cost=125,color=(70,124,145),history='Cartas, observación de costas y señales ayudaron a orientarse por el Mediterráneo. Este atuendo ficticio de estudioso invita a comparar instrumentos y saberes de distintas épocas sin suponer que todos los mapas eran iguales.',url='https://www.bibalex.org/fr/page/faq'),
+ dict(id='telegrafista',name='Telegrafista ferroviario',cost=120,color=(82,103,113),history='La coordinación ferroviaria dependió de señales y comunicaciones, además de vías y locomotoras. El uniforme de Crono es ilustrativo: los sistemas y oficios cambiaron entre regiones y momentos.',url='https://www.railwaymuseum.org.uk/objects-and-stories'),
+ dict(id='molinero',name='Oficio del molino',cost=95,color=(180,159,115),history='Moler granos fue un trabajo importante para la alimentación. Molinos de agua y de viento utilizaron fuentes de energía disponibles en su entorno; su distribución y propiedad variaron entre sociedades.',url='https://www.english-heritage.org.uk/visit/places/byland-abbey/history/'),
+)
+SKIN_MAPS=dict(granadero=28,marinero=29,escriba=24,ingeniera=13,sanitaria=32,astronauta=44,
+              paleontologo=1,glacial=3,agora=6,copista=11,corresponsal=15,cientifica=20,
+              gaucha=36,infernal=37,arriero=28,cartografo=30,telegrafista=31,molinero=9)
+
+def unlocked_for_purchase(save,key):
+    return save.data['practice'] or key in save.data['purchased_skins'] or str(SKIN_MAPS.get(key,-1)) in save.data['records']
+
+
 def buy_skin(save,key):
     item=next((s for s in SKINS if s['id']==key),None)
+    if not unlocked_for_purchase(save,key):return False
     if not item or key=='cronista' or key in save.data['purchased_skins'] or save.data['coins']<item['cost'] or save.data['practice']:return False
     save.data['coins']-=item['cost'];save.data['purchased_skins'].append(key)
     save.refresh_achievements();save.write();return True
@@ -80,6 +97,25 @@ def details(s,player,y):
         rect(s,(81,99,78),(27,y-11,26,12),4);line(s,(51,65,55),(25,y+2),(55,y+2),4)
         line(s,(93,72,51),(30,y+18),(49,y+39),5);rect(s,(137,105,64),(43,y+32,16,16),2)
         rect(s,(222,213,184),(46,y+35,10,6),1)
+    elif key in ('gaucha','infernal','arriero'):
+        col=(158,52,43) if key=='infernal' else (142,106,65) if key=='arriero' else (82,101,92)
+        rect(s,(68,56,48),(25,y-14,29,13),4);rect(s,(60,49,43),(18,y-2,44,5),2)
+        polygon(s,col,[(23,y+16),(50,y+16),(60,y+36),(40,y+44),(17,y+34)])
+        for yy in (24,31):line(s,(218,186,127),(23,y+yy),(50,y+yy+4),2)
+        line(s,(49,37,36),(38,y+15),(38,y+39),2)
+        if key=='gaucha':line(s,(196,76,52),(28,y+13),(48,y+18),4)
+        if key=='arriero':rect(s,(121,78,45),(16,y+29,14,19),3)
+    elif key in ('cartografo','telegrafista','molinero'):
+        if key=='cartografo':
+            polygon(s,(56,108,130),[(23,y+16),(50,y+16),(54,y+47),(21,y+47)])
+            rect(s,(230,211,157),(18,y+26,14,21),2);line(s,(122,90,58),(28,y+29),(28,y+41),2)
+        elif key=='telegrafista':
+            rect(s,(48,66,76),(25,y-13,29,13),4);rect(s,GOLD,(25,y-2,32,3))
+            rect(s,(137,146,129),(26,y+23,22,21),3);line(s,(69,82,87),(26,y+27),(48,y+27),2)
+            circle(s,GOLD,(40,y+21),3)
+        else:
+            rect(s,(217,202,163),(27,y-12,27,13),3);polygon(s,(237,222,184),[(27,y+18),(48,y+18),(52,y+43),(24,y+43)])
+            rect(s,(164,125,76),(17,y+26,12,18),3);line(s,(227,214,173),(19,y+28),(26,y+39),2)
     elif key=='cientifica':
         for xx in (35,45):circle(s,CYAN,(xx,y+3),5,2)
         line(s,CYAN,(35,y+3),(45,y+3),2);polygon(s,(239,238,220),[(27,y+18),(25,y+45),(38,y+42),(50,y+45),(47,y+18)])
