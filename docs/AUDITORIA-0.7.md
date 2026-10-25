@@ -4,7 +4,7 @@
 
 ## Dictámenes de fuente
 
-Ambos auditores concluyeron que no quedaban bloqueos reproducibles de sus revisiones para pasar a compilar candidatos. La última batería independiente pasó **113/113 pruebas** y el ensayo de compras, guardado y recarga pasó **100/100 ciclos**.
+Ambos auditores concluyeron que no quedaban bloqueos reproducibles de sus revisiones para pasar a compilar candidatos. La última batería del principal pasó **113/113 pruebas**; los auditores independientes cerraron sus rondas con 109 y 112 pruebas y el ensayo de compras, guardado y recarga pasó **100/100 ciclos**.
 
 - [Juego, arte, rutas e interfaz](AUDITORIA-0.7-JUGABILIDAD.md).
 - [Aula, persistencia, salas y puente Android](AUDITORIA-0.7-SISTEMAS.md).

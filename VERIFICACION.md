@@ -4,7 +4,7 @@
 
 ## Fuente
 
-113 pruebas correctas en la revisión independiente más reciente, con HTTP real sobre localhost. La cobertura de rutas obligatorias, tres fragmentos, dos archivos y reducción de anclas se amplió a los 36 mapas. Se validan 1296 registros únicos en 72 temas y tres edades; seis alternativas por combinación.
+113 pruebas correctas en la ejecución final del agente principal; las revisiones independientes cerraron con 109 y 112 pruebas, con HTTP real sobre localhost. La cobertura de rutas obligatorias, tres fragmentos, dos archivos y reducción de anclas se amplió a los 36 mapas. Se validan 1296 registros únicos en 72 temas y tres edades; seis alternativas por combinación.
 
 Se comprobaron migración de partidas y bancos, aislamiento de perfiles, práctica sin premios ni ranking reales, mejores puntuaciones por mapa, cinco rescates, tres grietas y retorno exacto, 60 condiciones de logros, compras de skins, teclado y multitouch, preguntas y reflexiones exportadas.
 
@@ -41,3 +41,9 @@ El APK Android real se instaló en un emulador aislado Android 14 (API 34). Se c
 Las pruebas finales de fuente son **113/113 correctas**, incluida una nueva comprobación de las 60 condiciones de logros y del beneficio real de energía. Los controles simultáneos se verificaron mediante eventos de dos dedos en la suite; no se afirma una prueba con dedos físicos. No se completó en Android una campaña ni una grieta de principio a fin. La comprobación LAN usa la red virtual del emulador hacia el host Windows, no varios teléfonos físicos sobre una WiFi escolar.
 
 El emulador de Google APIs sufrió fallos de su proveedor de fuentes; se desactivaron sus servicios de Google únicamente en el entorno aislado de auditoría. El juego no necesita Google Play Services ni Internet. Esto no sustituye la prueba en teléfonos físicos.
+
+La verificación final de la sala Android repitió tres sincronizaciones completas, cada una con HTTP 200 en /results, /activity y /rankings. El ajuste final declara el tamaño UTF-8 de la petición y solicita conexión independiente; el error de lectura observado dejó de reproducirse en esas repeticiones.
+
+Ejecutable Windows final: SHA-256 cd873e5f7379a9508a2e1767aaab145505cf75c0dd2803caefd4c447c26d2ed9.
+APK final: SHA-256 18e7406d1b63b573dde29c25d9a12130cceda7dd92d7fe135ed0ee5dbe47e90d.
+Las revisiones independientes corresponden a las etapas documentadas; los últimos paquetes y sus hashes se verificaron por el agente principal.
