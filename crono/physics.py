@@ -23,6 +23,7 @@ class Controls:
     dash: bool = False
     attack: bool = False
     drop: bool = False
+    descend: bool = False
 
 
 class Platform:
@@ -79,7 +80,7 @@ class Player:
     def update(self, dt, controls, world):
         events = []
         self.drop_time=max(0,self.drop_time-dt)
-        if controls.drop and self.grounded and self.support and self.support.oneway:
+        if controls.descend and self.grounded and self.support and self.support.oneway:
             self.drop_time=.22
             self.rect.y+=3
             self.grounded=False
@@ -90,7 +91,8 @@ class Player:
         self.cooldown = max(0, self.cooldown - dt)
         self.shot_cooldown=max(0,self.shot_cooldown-dt)
         self.coyote = .115 if self.grounded else max(0, self.coyote - dt)
-        self.buffer = .14 if controls.jump and not self.drop_time else max(0, self.buffer - dt)
+        jump_requested=controls.jump and not self.drop_time
+        self.buffer = .14 if jump_requested else max(0, self.buffer - dt)
         if self.support and self.grounded:
             self.rect.x += self.support.dx
             self.rect.y += self.support.dy
@@ -119,7 +121,7 @@ class Player:
                 self.buffer = self.coyote = 0
                 self.grounded = False
                 events.append('jump')
-            elif controls.jump and 'double_jump' in self.upgrades and self.air_jump and not self.grounded:
+            elif jump_requested and 'double_jump' in self.upgrades and self.air_jump and not self.grounded:
                 self.vy=JUMP*.93*getattr(getattr(world,'mechanic',None),'jump_scale',1.)
                 self.air_jump=False
                 self.buffer=0
@@ -302,7 +304,8 @@ class World:
         self.message_time = max(0, self.message_time - dt)
         self.portal_lock = max(0, self.portal_lock - dt)
         for platform in self.platforms:
-            platform.update(self.time)
+            if platform.moving:platform.update(self.time)
+            else:platform.dx=platform.dy=0.
         p = self.player
         old_bottom = p.rect.bottom
         mounted=self.mechanic.update(dt,controls)
@@ -326,14 +329,17 @@ class World:
         if p.rect.top > 800:
             self.respawn()
             return events + ['death']
+        shard_radius=95 if 'magnet' in self.upgrades else 20
+        shard_area=p.rect.inflate(shard_radius,shard_radius)
         for i, (x, y) in enumerate(self.data['shards']):
-            if i not in self.shards and p.rect.inflate(95 if 'magnet' in self.upgrades else 20,95 if 'magnet' in self.upgrades else 20).collidepoint(x, y):
+            if i not in self.shards and shard_area.collidepoint(x, y):
                 self.shards.add(i)
                 events.append('shard')
                 self.say('Umbral estabilizado. Encuentra el portal.' if len(self.shards) == 3 else f'Fragmento recuperado · {len(self.shards)} de 3')
+        radius=(120 if 'magnet' in self.upgrades else 12)+(120 if 'chronista' in self.upgrades else 0)
+        echo_area=p.rect.inflate(radius,radius)
         for i, (x, y) in enumerate(self.data['echoes']):
-            radius=(120 if 'magnet' in self.upgrades else 12)+(120 if 'chronista' in self.upgrades else 0)
-            if i not in self.echoes and p.rect.inflate(radius,radius).collidepoint(x, y):
+            if i not in self.echoes and echo_area.collidepoint(x, y):
                 self.echoes.add(i)
                 events.append('echo')
         for i, (x, y) in enumerate(self.data['checkpoints']):

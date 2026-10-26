@@ -78,6 +78,15 @@ def glow(surface, pos, radius=60, color=CYAN):
     surface.blit(glow_image(radius, color), (int(pos[0] - radius), int(pos[1] - radius)))
 
 
+@lru_cache(maxsize=46)
+def echo_image(color):
+    image=pg.Surface((44,44),pg.SRCALPHA)
+    glow(image,(21,21),21,color)
+    circle(image,color,(21,21),5,1)
+    circle(image,PAPER,(21,21),2)
+    return image
+
+
 def diamond(surface, pos, size, color, filled=True):
     x, y = pos
     polygon(surface, color, [(x, y-size), (x+size*.65, y), (x, y+size), (x-size*.65, y)], 0 if filled else 1)
@@ -215,16 +224,15 @@ class Artist:
             for xx in range(0,int(hazard.w)-6,13):
                 polygon(surface,(205,108,105),[(x+xx,y+14),(x+xx+6,y-2),(x+xx+13,y+14)])
                 line(surface,(243,165,135),(x+xx+6,y),(x+xx+10,y+10))
+        echoes=[];image=echo_image(era.accent)
         for i,(wx,wy) in enumerate(world.data['echoes']):
-            if i in world.echoes:
+            if i in world.echoes or not camera-30<wx<camera+surface.get_width()+30:
                 continue
             x,y=wx-camera,wy+math.sin(time*2.8+i)*4
-            if -30<x<W+30:
-                glow(surface,(x,y),21,era.accent)
-                circle(surface,era.accent,(x,y),5,1)
-                circle(surface,PAPER,(x,y),2)
+            if -25<y<surface.get_height()+25:echoes.append((image,(int(x-21),int(y-21))))
+        if echoes:surface.blits(echoes,doreturn=False)
         for i,(wx,wy) in enumerate(world.data['shards']):
-            if i in world.shards:
+            if i in world.shards or not camera-55<wx<camera+surface.get_width()+55:
                 continue
             x,y=wx-camera,wy+math.sin(time*2+i)*6
             if -50<x<W+50:

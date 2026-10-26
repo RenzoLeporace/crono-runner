@@ -1,5 +1,6 @@
 """Fifteen distinctive landmarks and original fictional guardian illustrations."""
 import math
+from functools import lru_cache
 import pygame as pg
 from .art import rect,line,circle,polygon,glow,diamond,text,mix,CYAN,GOLD,PAPER,INK,W,H
 from .levels import ERAS
@@ -141,10 +142,19 @@ def _boss_body(s,boss,camera,time):
         circle(s,GOLD,(tx,ty),28,2);text(s,'MUÉVETE',(tx,ty-45),13,GOLD,True,'center')
 
 
+@lru_cache(maxsize=8)
+def pulse_image(color,sign):
+    image=pg.Surface((52,52),pg.SRCALPHA)
+    glow(image,(25,25),25,color)
+    circle(image,color,(25,25),6)
+    line(image,color,(25,25),(25-sign*19,25),3)
+    return image
+
+
 def projectiles(s,world,camera):
     for shot in world.projectiles:
         x,y=shot.rect.centerx-camera,shot.rect.centery
-        if not -40<x<W+40:
+        if not -40<x<s.get_width()+40 or not -40<y<s.get_height()+40:
             continue
         color=CYAN if shot.owner=='player' else (244,151,115)
         if shot.kind in ('arrow','bolt','feather'):
@@ -169,6 +179,4 @@ def projectiles(s,world,camera):
             polygon(s,color,[(x-18,584),(x-12,563),(x,552),(x+12,563),(x+18,584)],2)
             glow(s,(x,574),30,color)
         else:
-            glow(s,(x,y),25,color)
-            circle(s,color,(x,y),6)
-            line(s,color,(x,y),(x-(1 if shot.vx>0 else -1)*19,y),3)
+            s.blit(pulse_image(color,1 if shot.vx>0 else -1),(int(x-25),int(y-25)))

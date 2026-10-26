@@ -4,7 +4,7 @@ from functools import lru_cache
 from .art import rect,text,line,polygon,CYAN,PAPER
 
 DEFAULT_KEYS=dict(left=pg.K_a,right=pg.K_d,jump=pg.K_SPACE,dash=pg.K_LSHIFT,attack=pg.K_f,interact=pg.K_e,drop=pg.K_s,pause=pg.K_ESCAPE)
-KEY_LABELS=dict(left='Izquierda',right='Derecha',jump='Saltar',dash='Impulso',attack='Disparar',interact='Interactuar',drop='Descender',pause='Pausa')
+KEY_LABELS=dict(left='Izquierda',right='Derecha',jump='Saltar',dash='Impulso',attack='Disparar',interact='Interactuar',drop='Trabajo / abajo',pause='Pausa')
 
 
 def boxes_for_width(width):
@@ -79,7 +79,9 @@ class TouchUI:
             if name in ('left','right'):
                 sign=-1 if name=='left' else 1
                 polygon(s,PAPER,[(cx+sign*25,cy),(cx-sign*14,cy-25),(cx-sign*14,cy+25)])
-            elif name=='drop':polygon(s,PAPER,[(cx-23,cy-12),(cx+23,cy-12),(cx,cy+23)])
+            elif name=='drop':
+                polygon(s,PAPER,[(cx-23,cy-12),(cx+23,cy-12),(cx,cy+23)])
+                text(s,'ACCIÓN',(cx,cy+32),10,PAPER,True,'center')
             elif name=='attack':
                 pg.draw.circle(s,PAPER,(cx,cy),16,2)
                 line(s,PAPER,(cx-24,cy),(cx+24,cy),3);line(s,PAPER,(cx,cy-24),(cx,cy+24),3)

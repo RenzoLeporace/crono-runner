@@ -23,7 +23,8 @@ def can_traverse(world,a,b):
                     inside=tr.left+5<p.rect.centerx<tr.right-5
                     descend=inside and p.rect.bottom<tr.top and p.support is not target and p.grounded and p.support and p.support.oneway
                     steer=0 if inside and p.rect.bottom<tr.top and tick>35 else axis
-                    p.update(STEP,Controls(axis=steer,jump=jump and tick==0,held=True,drop=(drop and tick==0) or bool(descend)),model)
+                    lowering=(drop and tick==0) or bool(descend)
+                    p.update(STEP,Controls(axis=steer,jump=(jump and tick==0) or lowering,held=True,drop=lowering,descend=lowering),model)
                     if p.grounded:
                         if p.support is target:
                             return True

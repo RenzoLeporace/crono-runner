@@ -1,6 +1,6 @@
 # CRONO · Ecos del tiempo
 
-**Beta educativa 0.9.1**, creada por **Renzo Leporace**. © 2026 Renzo Leporace. Todos los derechos reservados.
+**Beta educativa 0.9.2**, creada por **Renzo Leporace**. © 2026 Renzo Leporace. Todos los derechos reservados.
 
 Crono viaja por el pasado para volver al presente. Explorar, comprender archivos y aplicar lo aprendido forman parte del avance: cada salida exige tres fragmentos, una misión contextual completa y al menos un archivo resuelto; en los mapas de cierre también hay que liberar un guardián ficticio.
 
@@ -57,10 +57,12 @@ El docente aloja una sala desde Windows; los dispositivos Windows y Android de l
 
 ## Controles y desarrollo
 
-A/D o flechas: mover; Espacio: salto; Shift: impulso; F: disparo; E: interactuar; abajo: bajar, cubrirse o aplicar herramientas; H: misión histórica; U/C: mejoras/cuaderno; Esc: pausa. En Android hay controles táctiles ampliados aproximadamente un 44%, con iconos mayores, separados entre sí y con margen lateral de 32 píxeles lógicos. El ancho de cámara se adapta mostrando más mapa y conservando proporciones. El cielo y los distintos planos del fondo se desplazan de forma continua, sin reconstrucciones por tramos.
+A/D o flechas: mover; Espacio: salto; Shift: impulso; F: disparo; E: interactuar; abajo: cubrirse o aplicar herramientas; abajo + salto: bajar por una pasarela delgada; H: misión histórica; U/C: mejoras/cuaderno; Esc: pausa. Abajo solo nunca hace atravesar la plataforma de trabajo. En Android, mantén el botón ↓ ACCIÓN y toca salto para descender de forma deliberada. Los controles conservan sus iconos ampliados y margen lateral de 32 píxeles lógicos. El ancho de cámara muestra más mapa sin estirar personajes ni plataformas.
+
+Enemigos, orbes y pulsos reutilizan gráficos en caché. Los elementos fuera de pantalla se descartan antes de dibujarlos y se limita únicamente la cantidad de partículas decorativas. Las colisiones, enemigos, recogidas y premios se mantienen. [Mediciones y cambios de rendimiento](docs/CAMBIOS-0.9.2.md).
 
 El pulso base tiene alcance corto. Horizonte temporal amplía Crono de 330 a 500 píxeles y la nave de 540 a 800; siguen teniendo límite. El sonido incluye nueve composiciones originales y 17 efectos. La representación visual es original e ilustrativa; las misiones no sustituyen las fuentes.
 
 Pruebas: `python -m unittest discover -s tests`. Windows: `tools/build_beta.py` y `tools/package_beta.py`. Android: `tools/prepare_android.py` y `tools/build_android.py`, con SDK 34 y JDK 17. Entrega: `tools/create_delivery.py`. El contenedor web intermedio no es el APK instalable.
 
-[Novedades de la entrega](docs/CAMBIOS-0.9.1.md) · [Contenido 0.9](docs/CAMBIOS-0.9.md) · [Fuentes](FUENTES.md) · [Verificación](VERIFICACION.md) · [Licencias](LICENCIAS.txt) · [Derechos](COPYRIGHT.txt).
+[Novedades de la entrega](docs/CAMBIOS-0.9.2.md) · [Contenido 0.9](docs/CAMBIOS-0.9.md) · [Fuentes](FUENTES.md) · [Verificación](VERIFICACION.md) · [Licencias](LICENCIAS.txt) · [Derechos](COPYRIGHT.txt).

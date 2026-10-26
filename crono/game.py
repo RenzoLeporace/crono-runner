@@ -47,7 +47,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.init_school_settings()
         self.fullscreen=self.save.data['fullscreen'] and not headless
         self.display=pg.display.set_mode((W,H),pg.FULLSCREEN if self.fullscreen else pg.RESIZABLE)
-        pg.display.set_caption('CRONO · Ecos del tiempo | Beta educativa 0.9.1')
+        pg.display.set_caption('CRONO · Ecos del tiempo | Beta educativa 0.9.2')
         icon=pg.Surface((48,48),pg.SRCALPHA)
         clock_icon(icon,24,24,19,CYAN)
         pg.display.set_icon(icon)
@@ -359,6 +359,11 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         p=self.world.player.rect
         color=CYAN if event in ('dash','shard','checkpoint') else GOLD
         count=25 if event in ('shard','checkpoint') else 10
+        # Cosmetic trails are bounded; every collected item still grants its
+        # normal reward and emits its sound/event, even during a dense pickup.
+        budget=120 if self.touch_enabled() else 240
+        overflow=len(self.particles)+count-budget
+        if overflow>0:del self.particles[:overflow]
         for n in range(count):
             a=n*2.399+self.time
             speed=40+n%7*25
@@ -394,7 +399,8 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.accumulator+=min(dt,.1)
         tick=1/60 if self.touch_enabled() else STEP
         while self.accumulator>=tick:
-            controls=Controls(axis,self.jump_pending,held,self.dash_pending,self.shoot_pending or bool(keys[self.key_for('attack')] or self.touch_down('attack')),bool(keys[self.key_for('drop')] or keys[pg.K_DOWN] or self.touch_down('drop')))
+            down=bool(keys[self.key_for('drop')] or keys[pg.K_DOWN] or self.touch_down('drop'))
+            controls=Controls(axis,self.jump_pending,held,self.dash_pending,self.shoot_pending or bool(keys[self.key_for('attack')] or self.touch_down('attack')),down,descend=down and self.jump_pending)
             self.jump_pending=self.dash_pending=False
             self.shoot_pending=False
             old_player=self.world.player
@@ -437,8 +443,10 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
 
     def hud(self):
         s=self.canvas
-        panel=pg.Surface((W,91),pg.SRCALPHA)
-        panel.fill((9,19,28,228))
+        panel=getattr(self,'hud_panel',None)
+        if panel is None:
+            panel=pg.Surface((W,91),pg.SRCALPHA);panel.fill((9,19,28,228))
+            self.hud_panel=panel
         s.blit(panel,(0,0))
         line(s,(49,73,79),(28,90),(W-28,90))
         clock_icon(s,48,41,19,CYAN,self.world.time*.4)
@@ -651,7 +659,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
               ('F','Pulso temporal','Dispara. Los jefes reciben daño cuando exponen su núcleo.'),
               ('E','Aprender','Activa archivos, lee y responde una pregunta al azar.'),
               ('U / C','Mejoras / cuaderno','Usa el conocimiento para mejorar tu equipo o repasa tus hallazgos.'),
-              ('V · S / ↓','Plano / descender','Consulta las rutas o baja a través de las pasarelas delgadas.'),
+              ('V · S / ↓','Plano / trabajo de campo','Abajo aplica herramientas o cobertura. Abajo + salto baja por pasarelas delgadas.'),
               ('ESC / P · R','Pausa / ancla','Pausa la partida o reaparece en tu último punto de control.')]
         for i,(key,action,description) in enumerate(rows):
             y=150+i*48

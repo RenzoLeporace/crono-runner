@@ -1,6 +1,7 @@
 """Eight silhouette families; historical creatures/objects transformed by the clock."""
 import math
-from copy import copy
+from functools import lru_cache
+from types import SimpleNamespace
 import pygame as pg
 from .art import rect,line,circle,polygon,glow,text,mix,PAPER,INK,GOLD,W
 from .visuals import palette_for
@@ -173,19 +174,43 @@ def _draw_enemy(s,e,camera,t,era,stage=0):
     if e.hit_flash:circle(s,PAPER,(x,y-26),26,2)
 
 
+@lru_cache(maxsize=128)
+def enemy_picture(era,stage,kind,variant,faction,frame,human,direction,mode,timer,hp,max_hp,hit,label,moving):
+    # Identical enemies share a bounded cyclic frame cache. Absolute game time
+    # used to invalidate every enemy's mask at once, twelve times per second.
+    # Cropping also avoids blending a mostly transparent 210x180 rectangle.
+    origin=180 if label else 105
+    proxy=SimpleNamespace(rect=pg.FRect(origin-22,100,44,50),alive=True,era=era,stage=stage,
+        kind=kind,variant=variant,faction=faction,left=0,time=frame/10,direction=direction,
+        mode=mode,timer=(.3,.45,1.)[timer],hp=hp,max_hp=max_hp,hit_flash=hit,
+        show_label=label,speed=1 if moving else 0)
+    draw_time=frame*math.tau/16/(9 if era==8 else 10)
+    picture=pg.Surface((origin*2,180),pg.SRCALPHA)
+    _draw_enemy(picture,proxy,0,draw_time,era,stage)
+    bounds=picture.get_bounding_rect(min_alpha=1).inflate(4,4).clip(picture.get_rect())
+    picture=picture.subsurface(bounds)
+    mask=pg.mask.from_surface(picture,120)
+    dark=mask.to_surface(setcolor=(20,30,38,255),unsetcolor=(0,0,0,0))
+    light=mask.to_surface(setcolor=(245,218,160,255),unsetcolor=(0,0,0,0))
+    outlined=pg.Surface(picture.get_size(),pg.SRCALPHA)
+    for dx,dy in ((-2,0),(2,0),(0,-2),(0,2),(-2,-2),(2,2),(-2,2),(2,-2)):outlined.blit(dark,(dx,dy))
+    for dx,dy in ((-1,0),(1,0),(0,-1),(0,1)):outlined.blit(light,(dx,dy))
+    outlined.blit(picture,(0,0))
+    return outlined,(bounds.x-origin,bounds.y-150)
+
+
 def draw_enemy(s,e,camera,t,era,stage=0):
-    if not e.alive or not -110<e.rect.centerx-camera<s.get_width()+110:return
-    # Cache animation frames on the enemy: one blit per frame even on mobile.
-    key=(int(t*12),e.hp,e.max_hp,e.direction,e.mode,e.timer<.5,bool(e.hit_flash),getattr(e,'show_label',False),era,stage)
-    if getattr(e,'_contrast_key',None)!=key:
-        proxy=copy(e);proxy.rect=e.rect.copy();proxy.rect.centerx=105;proxy.rect.bottom=150
-        picture=pg.Surface((210,180),pg.SRCALPHA)
-        _draw_enemy(picture,proxy,0,int(t*12)/12,era,stage)
-        mask=pg.mask.from_surface(picture,120)
-        dark=mask.to_surface(setcolor=(20,30,38,255),unsetcolor=(0,0,0,0))
-        light=mask.to_surface(setcolor=(245,218,160,255),unsetcolor=(0,0,0,0))
-        outlined=pg.Surface(picture.get_size(),pg.SRCALPHA)
-        for dx,dy in ((-2,0),(2,0),(0,-2),(0,2),(-2,-2),(2,2),(-2,2),(2,-2)):outlined.blit(dark,(dx,dy))
-        for dx,dy in ((-1,0),(1,0),(0,-1),(0,1)):outlined.blit(light,(dx,dy))
-        outlined.blit(picture,(0,0));e._contrast_picture=outlined;e._contrast_key=key
-    s.blit(e._contrast_picture,(round(e.rect.centerx-camera-105),round(e.rect.bottom-150)))
+    x,y=e.rect.centerx-camera,e.rect.bottom
+    if not e.alive or not -190<x<s.get_width()+190 or y<-45 or y>s.get_height()+155:return
+    from .humanoid_roster import humanoid
+    human=humanoid(era,e.kind) or era==7
+    moving=abs(e.speed)>0
+    if human:
+        frame=int(e.time*10)%8 if e.kind!='sentry' and (moving if era==7 else e.mode!='warning') else 0
+    else:
+        angle=t*9 if era==8 else t*10+e.left
+        frame=round(angle*16/math.tau)%16
+    timer=0 if e.timer<.4 else 1 if e.timer<.5 else 2
+    picture,offset=enemy_picture(era,stage,e.kind,getattr(e,'variant',''),getattr(e,'faction',''),
+        frame,human,e.direction,e.mode,timer,e.hp,e.max_hp,bool(e.hit_flash),getattr(e,'show_label',False),moving)
+    s.blit(picture,(round(x)+offset[0],round(y)+offset[1]))

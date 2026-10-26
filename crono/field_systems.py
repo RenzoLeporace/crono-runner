@@ -92,8 +92,9 @@ class FieldSystem:
             lift.active=step>i
             if lift.active and p.support is lift:self.crossed.add(i)
         if self.kind in PICKUPS:
+            pickup_area=p.rect.inflate(32,32)
             for i,point in enumerate(self.points):
-                if i not in self.collected and p.rect.inflate(32,32).collidepoint(point):
+                if i not in self.collected and pickup_area.collidepoint(point):
                     self.collected.add(i);w.say(PICKUPS[self.kind][0]+f' · {len(self.collected)} / 3')
             if self.kind=='trade' and len(self.collected)<3:m.speed=.93
             if self.kind=='provisions':

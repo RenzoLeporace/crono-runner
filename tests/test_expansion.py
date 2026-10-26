@@ -134,7 +134,7 @@ class ExpansionTests(unittest.TestCase):
         upper=next(p for p in w.platforms if p.oneway and not p.moving)
         p=w.player;p.rect.midbottom=(upper.rect.centerx,upper.rect.top)
         p.grounded=True;p.support=upper
-        p.update(STEP,Controls(drop=True),w)
+        p.update(STEP,Controls(drop=True,jump=True,descend=True),w)
         self.assertGreater(p.rect.bottom,upper.rect.top)
         self.assertFalse(p.grounded)
 
