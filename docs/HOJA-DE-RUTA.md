@@ -2,6 +2,17 @@
 
 Actualizada el **27 de octubre de 2026**. Leer este archivo antes de continuar.
 
+> **Punto inmediato de reanudación:** fuentes y hoja de ruta subidas a GitHub.
+> Último cambio de código: **b61a838**. La APK con canales RGBA coincidentes y
+> FLAG_KEEP_SCREEN_ON se instaló correctamente en el J6. Su SHA256 es
+> **1e8a837253e3aaf487394becd7912e8f327c19537f2edcd4dce0600d93c37e42**.
+> Falta completar la medición en primer plano: Renzo recibió una pregunta para
+> dejar el teléfono desbloqueado con CRONO abierto durante un minuto. No hay
+> comparación válida final de FPS ni prueba real de jefe/escena densa todavía.
+> Priorizar esos dos escenarios, como reiteró Renzo. Después portar la guía
+> contextual al HUD de PC y terminar compilaciones/entrega. No repetir los
+> cambios de contenido ya aprobados ni anunciar la optimización como cerrada.
+
 ## Estado exacto al cerrar el punto de trabajo
 
 - Base publicada: **v0.9.2**, commit `d6888e1` en `main` de
@@ -276,8 +287,8 @@ sus8–9FPS como comparación válida con el ensayo anterior a1480.
 Para evitar ese problema, MainActivity mantiene la pantalla encendida solo en
 primer plano mediante FLAG_KEEP_SCREEN_ON. Renzo recibió una petición para
 mantener el J6 desbloqueado durante un minuto; la medición comparable permanece
-pendiente. La última APK está verificada, pero esta última variante debe
-instalarse de nuevo con `adb -d install --no-incremental --no-streaming -r ...`.
+pendiente. La última APK está verificada y la instalación posterior en el J6 devolvió
+Success. Para repetir la instalación usar `adb -d install --no-incremental --no-streaming -r ...`.
 La huella vigente está en APK-CHECK.json, no en los informes anteriores.
 
 Prioridad al retomar: (1) instalar esa APK y dejar la pantalla encendida,
