@@ -1,10 +1,10 @@
 """Roles and historical framing, separate from the student's question bank."""
 CONTEXT=(
-    'Mayo de 1810 fue un proceso político. La aventura combina su escenario con figuras realistas de ficción inspiradas en los conflictos del período.',
-    'La escena combina el Congreso de Tucumán de 1816 con ecos de las guerras de independencia. Los uniformes son interpretaciones, no réplicas de un regimiento.',
-    'La dictadura ejerció terrorismo de Estado; también hubo atentados de organizaciones armadas. Los enemigos evocan violencias previas al regreso democrático de 1983.',
+    'La Revolución de Mayo de 1810 fue un proceso político que llevó a la formación de la Primera Junta de gobierno en Buenos Aires.',
+    'El Congreso de Tucumán declaró la independencia el 9 de julio de 1816. En Cuyo, San Martín preparaba la expedición que cruzaría los Andes en 1817.',
+    'La última dictadura argentina gobernó entre 1976 y 1983 y ejerció terrorismo de Estado. Las elecciones del 30 de octubre de 1983 precedieron a la asunción de Raúl Alfonsín el 10 de diciembre.',
 )
-SIMPLE_CONTEXT='En 1983 se recuperó la democracia. Los adversarios representan violencias del pasado; las personas que celebran el regreso democrático no son enemigos.'
+SIMPLE_CONTEXT='En 1983 se recuperó la democracia en Argentina. La ciudadanía volvió a elegir presidente mediante el voto. Raúl Alfonsín asumió el 10 de diciembre.'
 FACTION_LABELS={'royalist':'Realistas','state_force':'Militares · represión estatal','armed_cell':'Organizaciones armadas · terrorismo'}
 ROLE_NAMES={'walker':'Fusilero realista','hopper':'Granadero realista','sentry':'Tirador realista',
             'charger':'Oficial realista','armored':'Coracero realista'}

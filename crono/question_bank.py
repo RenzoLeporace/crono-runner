@@ -3,6 +3,7 @@ from collections import Counter
 from copy import deepcopy
 from datetime import datetime
 import json
+import hashlib
 import os
 from pathlib import Path
 import random
@@ -46,7 +47,7 @@ def validate_record(value):
     if len({o.strip().casefold() for o in options})!=3:
         raise ValueError('Las tres respuestas deben ser diferentes.')
     record['options']=[o.strip() for o in options]
-    record['kind']=value.get('kind','choice') if value.get('kind','choice') in ('choice','source','image','reason','chronology') else 'choice'
+    record['kind']=value.get('kind','choice') if value.get('kind','choice') in ('choice','source','image','reason','chronology','curiosity') else 'choice'
     return record
 
 
@@ -54,12 +55,14 @@ class QuestionBank:
     def __init__(self,path=None):
         self.path=Path(path) if path else content_path()
         self.records=builtin_records()
+        self.original_explanations={q['id']:q['explanation'] for q in self.records}
+        self.original_records={q['id']:validate_record(q) for q in self.records}
         self.warning=''
         try:
             from .mobile import ensure_file
             ensure_file(self.path)
             document=json.loads(self.path.read_text(encoding='utf-8-sig'))
-            if not isinstance(document,dict) or document.get('version') not in (1,2,3,4,5) or not isinstance(document.get('questions'),list):
+            if not isinstance(document,dict) or document.get('version') not in (1,2,3,4,5,6,7) or not isinstance(document.get('questions'),list):
                 raise ValueError('Formato de banco desconocido.')
             records=[validate_record(q) for q in document['questions']]
             records=self.migrate(records,document['version'])
@@ -74,8 +77,8 @@ class QuestionBank:
 
     @staticmethod
     def migrate(records,version):
-        if version not in (1,2,3,4):return records
-        first={1:30,2:48,3:54,4:72}[version]
+        if version not in (1,2,3,4,5,6):return records
+        first={1:30,2:48,3:54,4:72,5:92,6:92}[version]
         records=deepcopy(records);used={q['id']:q for q in records}
         for q in builtin_records():
             if q['topic']<first and not (version<4 and q['id']>=5000000):continue
@@ -83,6 +86,12 @@ class QuestionBank:
                 if used[q['id']]['topic']==q['topic']:continue
                 q['id']=max(used)+1
             used[q['id']]=q;records.append(q)
+        from .curriculum_migration import V5_HASHES
+        from .curriculum_v6 import V6_HASHES
+        current={q['id']:q for q in builtin_records()}
+        for i,q in enumerate(records):
+            digest=hashlib.sha256(json.dumps(validate_record(q),sort_keys=True,ensure_ascii=False,separators=(',',':')).encode()).hexdigest()
+            if digest in (V5_HASHES.get(q['id']),V6_HASHES.get(q['id'])) and q['id'] in current:records[i]=deepcopy(current[q['id']])
         return records
 
     @staticmethod
@@ -106,6 +115,14 @@ class QuestionBank:
     def choose(self,topic,band,rng=None,previous=None):
         rng=rng or random
         pool=[q for q in self.records if q['topic']==topic and q['band']==band]
+        complete_pool=pool
+        if band<2:
+            authored={q[0] for q in LESSONS[topic].questions[:(band+1)*2]}
+            # Original supplementary IDs must not expose six-year-olds to the
+            # oldest band's wording. Teacher-authored edits retain priority.
+            pool=[q for q in pool if q.get('kind')=='curiosity' or q['prompt'] in authored or validate_record(q)!=self.original_records.get(q['id'])]
+            if not pool:pool=complete_pool  # A teacher may deliberately keep one replacement only.
+        pool=list({(q['prompt'],tuple(q['options']),q['correct']):q for q in pool}.values())
         if len(pool)>1:
             pool=[q for q in pool if q['id']!=previous]
         record=rng.choice(pool)
@@ -126,7 +143,7 @@ class QuestionBank:
 
     @staticmethod
     def serialise(records):
-        return json.dumps(dict(version=5,questions=records),ensure_ascii=False,indent=2)+'\n'
+        return json.dumps(dict(version=7,questions=records),ensure_ascii=False,indent=2)+'\n'
 
     def upsert(self,draft):
         candidate=deepcopy(draft)

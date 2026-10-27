@@ -55,13 +55,13 @@ def extend_egypt(Stage,lesson,stages,lessons,sources):
         ('¿Por qué los jeroglíficos no son simples dibujos decorativos?','Sus signos también representan sonidos','No transmitían información','Todos significan exactamente lo mismo'),
         ('¿Qué distingue soporte y sistema de escritura?','Papiro es material; jeroglíficos son signos','Ambos son nombres de faraones','El papiro es un idioma moderno'))),
       ('Moisés y los relatos del Éxodo',
-       'En la tradición bíblica, Moisés guía la salida de los israelitas de Egipto. El relato del Éxodo tiene importancia religiosa y cultural. No permite fijar por sí solo una fecha histórica; este juego no identifica a su faraón con un gobernante concreto.',3,(
+       'En la tradición bíblica, Moisés guía la salida de los israelitas de Egipto. El relato del Éxodo tiene importancia religiosa y cultural. El relato religioso y las evidencias arqueológicas se estudian como fuentes de naturaleza distinta.',3,(
         ('¿Quién guía la salida de Egipto en el relato bíblico?','Moisés','Un astronauta','Un caballero medieval'),
         ('¿Cómo se llama ese relato de salida?','Éxodo','Revolución industrial','Edad del hielo'),
-        ('¿Qué tipo de referencia es Moisés en este mapa?','Una tradición religiosa y cultural','Un jefe que debes atacar','Una máquina histórica'),
-        ('¿Cómo presenta el juego la escena del mar?','Como representación del relato bíblico','Como una filmación de la época','Como una fecha arqueológica segura'),
+        ('¿A qué tradición pertenece el relato de Moisés y el Éxodo?','Una tradición religiosa y cultural','Una técnica de construcción','Una máquina histórica'),
+        ('¿En qué tradición se narra la apertura del mar?','En el relato bíblico del Éxodo','En un tratado de ingeniería romana','En una crónica medieval inglesa'),
         ('¿Qué debe distinguir el estudio histórico?','Tradición religiosa y evidencia arqueológica','Toda narración y una prueba concluyente','Un personaje bíblico y un robot'),
-        ('¿Qué conclusión evita este mapa?','Identificar sin pruebas a un faraón concreto','Reconocer el valor cultural del Éxodo','Explicar que se trata de una tradición'))),
+        ('¿Qué afirmación requiere evidencias históricas independientes?','Identificar a un faraón concreto como el del Éxodo','Reconocer el valor cultural del Éxodo','Explicar que se trata de una tradición'))),
     )
     for title,fact,source,questions in rows:
         lessons.append(lesson(title,fact,base+source,*questions))

@@ -63,7 +63,7 @@ class TeacherUI:
         text(s,'Configuración',(62,73),45,PAPER,True,serif=True)
         rect(s,(19,35,45),(65,160,537,445),8)
         text(s,'Partida y presentación',(88,184),24,PAPER,True)
-        self.button('Sonido: '+('activado' if self.audio.enabled else 'desactivado'),(88,241,491,50),self.toggle_sound,small=True)
+        self.button('Música y sonidos',(88,241,491,50),lambda:self.set_state('sound_settings'),small=True)
         self.button('Pantalla: '+('completa' if self.fullscreen else 'ventana'),(88,307,491,50),self.toggle_fullscreen,small=True)
         self.age_switch(88,423,491)
         wrapped(s,'La edad cambia preguntas y combate: 6–9 mínima, 10–14 media y 15+ alta. Los jefes ganan patrones y los enemigos reaccionan más rápido.',(88,487),481,15,MUTED,leading=23)

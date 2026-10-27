@@ -9,6 +9,10 @@ _file_jobs=[]
 def encode_text(value):return base64.b64encode(value.encode('utf-8')).decode('ascii')
 def decode_text(value):return base64.b64decode(str(value),validate=True).decode('utf-8')
 
+def speak(value):
+    native=bridge()
+    return bool(native.speak(encode_text(value))) if native else False
+
 def bridge():
     if sys.platform!='emscripten':return None
     try:
@@ -92,6 +96,7 @@ def export_document(path,callback=None):
     return True
 
 def poll_files():
+    if not _file_jobs:return
     native=bridge()
     if not native:return
     for job,callback in list(_file_jobs):

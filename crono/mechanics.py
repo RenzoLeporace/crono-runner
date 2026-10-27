@@ -49,6 +49,7 @@ ROWS=(
 
 from .new_histories import NEW_MAPS
 ROWS+=tuple(row['mechanic'] for row in NEW_MAPS)
+ROWS=ROWS[:35]+(('Información para la comunidad','escort','Organiza los avisos y acompaña a la población hacia la salida.',('Comprobar el aviso','Preparar la asistencia','Acompañar la evacuación'),'La comunicación y las medidas de protección son parte de la historia del accidente.'),)+ROWS[36:]
 
 class Mechanic:
     def __init__(self,world):
@@ -69,6 +70,8 @@ class Mechanic:
         self.vehicle_kind=False
         self.state['vehicle_x']=self.devices[1][0];self.state['vehicle_y']=self.devices[1][1]-32
         self.wind=0.;self.gravity=world.data.get('gravity',1.);self.jump_scale=world.data.get('jump_scale',1.);self.air_control=.42 if world.level_id==44 else 1.;self.speed=1.;self.sheltered=False
+        from .education import LESSONS
+        self.note=LESSONS[world.level_id*2].fact
         from .field_systems import FieldSystem
         self.field=FieldSystem(self)
         # First contact teaches the device on safe ground.
@@ -91,6 +94,7 @@ class Mechanic:
         # Mounting never survives loading; restore to a safe anchor first.
         self.state['vehicle']=False
         self.state['sea_complete']=value.get('sea_complete') is True
+        self.state['curiosity_tested']=value.get('curiosity_tested') is True
         self.field.restore(value)
     def near(self):
         p=self.world.player.rect
@@ -186,7 +190,7 @@ class Mechanic:
             diamond(s,(x,y-119),6,c,active)
             if abs(wx-self.world.player.rect.centerx)<160:
                 label=('Preparación','GRIETA MARÍTIMA','Registro del viaje')[i] if self.kind in ('naval','canal','tide') else f'Puesto {i+1}'
-                text(s,'E · '+label+(' · LISTO' if active else ''),(x,y-139),12,c,True,'center')
+                text(s,('USAR · ' if getattr(self.world,'mobile_render',False) else 'E · ')+label+(' · LISTO' if active else ''),(x,y-139),12,c,True,'center')
         if self.state['vehicle']:
             x=self.state['vehicle_x']-camera;y=self.state['vehicle_y']
             polygon(s,(90,69,56),[(x-80,y+4),(x+85,y+4),(x+55,y+35),(x-55,y+35)])

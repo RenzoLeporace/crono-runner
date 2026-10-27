@@ -89,7 +89,7 @@ class Beta09Tests(unittest.TestCase):
                 for x,y in f.points:w.player.rect.midbottom=(x,y+40);f.update(.01,Controls())
             if f.kind in ('supply','catalogue','printing','dialogue','moonrepair'):
                 w.player.rect.midbottom=w.data['repair_ship'] if f.kind=='moonrepair' else m.devices[0 if f.kind=='catalogue' else 2];w.player.grounded=True
-                for _ in range(180):f.update(.02,Controls(drop=True))
+                for _ in range(180):f.update(.02,Controls(work=True))
             elif f.kind=='manuscripts':
                 for _ in range(3000):
                     w.player.rect.midbottom=(f.escort_x+160,f.escort_y);f.update(.05,Controls())
@@ -99,16 +99,17 @@ class Beta09Tests(unittest.TestCase):
             elif f.kind=='cipher':
                 for x,y in f.points:
                     w.player.rect.midbottom=(x,y+40);w.player.grounded=True
-                    for _ in range(200):f.update(.02,Controls(drop=True))
+                    for _ in range(200):f.update(.02,Controls(work=True))
             self.assertTrue(m.completed,f'Mission {level}: {f.description()}')
             save=Save(Path(self.temp.name)/f'mission-{level}.json');save.capture(w)
             restored=World(*divmod(level,3));Save(save.path).restore(restored);self.assertTrue(restored.mechanic.completed)
 
     def test_cold_coat_water_and_energy_have_real_gameplay_effects(self):
         cold=World(1,0);cold.player.rect.midbottom=(cold.traits.coat_pos[0]+300,584)
-        cold.traits.update(31,Controls());self.assertEqual(cold.player.hp,2)
+        cold.traits.update(10,Controls());self.assertLess(cold.traits.resource,100)
         cold.player.rect.midbottom=cold.traits.coat_pos;cold.traits.update(.01,Controls());self.assertTrue(cold.traits.coat)
-        cold.player.rect.x+=300;cold.traits.update(90,Controls());self.assertEqual(cold.player.hp,2)
+        cold.player.rect.x+=300;before=cold.traits.resource;cold.traits.update(10,Controls());self.assertLess(cold.traits.resource,before)
+        cold.traits.resource=0;cold.traits.update(.01,Controls());self.assertEqual(cold.player.hp,3);self.assertEqual(cold.checkpoint,-1)
         egypt=World(8,0);egypt.player.rect.x=5000;egypt.traits.resource=0
         egypt.traits.update(9,Controls());self.assertEqual(egypt.player.hp,2)
         egypt.player.rect.midbottom=egypt.traits.points[0];egypt.traits.update(1,Controls());self.assertGreater(egypt.traits.resource,0)
@@ -143,7 +144,7 @@ class Beta09Tests(unittest.TestCase):
         for i in range(3):w.mechanic.activate(i,i)
         for x,y in w.mechanic.field.points:w.player.rect.midbottom=(x,y+40);w.mechanic.field.update(.01,Controls())
         w.player.rect.midbottom=w.data['repair_ship'];w.player.grounded=True
-        for _ in range(200):w.mechanic.field.update(.02,Controls(drop=True))
+        for _ in range(200):w.mechanic.field.update(.02,Controls(work=True))
         self.assertTrue(w.mechanic.completed);w.player.rect.midbottom=w.data['portal'];w.update(.01,Controls());self.assertTrue(w.complete)
         save=Save(Path(self.temp.name)/'moon-save.json');save.capture(w);self.assertEqual(Save(save.path).data['current'],44)
         reloaded=World(14,2);Save(save.path).restore(reloaded);self.assertTrue(reloaded.mechanic.completed)
@@ -154,7 +155,7 @@ class Beta09Tests(unittest.TestCase):
         old=[r for r in builtin_records() if r['topic']<72];old[0]['prompt']='Pregunta personal conservada'
         path=Path(self.temp.name)/'old-bank.json';path.write_text(json.dumps(dict(version=4,questions=old)),encoding='utf-8')
         bank=QuestionBank(path);self.assertFalse(bank.warning);self.assertEqual(bank.get(0)['prompt'],'Pregunta personal conservada')
-        self.assertEqual(len(bank.records),1656);self.assertTrue(all(any(r['topic']==t for r in bank.records) for t in range(92)))
+        self.assertEqual(len(bank.records),1800);self.assertTrue(all(any(r['topic']==t for r in bank.records) for t in range(92)))
 
     def test_new_scenes_and_all_era_features_render(self):
         g=self.game;g.tutorial_active=False;g.save.data['practice']=False

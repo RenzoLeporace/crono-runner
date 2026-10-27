@@ -112,6 +112,16 @@ def vessel_image(kind,enemy=False,boss=False):
     if boss:s=pg.transform.smoothscale(s,(286,260))
     return s
 
+@lru_cache(maxsize=24)
+def vessel_effect(kind,enemy,boss,style):
+    image=vessel_image(kind,enemy,boss)
+    if not style:return image
+    image=image.copy()
+    if style==1:image.fill((100,80,60,0),special_flags=pg.BLEND_RGBA_ADD)
+    else:image.set_alpha(125)
+    return image
+
+
 def draw_vessel(s,kind,x,y,time,enemy=False,boss=False,hit=0.,invincible=0.,hp=6):
     image=vessel_image(kind,enemy,boss)
     scale=1.3 if boss else 1.
@@ -119,9 +129,8 @@ def draw_vessel(s,kind,x,y,time,enemy=False,boss=False,hit=0.,invincible=0.,hp=6
     if hit:x+=math.sin(hit*90)*4;y-=math.sin(hit*40)*2
     pos=(round(x-105*scale),round(y-153*scale+bob))
     if hit or invincible and int(time*12)%2:
-        image=image.copy()
-        if hit and int(hit*26)%2:image.fill((100,80,60,0),special_flags=pg.BLEND_RGBA_ADD)
-        elif invincible:image.set_alpha(125)
+        style=1 if hit and int(hit*26)%2 else 2 if invincible else 0
+        image=vessel_effect(kind,enemy,boss,style)
     s.blit(image,pos)
     for n in range(3):
         xx=x-73-(time*65+n*19)%50;yy=y+13+math.sin(time*4+n)*5

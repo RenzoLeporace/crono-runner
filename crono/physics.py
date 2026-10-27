@@ -24,6 +24,7 @@ class Controls:
     attack: bool = False
     drop: bool = False
     descend: bool = False
+    work: bool = False
 
 
 class Platform:
@@ -31,7 +32,7 @@ class Platform:
         self.rect = pg.FRect(spec['x'], spec['y'], spec['w'], spec['h'])
         self.origin = self.rect.x
         self.moving = spec['moving']
-        self.oneway = spec.get('oneway',self.moving)
+        self.oneway = spec.get('oneway',self.moving or spec['h']<=40)
         self.amplitude = spec.get('amplitude', 0)
         self.speed = spec.get('speed', 0)
         self.dx = 0
@@ -68,6 +69,7 @@ class Player:
         self.anim = 0.
         self.trail = []
         self.drop_time=0.
+        self.jump_hold=0.
         self.recovery_clock=0.
 
     def configure(self,upgrades,heal=False):
@@ -80,7 +82,7 @@ class Player:
     def update(self, dt, controls, world):
         events = []
         self.drop_time=max(0,self.drop_time-dt)
-        if controls.descend and self.grounded and self.support and self.support.oneway:
+        if (controls.descend or controls.drop) and self.grounded and self.support and self.support.oneway:
             self.drop_time=.22
             self.rect.y+=3
             self.grounded=False
@@ -89,6 +91,7 @@ class Player:
         self.invincible = max(0, self.invincible - dt)
         self.hurt_time = max(0, self.hurt_time - dt)
         self.cooldown = max(0, self.cooldown - dt)
+        self.jump_hold=max(0,self.jump_hold-dt)
         self.shot_cooldown=max(0,self.shot_cooldown-dt)
         self.coyote = .115 if self.grounded else max(0, self.coyote - dt)
         jump_requested=controls.jump and not self.drop_time
@@ -100,7 +103,7 @@ class Player:
             self.facing = 1 if controls.axis > 0 else -1
         if controls.dash and self.dash_ready and self.cooldown <= 0:
             self.dash_time = .20 if 'dash' in self.upgrades else .16
-            self.cooldown = .28 if 'dash' in self.upgrades else .46
+            self.cooldown = .65 if 'dash' in self.upgrades else 1.15
             self.dash_ready = False
             self.vy = 0
             events.append('dash')
@@ -120,20 +123,22 @@ class Player:
                 self.vy = JUMP*getattr(getattr(world,'mechanic',None),'jump_scale',1.)
                 self.buffer = self.coyote = 0
                 self.grounded = False
+                self.jump_hold=.06
                 events.append('jump')
             elif jump_requested and 'double_jump' in self.upgrades and self.air_jump and not self.grounded:
                 self.vy=JUMP*.93*getattr(getattr(world,'mechanic',None),'jump_scale',1.)
                 self.air_jump=False
                 self.buffer=0
+                self.jump_hold=.06
                 events.append('jump')
-            if not controls.held and self.vy < -250:
+            if not controls.held and self.jump_hold<=0 and self.vy < -250:
                 self.vy = approach(self.vy, -250, 4200 * dt)
             brake=.38 if 'air_brake' in self.upgrades and controls.held and self.vy>0 else 1.
             self.vy = min(950, self.vy + GRAVITY * getattr(getattr(world,'mechanic',None),'gravity',1.) * brake * dt)
             self.vx+=getattr(getattr(world,'mechanic',None),'wind',0.)*dt
         # Axis-separated collisions; float positions avoid low-speed quantisation.
         self.rect.x += self.vx * dt
-        for p in world.platforms:
+        for p in (world.near_platforms(self.rect) if hasattr(world,'near_platforms') else world.platforms):
             if not p.active:continue
             if p.oneway:  # Branch galleries and ferries can be entered from below.
                 continue
@@ -149,7 +154,7 @@ class Player:
         self.rect.y += self.vy * dt
         self.grounded = False
         self.support = None
-        for p in world.platforms:
+        for p in (world.near_platforms(self.rect) if hasattr(world,'near_platforms') else world.platforms):
             if not p.active:continue
             if p.oneway and self.drop_time>0:
                 continue
@@ -197,7 +202,7 @@ class World:
                     floor=min(floors,key=lambda p:abs(p.rect.top-enemy.rect.bottom))
                     enemy.rect.bottom=floor.rect.top;enemy.base_y=enemy.rect.y
                     enemy.left=max(enemy.left,floor.rect.left);enemy.right=min(enemy.right,floor.rect.right)
-            enemy.variant='timbuktu' if self.level_id==41 else 'roman' if self.level_id==34 else 'malvinas' if self.level_id==33 else ''
+            enemy.variant='berlin' if self.level_id==43 else 'detente' if self.level_id==45 else 'timbuktu' if self.level_id==41 else 'roman' if self.level_id==34 else 'malvinas' if self.level_id==33 else ''
             if self.level_id==33:enemy.stage=2
         self.hazards = [pg.FRect(s) for s in self.data['hazards']]
         self.shards = set()
@@ -219,6 +224,8 @@ class World:
         self.mechanic=Mechanic(self)
         from .era_traits import EraTraits
         self.traits=EraTraits(self)
+        from .interaction_layout import arrange
+        arrange(self)
 
     def make_boss(self):
         b=Boss(self.combat_era,self.difficulty,self.data['arena_left'],self.data['arena_right'])
@@ -228,6 +235,23 @@ class World:
             from .journey_encounters import HINTS
             b.hint=HINTS[b.variant]
         return b
+
+    def near_platforms(self,bounds):
+        """Static X buckets reduce projectile/player broad-phase work on long maps.
+
+        Preserve original platform order; moving lifts stay live and activation
+        flags are checked by the caller. Replacing/extending a level rebuilds it.
+        """
+        key=(id(self.platforms),len(self.platforms))
+        if getattr(self,'_collision_key',None)!=key:
+            self._collision_key=key;self._platform_bins={};self._moving_ids=[]
+            for i,platform in enumerate(self.platforms):
+                if platform.moving:self._moving_ids.append(i);continue
+                for cell in range(math.floor(platform.rect.left/256),math.floor(platform.rect.right/256)+1):
+                    self._platform_bins.setdefault(cell,[]).append(i)
+        candidates=set(self._moving_ids)
+        for cell in range(math.floor(bounds.left/256),math.floor(bounds.right/256)+1):candidates.update(self._platform_bins.get(cell,()))
+        return [self.platforms[i] for i in sorted(candidates)]
 
     def set_difficulty(self,band):
         """Apply a profile immediately without resurrecting defeated opponents."""
@@ -412,7 +436,7 @@ class World:
                 shot.alive=False
                 if self.player is not p:
                     return events
-            if shot.kind!='wave' and any(shot.rect.colliderect(platform.rect) for platform in self.platforms if not platform.moving):
+            if shot.kind!='wave' and any(shot.rect.colliderect(platform.rect) for platform in self.near_platforms(shot.rect) if platform.active and not platform.moving):
                 shot.alive=False
         self.projectiles=[s for s in self.projectiles if s.alive]
         for hazard in self.hazards:

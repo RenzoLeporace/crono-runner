@@ -119,10 +119,31 @@ class SchoolSettingsUI:
         self.button('Controles táctiles: '+('SÍ' if self.touch_enabled() else 'NO'),(790,287,420,52),lambda:(self.save.data.update(touch_controls=not self.touch_enabled()),self.save.write()),small=True)
         for i,(action,label) in enumerate(KEY_LABELS.items()):
             x=65+i%4*292;y=378+i//4*78
-            self.button(label+': '+('pulsa tecla…' if self.rebind_action==action else pg.key.name(self.key_for(action))),(x,y,270,57),lambda a=action:setattr(self,'rebind_action',a),small=True,arrow=False)
+            self.button(label+': '+('pulsa tecla…' if self.rebind_action==action else pg.key.name(self.key_for(action))),(x,y,270,57),lambda a=action:self.begin_rebind(a),small=True,arrow=False,wrap=True)
         wrapped(s,self.access_message or 'Reasigna una acción y pulsa una tecla. Esc cancela. En lectura: Tab alterna panel; RePág / AvPág desplazan el texto.',(65,562),1110,18,MUTED)
         self.button('Volver',(65,638,250,51),lambda:self.set_state('settings'),True,small=True)
-        self.button('Restablecer teclas',(830,638,380,51),lambda:(self.save.data.update(key_bindings={}),self.save.write()),small=True)
+        self.button('Restablecer teclas',(830,638,380,51),self.reset_keys,small=True)
+        text(s,'Ejemplo: descubre la historia de este lugar.',(65,343),self.save.data['reading_size'],CYAN)
+        if self.rebind_action:
+            self.dim(220);self.buttons=[]
+            rect(s,(24,47,57),(190,225,900,260),12)
+            wrapped(s,'Pulsa una tecla para: '+KEY_LABELS[self.rebind_action],(225,260),830,30,PAPER,True)
+            wrapped(s,self.access_message,(225,337),830,21,GOLD)
+            self.button('Cancelar',(225,418,830,50),lambda:(setattr(self,'rebind_action',None),setattr(self,'access_message','Cambio cancelado.')),True)
+
+    def set_volume(self,key,value):
+        self.save.data[key]=max(0,min(100,value));self.save.write()
+        self.audio.set_volumes(self.save.data['music_volume'],self.save.data['effects_volume'])
+
+    def sound_settings(self):
+        s=self.canvas;s.fill((13,27,37));text(s,'Música y sonidos',(65,48),42,PAPER,True,serif=True)
+        self.button('Sonido: '+('activado' if self.audio.enabled else 'silenciado'),(65,139,1140,70),self.toggle_sound,True)
+        for row,(key,label) in enumerate((('music_volume','Música'),('effects_volume','Efectos'))):
+            y=260+row*145;value=self.save.data[key]
+            text(s,f'{label} · {value} %',(65,y),29,CYAN,True)
+            for i,volume in enumerate((0,25,50,75,100)):
+                self.button(str(volume)+' %',(65+i*233,y+48,208,64),lambda k=key,v=volume:self.set_volume(k,v),primary=value==volume,arrow=False)
+        self.button('Volver',(65,630,1140,65),self.go_back,True)
     def school_settings(self):
         s=self.canvas;s.fill((13,27,37));text(s,'Herramientas del aula',(62,45),40,PAPER,True,serif=True)
         for i,(label,key) in enumerate((('Importar / exportar','files'),('Selección de temas','topics'),('PIN y privacidad','privacy'),('Guía docente','guide'))):
@@ -141,13 +162,14 @@ class SchoolSettingsUI:
                 self.button('Revisar banco de la sala',(65,425,490,55),self.preview_shared_bank,small=True)
             wrapped(s,self.exchange_message,(65,509),1110,20,GOLD,leading=30)
         elif self.school_tab=='topics':
-            selected=set(self.school.config.get('topics',[]));self.topic_page=max(0,min(5,self.topic_page))
+            last=(len(LESSONS)-1)//12
+            selected=set(self.school.config.get('topics',[]));self.topic_page=max(0,min(last,self.topic_page))
             text(s,'Sin selección se usan todos. La selección se aplica al entrar a otro mapa.',(65,194),18,GOLD)
             for i,topic in enumerate(range(self.topic_page*12,min(len(LESSONS),(self.topic_page+1)*12))):
                 x=65+i%2*585;y=238+i//2*53
                 self.button(('✓ ' if topic in selected else '○ ')+LESSONS[topic].title,(x,y,557,46),lambda n=topic:self.toggle_topic(n),primary=topic in selected,small=True,arrow=False,wrap=True)
             self.button('Anterior',(65,568,250,48),lambda:setattr(self,'topic_page',self.topic_page-1),enabled=self.topic_page>0,small=True)
-            self.button('Siguiente',(335,568,250,48),lambda:setattr(self,'topic_page',self.topic_page+1),enabled=self.topic_page<5,small=True)
+            self.button('Siguiente',(335,568,250,48),lambda:setattr(self,'topic_page',self.topic_page+1),enabled=self.topic_page<last,small=True)
             self.button('Usar todos',(850,568,360,48),self.clear_topics,small=True)
         elif self.school_tab=='privacy':
             text(s,'Nuevo PIN (vacío lo desactiva)',(65,196),21,PAPER,True)

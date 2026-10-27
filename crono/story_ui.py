@@ -8,6 +8,14 @@ TUTORIAL=('Camina hacia la primera señal: usa la cruceta o A/D.',
           'Dispara un pulso corto: toca el objetivo o F.',
           'Busca el libro abierto que señala la guía.')
 
+def map_summary(level):
+    from .education import LESSONS
+    sentences=LESSONS[level*2].fact.split('. ');value=sentences[0]
+    for sentence in sentences[1:]:
+        if len(value)+len(sentence)+2>265:break
+        value+='. '+sentence
+    return value.rstrip('.')+'.'
+
 class StoryUI:
     def init_story(self):
         self.tutorial_active=False;self.tutorial_step=0;self.workshop_page=0;self.skin_page=0
@@ -51,6 +59,7 @@ class StoryUI:
                 self.world.say('¡Ya sabes explorar! Ahora completa la misión del mapa. H abre tu historia.')
 
     def story_hud(self):
+        if self.touch_enabled():return self.mobile_story_hud()
         w=self.world;m=w.mechanic
         if self.tutorial_active:
             rect(self.canvas,(16,39,46),(245,204,790,70),8)
@@ -70,6 +79,7 @@ class StoryUI:
                 text(self.canvas,f'Historia: {m.state["step"]}/3 puestos · aplicación '+('✓' if m.field.done else 'pendiente')+' · archivo '+('✓' if learned else 'pendiente'),(36,111),14,CYAN if w.story_ready else GOLD)
 
     def story_panel(self):
+        if self.touch_enabled():return self.mobile_story_panel()
         s=self.canvas;s.fill((13,28,38));w=self.world;m=w.mechanic
         text(s,'Tu misión en esta historia',(62,35),40,PAPER,True,serif=True)
         text(s,w.data['meta'].name,(65,106),26,GOLD,True)
@@ -101,4 +111,4 @@ class StoryUI:
         wrapped(s,'Guerra de los Farrapos · 1835–1845. Una ruta sobre recursos, conflicto y desigualdades.',(680,449),480,22,GOLD)
         self.button('Entrar a Argentina',(95,572,495,72),self.continue_dlc,True)
         self.button('Entrar a Brasil · Farrapos',(680,572,495,72),lambda:self.load(12,0,restore=True),True)
-        self.button('Volver',(65,659,250,45),lambda:self.set_state('menu'),small=True)
+        self.button('Volver',(65,659,250,45),self.go_back,small=True)

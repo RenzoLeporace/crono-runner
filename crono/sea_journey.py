@@ -130,17 +130,8 @@ class SeaJourney:
             game.button('Volver por la grieta sin completar',(350,390,580,80),lambda:game.leave_voyage(False))
         if self.quiz:
             game.dim(230)
-            topics={
-                'canal':(('¿Por qué el Nilo fue clave para el abastecimiento?',('Permitía transportar personas y productos entre poblaciones','Egipto no necesitaba cultivar alimentos','Todas las ciudades estaban junto al mar')),
-                         ('¿Cómo se aprovechaba el ciclo de las crecidas?',('Observando el río y organizando cultivos y canales','Construyendo motores eléctricos','Evitando cualquier trabajo colectivo')),
-                         ('¿Qué permite estudiar esta ruta fluvial?',('La relación entre agua, transporte y organización social','Una batalla exacta documentada por el juego','Que todos los egipcios tenían los mismos recursos'))),
-                'tide':(('¿Qué separa este esquife de los animales del Cretácico?',('Crono y su nave son ficción: no había seres humanos allí','Los dinosaurios construyeron estas naves','Los barcos actuales existían hace 66 millones de años')),
-                        ('¿Cómo estudiamos los ambientes del Cretácico?',('Relacionando fósiles, rocas y otras evidencias','Tomando el videojuego como una fotografía real','Suponiendo que el clima siempre fue igual')),
-                        ('¿Qué significa una extinción masiva?',('Una gran pérdida de biodiversidad en un intervalo geológico','Que desaparece toda forma de vida','Que una sola especie cambia de lugar'))),
-                'naval':(('¿Por qué proteger el abastecimiento del convoy?',('Sostiene el viaje y el cuidado de la tripulación','Solo sirve para decorar el barco','Evita tener que organizarse')),
-                         ('¿Contra quién combatió Brown en 1826–1827?',('Contra fuerzas del Imperio del Brasil en la guerra de esa época','Contra las carabelas de Colón','Contra una flota de la Segunda Guerra Mundial')),
-                         ('¿Por qué importaban los canales y bancos del Río de la Plata?',('Condicionaban el calado, las rutas y las decisiones navales','Permitían navegar sin conocer el río','Hacían innecesaria la coordinación')))
-            }[self.kind]
+            from .sea_fieldwork import SEA_QUESTIONS
+            topics=SEA_QUESTIONS[self.kind]
             prompt,options=topics[self.phase]
             text(s,'Una decisión abre la ruta',(65,100),36,PAPER,True)
             from .learning_ui import wrapped

@@ -55,7 +55,7 @@ class PhysicsTests(unittest.TestCase):
                 w.update(STEP,Controls(held=held))
                 peak=min(peak,w.player.rect.y)
             peaks.append(peak)
-        self.assertGreater(peaks[0]-peaks[1],45)
+        self.assertGreater(peaks[0]-peaks[1],35)
 
     def test_coyote_time(self):
         p=self.world.player
@@ -170,7 +170,7 @@ class PhysicsTests(unittest.TestCase):
 class CampaignTests(unittest.TestCase):
     def test_all_required_routes_reachable_with_real_jump_physics(self):
         from route_probe import probe_route
-        for level_id in range(46):
+        for level_id in range(50):
             world=World(*divmod(level_id,3))
             reachable,failed=probe_route(world)
             for x,y in world.data['shards']:

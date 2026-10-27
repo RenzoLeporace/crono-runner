@@ -31,6 +31,9 @@ def vessel(side='rio'):
 
 @lru_cache(maxsize=9)
 def scene_image(level):
+    if level==35:
+        from .war_art import chernobyl
+        return chernobyl()
     if level>=36:
         from .country_art import scene
         return scene(level)
@@ -111,7 +114,7 @@ def sky(index,stage):
     from .visuals import palette_for
     pal=palette_for(index,stage);level=index*3+stage;s=pg.Surface((W,H))
     for y in range(H):line(s,mix(pal.sky,pal.horizon,min(1,y/590)),(0,y),(W,y))
-    if level in (35,44):
+    if level==44:
         for n in range(65):circle(s,(186,195,196),((n*143)%W,107+(n*67)%270),1)
         circle(s,(91,151,183),(1020,176),39);polygon(s,(154,184,154),[(1001,151),(1022,148),(1040,169),(1027,191),(1008,183)])
     for y in range(584,H):line(s,mix(pal.near,(13,24,38),(y-584)/136),(0,y),(W,y))
@@ -122,7 +125,7 @@ def background(s,index,stage,camera,t):
     from .visuals import palette_for
     pal=palette_for(index,stage);level=index*3+stage
     s.blit(sky(index,stage),(0,0))
-    if level not in (35,44):
+    if level!=44:
         for layer in range(2):
             off=camera*(.035+layer*.04)
             for n in range(int(off//510)-1,int(off//510)+math.ceil(W/510)+1):

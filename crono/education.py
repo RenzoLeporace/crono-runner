@@ -94,7 +94,7 @@ LESSONS=[
  lesson('Huellas de una vida',
   'Huesos y dientes son restos del cuerpo. Huellas y otras señales de actividad también pueden fosilizarse: cuentan algo de lo que un organismo hizo.',1,
   ('¿Cuál es un resto del cuerpo?','Un diente','Una pisada','Una sombra actual'),
-  ('¿Qué puede mostrar una huella?','Que un animal pisó allí','Su nombre exacto','Que llevaba un reloj'),
+  ('¿Qué puede mostrar una huella?','Que un animal pisó allí','Su nombre exacto','Su color exacto'),
   ('¿Cuál es una señal de actividad?','Un rastro de pisadas','Un hueso de la pata','Un diente de la mandíbula'),
   ('¿Qué diferencia hay entre hueso y huella?','Uno es corporal; la otra registra actividad','Ambos son órganos vivos','La huella es siempre una pintura'),
   ('¿Qué pregunta se estudia mejor con pisadas?','Cómo se desplazaba un organismo','Cuál era su nombre individual','Qué sonido emitió exactamente'),
@@ -128,7 +128,7 @@ LESSONS=[
   ('¿Hubo un solo tipo de mamut?','No, hubo varias especies','Sí, uno solo','Todos eran aves'),
   ('¿Cuál de estos nombres corresponde a un mamut?','Mamut lanudo','Locomotora lanuda','Pez de hierro'),
   ('¿Qué generalización hay que evitar?','Todos los mamuts eran idénticos','Existieron especies distintas','El lanudo era un mamut'),
-  ('¿Qué conviene estudiar además de un ejemplar?','Otros mamuts y sus diferencias','Solo una película de ficción','Solo un dibujo inventado'),
+  ('¿Qué conviene estudiar además de un ejemplar?','Otros mamuts y sus diferencias','Solo una opinión sin evidencias','Solo un dibujo inventado'),
   ('¿Por qué un ejemplar no representa toda la diversidad?','El grupo incluía distintas especies','Toda variación es imposible','Todos vivieron en el mismo instante'),
   ('¿Qué afirmación es más rigurosa?','Los rasgos pueden variar entre especies de mamut','Todo mamut era un clon del lanudo','El nombre mamut describe una sola apariencia')),
  lesson('Piedra que se vuelve herramienta',
@@ -158,7 +158,7 @@ LESSONS=[
  lesson('Cuidar las evidencias',
   'Las cuevas decoradas del Vézère forman parte del Patrimonio Mundial. Conservar estos lugares protege testimonios que permiten investigar el pasado.',5,
   ('¿Qué conviene hacer con una pintura antigua?','Protegerla','Rayarla','Pintar encima'),
-  ('¿Qué nos ayuda a conocer?','El pasado humano','La contraseña de Crono','El futuro exacto'),
+  ('¿Qué nos ayuda a conocer?','El pasado humano','Una predicción exacta del futuro','El futuro exacto'),
   ('¿Por qué conservar una cueva decorada?','Para proteger evidencias','Para borrar sus dibujos','Para sustituirla por una copia sin registro'),
   ('¿Qué reconoce la UNESCO en estos sitios?','Su valor como patrimonio','Que sean parques de máquinas','Que todos sus dibujos sean modernos'),
   ('¿Qué se pierde si destruimos una evidencia?','Información difícil o imposible de recuperar','Solo una decoración reemplazable sin pérdida','La necesidad de investigar'),
@@ -182,7 +182,7 @@ LESSONS=[
  lesson('Barcos que conectan ciudades',
   'La Atenas clásica tuvo un poderoso imperio marítimo. Las rutas del Mediterráneo conectaban ciudades y favorecían la circulación de bienes.',7,
   ('¿Por dónde viajaban estos barcos?','Por el mar','Por vías de tren','Por la Luna'),
-  ('¿Qué mar aparece en este mapa?','El Mediterráneo','Un océano de lava','Un mar de plástico'),
+  ('¿Qué mar conectaba Atenas con otras ciudades?','El Mediterráneo','Un océano de lava','Un mar de plástico'),
   ('¿Qué permitían las rutas marítimas?','Conectar ciudades y mover bienes','Aislar para siempre todos los puertos','Eliminar todos los intercambios'),
   ('¿Qué significa marítimo?','Relacionado con el mar','Relacionado con trenes','Relacionado con volcanes solamente'),
   ('¿Por qué estudiar rutas además de ciudades?','Permite analizar sus conexiones','Cada ciudad existía sin contactos','Las rutas solo son decoración'),
@@ -223,7 +223,7 @@ LESSONS=[
   'Byland es un ejemplo concreto de economía monástica en Inglaterra. Su historia ayuda a estudiar la Edad Media, pero no representa a todas las comunidades del mundo.',9,
   ('¿Dónde está el ejemplo estudiado?','En Inglaterra','En la Luna','Bajo el océano'),
   ('¿Todas las comunidades vivían igual?','No','Sí, sin diferencias','No había personas'),
-  ('¿Qué alcance tiene este ejemplo?','Una abadía y su contexto','Todo el planeta sin excepciones','Solo el futuro de Crono'),
+  ('¿Qué alcance tiene este ejemplo?','Una abadía y su contexto','Todo el planeta sin excepciones','Todos los siglos sin diferencias'),
   ('¿Qué hace falta para comparar comunidades?','Estudiar más casos','Suponer que todas eran idénticas','Ignorar sus diferencias'),
   ('¿Por qué hay que indicar lugar y contexto?','Para no convertir un caso en una regla universal','Porque todas las regiones eran iguales','Porque la evidencia no necesita ubicación'),
   ('¿Qué conclusión es defendible?','Algunos monasterios ingleses obtuvieron ingresos de la lana','Toda sociedad medieval dependía de Byland','Toda institución tenía el mismo ingreso')),
@@ -261,7 +261,7 @@ LESSONS=[
   ('¿Qué explicación integra arte y técnica?','La construcción permite espacios para vidrieras','El color reemplaza todo soporte','El tamaño de una ventana no tiene límites físicos')),
  lesson('La máquina que sacaba agua',
   'Newcomen desarrolló en 1712 un motor empleado para bombear agua de minas. El vapor y su condensación intervenían en su funcionamiento.',12,
-  ('¿Qué sacaba este motor de las minas?','Agua','Plumas','Cuadernos de Crono'),
+  ('¿Qué sacaba este motor de las minas?','Agua','Plumas','Vasijas de cerámica'),
   ('¿Qué material produce vapor al calentarse?','Agua','Una piedra seca por sí sola','Un cable sin energía'),
   ('¿Qué problema ayudó a resolver?','La acumulación de agua en minas','La falta de juegos deportivos','La ausencia de cerámica griega'),
   ('¿En qué año se desarrolló este tipo de motor?','1712','66 millones de años atrás','El año pasado'),
@@ -301,7 +301,7 @@ LESSONS=[
   ('¿Qué pregunta completa la historia de una innovación?','Quién pudo usarla y cuándo','Solo quién recibió más fama','Solo qué aspecto tiene el invento')),
  lesson('Inventar también es colaborar',
   'Las lámparas prácticas de Edison y Swan aparecieron alrededor de 1880. La historia de la iluminación incluye a varias personas y distintas etapas de desarrollo.',14,
-  ('¿Cuántas personas aparecen en este ejemplo?','Dos: Edison y Swan','Solo Crono','Ninguna'),
+  ('¿Cuántas personas aparecen en este ejemplo?','Dos: Edison y Swan','Solo James Watt','Ninguna'),
   ('¿Para qué sirve una lámpara?','Para iluminar','Para fosilizar huesos','Para criar ovejas'),
   ('¿Qué muestra mencionar a Edison y a Swan?','Que participaron distintas personas','Que una sola persona hizo todo','Que nunca hubo mejoras'),
   ('¿Alrededor de qué año aparecieron estas lámparas?','1880','1380','Hace 12.000 años'),
@@ -407,4 +407,8 @@ extend_journeys(Stage,lesson,STAGES,LESSONS,SOURCES)
 
 from .new_histories import extend_new
 extend_new(Stage,lesson,STAGES,LESSONS,SOURCES)
-assert len(STAGES)==46 and len(LESSONS)==92
+from .world_wars import apply_existing
+apply_existing(Stage,Lesson,STAGES,LESSONS,SOURCES)
+from .chernobyl_content import apply as apply_chernobyl
+apply_chernobyl(Stage,Lesson,STAGES,LESSONS,SOURCES)
+assert len(STAGES)==50 and len(LESSONS)==100

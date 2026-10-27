@@ -53,6 +53,7 @@ class CommunityUI:
         from .physics import World
         if getattr(self,'session_started',False) and not self.world.complete:self.save.capture(self.world)
         self.save=self.school.select(key);self.audio.enabled=self.save.data['sound']
+        self.audio.set_volumes(self.save.data['music_volume'],self.save.data['effects_volume'])
         self.world=World(0,0,self.save.effective_upgrades(),self.save.data['solved'],self.save.combat_band())
         self.world.player.skin=self.save.data['skin']
         self.session_started=False;self.camera=0.;self.particles=[];self.rift_return_memory=None
@@ -64,6 +65,7 @@ class CommunityUI:
             except (KeyError,ValueError,TypeError):pass
 
     def toggle_practice(self):
+        origin=self.state;history=list(getattr(self,'navigation',[]));settings_return=self.settings_return
         entering=not self.save.data['practice']
         if entering:
             if getattr(self,'session_started',False):self.save.capture(self.world)
@@ -76,7 +78,8 @@ class CommunityUI:
                 self.load(*divmod(self.save.data['current'],3),restore=True)
             else:self.load(self.world.index,self.world.stage,restore=True)
         else:self.load(self.world.index,self.world.stage)
-        self.set_state('pause');self.settings_return='pause'
+        self.set_state(origin);self.navigation=history;self.settings_return=settings_return
+        self.community_message='Modo de prueba activado.' if entering else 'Modo de prueba desactivado. Progreso real conservado.'
 
     def start_room(self):
         from .mobile import bridge

@@ -6,6 +6,9 @@ from .art import line,rect,circle,text,GOLD,mix
 
 @lru_cache(maxsize=10)
 def scene(level):
+    if level>=46:
+        from .war_art import scene as war_scene
+        return war_scene(level)
     if level>=43:
         from .coldwar_art import scene as cold_scene
         return cold_scene(level)

@@ -41,6 +41,8 @@ ROUTE_NAMES+=(('Estancias','Paso de los suministros','Campamento farroupilha'),(
 
 ITINERARIES+=('000121232101232100','000000000000000000','001232101212321000')
 ROUTE_NAMES+=(('La ciudad dividida','Mensajes entre barrios','Antenas de encuentro'),('Cráteres','Baja gravedad','Reparación del módulo'),('Documentos','Perspectivas','La mesa del diálogo'))
+ITINERARIES+=('001001212321001210','000121232101212100','012321232100123210','000121012123210010')
+ROUTE_NAMES+=(('Camino de abastecimiento','Fuertes de Verdún','Puesto de ayuda'),('Mensajes fechados','El vagón de Compiègne','Ruta de asistencia'),('Ruinas junto al Volga','Refugios de invierno','Entrega de suministros'),('Aviso de gas','Respiradores','Evacuación de Ypres'))
 
 def build_route(index,stage,meta):
     level=index*3+stage
@@ -106,6 +108,7 @@ def build_route(index,stage,meta):
         if n:
             for j in range(2 if n%3==1 else 1):
                 kind=roster[(n+stage*2+index+j*3)%6]
+                if level in (43,45) and kind=='flyer':kind='sentry'
                 ex=xx+ww*(.45+j*.24)
                 if all(abs(ex-sx)>145 or abs(yy-sy)>80 for sx,sy in safe):
                     enemies.append(dict(x=ex,y=yy-34,left=xx+165,right=xx+ww-24,kind=kind,stage=stage))
@@ -124,6 +127,10 @@ def build_route(index,stage,meta):
         for spec in enemies:
             if spec['kind']=='flyer' and level in (36,37,38,39,40,41):spec['kind']='sentry'
             spec.update(stage=1 if level in (36,37) else 0,faction='imperial_brazil' if level==36 else 'royalist')
+    if level==35:enemies=[];hazards=[]
+    if level in (45,47):enemies=[]
+    if level==48:
+        for spec in enemies:spec['stage']=1
     # Exactly 48 echoes: each upper route contributes, the remainder marks travel.
     echoes=[(platforms[b]['x']+78,platforms[b]['y']-36) for _,a,b,c in branches]
     for xx,yy,ww,k in main:
@@ -141,6 +148,7 @@ def build_route(index,stage,meta):
         k=add(tail_x,tail_y,200,28)
         links.append((previous,k));previous=k;tail_x+=280
     has_boss=stage==2 or index>=9
+    if level in (35,43,45,47,49):has_boss=False
     arena_left=tail_x if has_boss else None
     end=add(tail_x,584,1280 if has_boss else 520,220)
     links.append((previous,end))

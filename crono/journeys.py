@@ -1,6 +1,6 @@
 """Stable IDs for historical excursions, rescues and their actual contexts."""
 COMBAT_ERAS=(7,7,7,2,4,5,5,2,6)
-DATES=('20 de noviembre de 1845','Enero de 1817','1825–1828','Alejandría · época helenística','Ferrocarril · siglo XIX','Europa · siglo XX','Malvinas · 1982','Pompeya · año 79','Apolo 11 · julio de 1969')
+DATES=('20 de noviembre de 1845','Enero de 1817','1825–1828','Alejandría · época helenística','Ferrocarril · siglo XIX','Europa · siglo XX','Malvinas · 1982','Pompeya · año 79','Chernóbil · abril de 1986')
 BOSSES=('El bloqueo del Paraná','El guardián del paso','La fragata del tiempo','La sombra del faro','La locomotora sin rumbo','La sirena del último refugio','La tormenta del Atlántico','El frente de ceniza','El ruido de la órbita')
 VARIANTS=('battery','andes','naval','lighthouse','train','hospital','malvinas','volcano','lunar')
 RESCUES={
@@ -16,12 +16,15 @@ RESCUES={
    text='La médica necesita una ruta segura para evacuar heridos. Su misión se centra en proteger vidas y abre un hospital de campaña ficticio inspirado en la atención durante la guerra.'),
 }
 RIFTS={23:33,11:34,20:35}
+RIFTS[15]=49
 
 from .new_histories import NEW_MAPS
 COMBAT_ERAS+=tuple(row['combat'] for row in NEW_MAPS)
 DATES+=tuple(row['date'] for row in NEW_MAPS)
 BOSSES+=('El cerco de los suministros','El eco de la quebrada','El desorden del archivo','La prensa desajustada','El coloso del equilibrio','El guardián del polvo','El ruido de las señales','La interferencia entre barrios','El módulo averiado','El nudo del desencuentro')
 VARIANTS+=('frontier','frontier','archive','press','lever','manuscript','cipher','cipher','moonrepair','archive')
+BOSSES+=('El bloqueo del abastecimiento','El último obstáculo','El cerco de invierno','La alarma del frente')
+VARIANTS+=('hospital','hospital','hospital','hospital')
 RESCUES.update({
  'bibliotecaria':dict(level=26,bonus=38,name='La bibliotecaria viajera',date='Personaje ficticio · Alejandría helenística',text='Una guardiana de los textos abre una ruta a la Alejandría helenística, posterior al Egipto de los templos. El reloj enlaza épocas distintas; su rescate es ficticio.'),
  'impresor':dict(level=10,bonus=39,name='El aprendiz de impresor',date='Personaje ficticio · Maguncia, hacia 1450',text='El reloj conecta la ciudad medieval con un taller del siglo XV. Rescatar al aprendiz abre otra época: no sitúa la imprenta de Gutenberg en 1380.'),
@@ -31,6 +34,7 @@ RESCUES.update({
 
 def combat_era(index,stage=0):return COMBAT_ERAS[index*3+stage-27] if index>=9 else index
 def date_for(level):
+    if level in (15,16,17):return {15:'Europa · 1914–1918',16:'Londres · 1940–1941',17:'Europa · 1945–1948'}[level]
     if level>=27:return DATES[level-27]
     from .levels import ERAS
     return ERAS[level//3].date

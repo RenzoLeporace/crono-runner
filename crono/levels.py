@@ -70,6 +70,10 @@ for title in ('PAÍSES Y MEMORIAS','EL SABER EN MOVIMIENTO','REDES DE COOPERACI�
         'Recupera fuentes, contrasta relatos y completa una misión contextual.',
         (41,62,79),(198,185,146),(108,130,122),(54,82,86),(66,74,69),(191,177,135),(239,195,111),'journey'))
 
+ERAS.append(Era('LA SEGUNDA GUERRA MUNDIAL','1939–1945','Vidas entre frentes y refugios',
+    'Londres, el frente oriental y el final de la guerra en Europa.',
+    (28,36,47),(142,148,137),(76,89,89),(43,56,64),(42,46,47),(146,151,133),(238,186,109),'journey'))
+
 
 def level_data(index,stage=0):
     from .education import STAGES

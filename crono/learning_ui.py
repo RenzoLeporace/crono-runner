@@ -1,11 +1,13 @@
 """Educational overlays, age selection, workshop and an illustrated field guide."""
 import random
 import webbrowser
+from functools import lru_cache
 from .education import AGE_BANDS, LESSONS, SOURCES, STAGES, UPGRADES, fact_for
 from .art import text, tracked, rect, line, circle, diamond, clock_icon, PAPER, MUTED, CYAN, GOLD, INK, W, H
 from .combat import ENEMY_NAMES, ENEMY_HINTS, BOSS_NAMES, BOSS_HINTS, Enemy
 
 
+@lru_cache(maxsize=512)
 def wrap_rows(value,width,size=18,bold=False):
     from .art import font
     words=[]
@@ -72,6 +74,7 @@ class LearningUI:
                         primary=band==self.save.data['age_band'],small=True,arrow=False)
 
     def open_panel(self,name):
+        if name in ('skins','achievements'):self.open_rewards(name);return
         if self.state not in ('workshop','notebook','bestiary','heritage'):
             self.panel_return=self.state
         self.set_state(name)
@@ -102,8 +105,9 @@ class LearningUI:
         station=self.world.near_station()
         if station:
             self.open_lesson(station[2])
+        elif self.world.traits.can_work():return
         else:
-            self.world.say('Acércate a un archivo luminoso y pulsa E. U abre las mejoras; C, el cuaderno.')
+            self.world.say('Camina hasta la señal. Cuando estés cerca, toca USAR.' if self.touch_enabled() else 'Acércate a un libro o puesto y pulsa E. Mantén E junto a una tarea para trabajar.')
 
     def open_lesson(self,topic):
         self.quiz_return=self.state if self.state in ('play','notebook') else 'play'
@@ -112,10 +116,21 @@ class LearningUI:
         band=self.save.data['age_band']
         key=(topic,band)
         self.question=self.learning_bank().choose(topic,band,random,self.question_history.get(key))
+        from .curiosities import MAP_CURIOSITIES
+        if topic%2 and MAP_CURIOSITIES[topic//2] in self.world.curiosities_this_run and not self.world.mechanic.state.get('curiosity_tested'):
+            records=self.learning_bank().records
+            record=next((r for r in records if r['topic']==topic and r['band']==band and r.get('kind')=='curiosity'),None)
+            if record:
+                from .education import Question
+                order=list(range(3));random.shuffle(order)
+                self.question=Question(record['id'],topic,record['prompt'],tuple(record['options'][i] for i in order),order.index(record['correct']),record['explanation'],record['source'],'curiosity')
+        self.quiz_read_record_id=self.question.id
+        self.quiz_read_fact=fact_for(topic,band) if self.question.kind!='curiosity' and self.bank.original_explanations.get(self.question.id)==self.question.explanation else self.question.explanation or fact_for(topic,band)
         self.question_history[key]=self.question.id
         self.quiz_mode='read'
         self.quiz_reward=False
         self.quiz_scroll=self.quiz_feedback_scroll=0
+        self.quiz_page=0
         self.set_state('quiz')
 
     def answer_question(self,choice):
@@ -124,6 +139,7 @@ class LearningUI:
         first=not any(a.get('question')==self.question.id and a.get('practice',False)==self.save.data['practice'] for a in self.save.data['attempts'])
         self.save.record_attempt(self.question,choice,first)
         if choice==self.question.correct:
+            if self.question.kind=='curiosity':self.world.mechanic.state['curiosity_tested']=True
             self.quiz_reward=self.save.answer(self.quiz_topic)
             self.world.answered.add(self.quiz_topic)
             if self.tutorial_active and self.tutorial_step==4 and self.quiz_topic==self.tutorial_topic:
@@ -136,6 +152,10 @@ class LearningUI:
         self.selection=0
         self.buttons=[]
         self.quiz_feedback_scroll=0
+
+    def reading_fact(self):
+        if getattr(self,'quiz_read_record_id',None)==self.question.id:return self.quiz_read_fact
+        return self.question.explanation or fact_for(self.quiz_topic,self.save.data['age_band'])
 
     def learning_scroll(self,event):
         import pygame as pg
@@ -172,11 +192,12 @@ class LearningUI:
         self.dim(235)
 
     def quiz(self):
+        if self.touch_enabled():return self.mobile_quiz()
         s=self.canvas
         self.artist.scene(s,self.world,self.camera,self.time)
         self.dim(220)
         lesson=LESSONS[self.quiz_topic]
-        fact=self.question.explanation or fact_for(self.quiz_topic,self.save.data['age_band'])
+        fact=self.reading_fact() if self.quiz_mode=='read' else self.question.explanation or fact_for(self.quiz_topic,self.save.data['age_band'])
         stage=STAGES[self.quiz_topic//2]
         tracked(s,'ARCHIVO DE CAMPO',(65,43),12,CYAN,3)
         text(s,stage.name,(65,73),32,PAPER,True,serif=True)

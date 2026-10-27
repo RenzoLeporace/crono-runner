@@ -50,7 +50,7 @@ class AndroidRenderTests(unittest.TestCase):
             boxes={key:pg.Rect(box) for key,box in boxes_for_width(width).items()}
             self.assertEqual(boxes['left'].left,32)
             self.assertEqual(width-boxes['jump'].right,32)
-            self.assertEqual(boxes['jump'].size,(112,112))
+            self.assertEqual(boxes['jump'].size,(156,156))
             for key,box in boxes.items():
                 self.assertGreaterEqual(min(box.size),96)
                 self.assertTrue(pg.Rect(32,100,width-64,588).contains(box))

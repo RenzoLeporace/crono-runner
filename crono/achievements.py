@@ -17,7 +17,7 @@ def earned(data):
     solved=set(data.get('solved',[]));upgrades=set(data.get('upgrades',[]));rescues=set(data.get('rescued_ids',[]))
     rifts=set(data.get('rifts_completed',[]));mechanics=set(data.get('mechanics_completed',[]));skins=set(data.get('purchased_skins',[]))
     checks=[bool(levels),0 in levels,
-        *[set(e*3+s for s in range(3))<=levels for e in (0,1,8,2,3,4,5,6)],
+        *[set(chapter_levels(e)+(chapter_levels(16) if e==5 else ()))<=levels for e in (0,1,8,2,3,4,5,6)],
         set(MAIN_LEVEL_IDS)<=levels,21 in levels,22 in levels,27 in levels,23 in levels,set(DLC_LEVEL_IDS)<=levels,
         set(MAIN_LEVEL_IDS+DLC_LEVEL_IDS)<=levels,
         any(bool(v) for v in fragments.values()),complete>=1,complete>=5,

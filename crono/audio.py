@@ -9,6 +9,7 @@ import sys
 class Audio:
     def __init__(self):
         self.enabled = True
+        self.music_volume=.7;self.effects_volume=.8
         self.ready = False
         self.sounds = {}
         self.ambient = []
@@ -69,16 +70,24 @@ class Audio:
         if self.ready and self.enabled and name in self.sounds:
             channel = pg.mixer.find_channel()
             if channel:
+                channel.set_volume(self.effects_volume)
                 channel.play(self.sounds[name])
+
+    def set_volumes(self,music,effects):
+        self.music_volume=music/100;self.effects_volume=effects/100
+        if self.ready:
+            pg.mixer.music.set_volume(self.music_volume)
+            pg.mixer.Channel(15).set_volume(self.music_volume)
+            for i in range(15):pg.mixer.Channel(i).set_volume(self.effects_volume)
 
     def ambience(self, index):
         if self.ready:
             pg.mixer.music.stop()
             file=self.folder/f'era-{index%9}.wav'
             if self.enabled and file.exists():
-                try:pg.mixer.music.load(str(file));pg.mixer.music.set_volume(.7);pg.mixer.music.play(-1,fade_ms=500)
+                try:pg.mixer.music.load(str(file));pg.mixer.music.set_volume(self.music_volume);pg.mixer.music.play(-1,fade_ms=500)
                 except pg.error:
-                    self.current_track=pg.mixer.Sound(str(file));self.current_track.set_volume(.7)
+                    self.current_track=pg.mixer.Sound(str(file));pg.mixer.Channel(15).set_volume(self.music_volume)
                     pg.mixer.Channel(15).play(self.current_track,loops=-1,fade_ms=500)
 
     def toggle(self, index):

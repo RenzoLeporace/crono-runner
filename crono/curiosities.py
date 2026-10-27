@@ -39,14 +39,17 @@ ROWS=(
  ('Una luz para encontrar el puerto','El Faro de Alejandría pertenece al mundo helenístico; este modelo no reproduce sus dimensiones exactas.',60),
  ('El valor de una señal','Organizar el ferrocarril también significa coordinar la circulación y comprobar nuevas tecnologías.',63),
  ('La ayuda deja documentos','Los objetos y testimonios de atención médica permiten estudiar experiencias de la guerra.',65),
- ('La voz que busca contacto','Este equipo de radio representa la importancia de comunicar y ayudar en un conflicto. La misión de rescate es ficticia.',66),
+ ('La voz que busca contacto','La radio permite transmitir mensajes por ondas electromagnéticas. Las comunicaciones militares y civiles pueden estudiarse mediante registros y testimonios.',66),
  ('Una ciudad debajo de la ceniza','Un fragmento de decoración invita a estudiar la vida cotidiana y los cambios de una ciudad romana.',69),
- ('Una muestra de otro mundo','Recoger, registrar y estudiar muestras forma parte de la investigación; los planes e imágenes de Apolo 11 son fuentes de su misión.',71),
+ ('Un registro del accidente','Las mediciones y los documentos permiten estudiar el accidente de Chernóbil de 1986 y sus consecuencias.',70),
 )
 
 from .new_histories import NEW_MAPS
 MAP_CURIOSITIES+=tuple(row['curiosity'][0] for row in NEW_MAPS)
 ROWS+=tuple((row['curiosity'][1],row['curiosity'][2],72+i*2) for i,row in enumerate(NEW_MAPS))
+
+ARTIFACT_NAMES=dict(wing='Ala de pterosaurio',footprint='Huella fósil',feather='Plumas y aves',mammoth_ears='Mamut lanudo',flint='Herramienta de piedra',pigments='Pintura rupestre',assembly='Ciudadanía ateniense',amphora='Ánfora griega',olympiad='Juegos de Olimpia',wool='Lana de Byland Abbey',charter='Carta de mercado',rose_window='Rosetón gótico',pump='Motor de Newcomen',rocket='Locomotora Rocket',lightbulb='Lámpara incandescente',letter='Carta de la Primera Guerra Mundial',civilian_archive='Documento de abastecimiento',rights='Declaración Universal de Derechos Humanos',network='Red informática',solar='Panel solar',science='Laboratorio científico',ballot='Urna electoral de 1983',papyrus='Papiro egipcio',stonework='Construcción de pirámides',river_chain='Cadenas de la Vuelta de Obligado',naval_compass='Brújula naval',pharos='Faro de Alejandría',rail_signal='Señal ferroviaria',field_medicine='Medicina de campaña',field_radio='Radio de campaña',roman_mosaic='Mosaico romano',lunar_sample='Muestra lunar',lunar_boot='Bota de traje espacial',movable_type='Tipos móviles de imprenta',balance_arm='Palanca',cipher_rotor='Rotor de una máquina de cifrado')
+
 
 def extend_entries(entries):
     from .education import LESSONS,SOURCES,STAGES
@@ -59,6 +62,8 @@ def extend_entries(entries):
             entries[key]=dict(title=title,subtitle=f'{level_label(level)} · {STAGES[level].name}',
                 body=intro+'\n\n'+lesson.fact,source=source,url=url)
         entries[key]['level']=level
+        if key in ARTIFACT_NAMES:entries[key]['title']=ARTIFACT_NAMES[key]
+    entries['lunar_sample']['title']='Registro de Chernóbil · 1986'
     return {MAP_CURIOSITIES[level]:entries[MAP_CURIOSITIES[level]] for level in DISPLAY_LEVEL_IDS}
 
 def place_site(index,stage,main,stations,enemies):

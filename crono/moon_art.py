@@ -61,7 +61,7 @@ def draw_lander(s,x,y,t,repaired):
     if not -190<x<s.get_width()+190:return
     s.blit(lander(repaired),(int(x-150),int(y-231)))
     if not repaired and int(t*3)%2:circle(s,GOLD,(x+70,y-72),6,2)
-    text(s,'MÓDULO REPARADO' if repaired else '↓ · REPARAR CON LAS 3 PIEZAS',(x,y-260),13,CYAN if repaired else GOLD,True,'center')
+    text(s,'MÓDULO REPARADO' if repaired else 'MANTÉN E · REPARAR CON LAS 3 PIEZAS',(x,y-260),13,CYAN if repaired else GOLD,True,'center')
 
 
 @lru_cache(maxsize=80)

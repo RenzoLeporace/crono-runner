@@ -1,4 +1,4 @@
-# Contenidos y fuentes de la beta educativa 0.9
+# Contenidos y fuentes de la beta educativa 0.9.3
 
 Las explicaciones son paráfrasis originales. Cada archivo del juego enlaza su fuente en el cuaderno.
 Los mapas son escenarios de ficción inspirados en temas concretos, no reconstrucciones exactas ni una historia universal. Los jefes y los enemigos son ficticios.
@@ -133,63 +133,84 @@ Innovación y adopción gradual de la electricidad.
 - **La luz llega poco a poco**. Fuente: [London Museum · Electricidad](https://www.londonmuseum.org.uk/collections/london-stories/when-did-london-get-electricity/).
 - **Inventar también es colaborar**. Fuente: [London Museum · Electricidad](https://www.londonmuseum.org.uk/collections/london-stories/when-did-london-get-electricity/).
 
-## 7.1 · Cartas desde 1914
+## 7.1 · 1914 · el frente y sus cartas
 
-Primera Guerra Mundial: alcance y vida civil.
+Inicio de la Primera Guerra Mundial, trincheras y vida civil.
 
 - **Una guerra de alcance mundial**. Fuente: [National Army Museum · Primera Guerra Mundial](https://www.nam.ac.uk/explore/first-world-war).
 - **Detrás de los frentes**. Fuente: [Parlamento británico · La población civil](https://www.parliament.uk/about/living-heritage/transformingsociety/private-lives/yourcountry/overview/homefront/).
 
-## 7.2 · Los refugios de 1939
+## 7.2 · Verdún · sostener la ruta de ayuda
 
-Segunda Guerra Mundial: población civil y protección.
+Francia, 1916: desgaste, fortificaciones y abastecimiento.
 
-- **Una nueva guerra mundial**. Fuente: [National Army Museum · Primera Guerra Mundial](https://www.nam.ac.uk/explore/first-world-war).
-- **Proteger la vida cotidiana**. Fuente: [Parlamento británico · La población civil](https://www.parliament.uk/about/living-heritage/transformingsociety/private-lives/yourcountry/overview/homefront/).
+- **Verdún, una batalla de desgaste**. Fuente: [Ministerio de las Fuerzas Armadas de Francia · 1916](https://www.defense.gouv.fr/chemins-memoire/histoire-memoires/ressources-historiques/premiere-guerre-mondiale/combattre-combats/fronts-32).
+- **La Somme y el cambio técnico**. Fuente: [Ministerio de las Fuerzas Armadas de Francia · 1916](https://www.defense.gouv.fr/chemins-memoire/histoire-memoires/ressources-historiques/premiere-guerre-mondiale/combattre-combats/fronts-32).
 
-## 7.3 · Reconstruir la paz
+## 7.3 · 1918 · llevar la noticia del armisticio
 
-1945 y 1948: cooperación y derechos humanos.
+Compiègne y frente occidental: cese del fuego, asistencia y posguerra.
 
-- **Cooperar después de la guerra**. Fuente: [ONU · Historia de las Naciones Unidas](https://www.un.org/en/about-us/history-of-the-un).
+- **La hora del cese del fuego**. Fuente: [National Army Museum · 1918](https://www.nam.ac.uk/explore/1918-victory).
+- **El armisticio no resolvió todo**. Fuente: [National Army Museum · Paz y conmemoración](https://www.nam.ac.uk/explore/peace-and-commemoration).
+
+## 8.1 · Londres · protegerse del Blitz
+
+Bombardeos de 1940–1941, refugios y población civil.
+
+- **Londres durante el Blitz**. Fuente: [London Museum · El Blitz](https://www.londonmuseum.org.uk/collections/london-stories/londons-blitz-a-city-at-war/).
+- **Sirenas, refugios y ayuda civil**. Fuente: [RAF Museum · El frente interno](https://www.rafmuseum.org.uk/research/online-exhibitions/history-of-the-battle-of-britain/the-home-front/).
+
+## 8.2 · Stalingrado · sobrevivir al invierno
+
+Frente oriental, 1942–1943: cerco, abastecimiento y coste humano.
+
+- **La ciudad junto al Volga**. Fuente: [United States Holocaust Memorial Museum · Frente oriental](https://encyclopedia.ushmm.org/content/en/article/the-soviet-union-and-the-eastern-front).
+- **El cerco y el abastecimiento**. Fuente: [United States Holocaust Memorial Museum · Frente oriental](https://encyclopedia.ushmm.org/content/en/article/the-soviet-union-and-the-eastern-front).
+
+## 8.3 · 1945 · de Berlín a la reconstrucción
+
+El final de la guerra en Europa, cooperación y derechos humanos.
+
+- **Berlín y el final de la guerra en Europa**. Fuente: [National Archives · Rendición de Alemania](https://www.archives.gov/milestone-documents/surrender-of-germany).
 - **Derechos para todas las personas**. Fuente: [ONU · Declaración Universal de Derechos Humanos](https://www.un.org/en/about-us/universal-declaration-of-human-rights).
 
-## 8.1 · Guerra Fría · una ciudad dividida
+## 9.1 · Guerra Fría · una ciudad dividida
 
 Berlín: fronteras, experiencias civiles y contraste de fuentes.
 
 - **Un mundo en tensión**. Fuente: [Berlín · historia del muro](https://www.berlin.de/sehenswuerdigkeiten/3561866-3558930-berliner-mauer.html).
 - **Berlín y sus habitantes**. Fuente: [Berlín · historia del muro](https://www.berlin.de/sehenswuerdigkeiten/3561866-3558930-berliner-mauer.html).
 
-## 8.2 · La Luna · reparar para regresar
+## 9.2 · La Luna · reparar para regresar
 
-Baja gravedad, carrera espacial y reparación del módulo ficticio de Crono.
+Gravedad lunar y exploración espacial durante la carrera espacial.
 
 - **La gravedad no desaparece**. Fuente: [NASA Science · preguntas sobre la Luna](https://science.nasa.gov/moon/top-moon-questions/).
-- **Explorar requiere preparación**. Fuente: [NASA Science · preguntas sobre la Luna](https://science.nasa.gov/moon/top-moon-questions/).
+- **Explorar requiere preparación**. Fuente: [NASA · Apollo 11](https://www.nasa.gov/mission/apollo-11/).
 
-## 8.3 · Guerra Fría · abrir caminos al diálogo
+## 9.3 · Guerra Fría · abrir caminos al diálogo
 
 Distensión, cambios de 1989–1991 y cooperación.
 
 - **Cambios que no ocurren en un solo día**. Fuente: [Office of the Historian · Berlín y la URSS](https://history.state.gov/departmenthistory/short-history/berlinwall).
 - **Investigar también exige escuchar**. Fuente: [Office of the Historian · Berlín y la URSS](https://history.state.gov/departmenthistory/short-history/berlinwall).
 
-## 9.1 · La ciudad de las redes
+## 10.1 · La ciudad de las redes
 
 Conectividad, acceso y cooperación digital.
 
 - **Conectarse también es acceder**. Fuente: [ONU · Cooperación digital](https://www.un.org/en/content/digital-cooperation-roadmap/).
 - **Compartir conocimiento digital**. Fuente: [ONU · Cooperación digital](https://www.un.org/en/content/digital-cooperation-roadmap/).
 
-## 9.2 · La energía del mañana
+## 10.2 · La energía del mañana
 
 Fuentes renovables y transformación de energía.
 
 - **Energía del Sol y del viento**. Fuente: [ONU · Energía renovable](https://www.un.org/en/climatechange/what-is-renewable-energy).
 - **Elegir fuentes de energía**. Fuente: [ONU · Energía renovable](https://www.un.org/en/climatechange/what-is-renewable-energy).
 
-## 9.3 · El observatorio del presente
+## 10.3 · El observatorio del presente
 
 Cooperación científica y salud mundial.
 
@@ -322,12 +343,19 @@ Erupción del Vesubio y evidencias de la vida romana.
 - **La erupción del Vesubio**. Fuente: [Parque Arqueológico de Pompeya](https://pompeiisites.org/en/pompeii-map/analysis/pompeii-after-the-eruption/).
 - **Una ciudad no es una sola imagen**. Fuente: [Parque Arqueológico de Pompeya](https://pompeiisites.org/en/pompeii-map/analysis/pompeii-after-the-eruption/).
 
-## G.3 · Apolo 11 · el Mar de la Tranquilidad
+## G.3 · Chernóbil · comunicar para proteger
 
-Exploración lunar, cooperación y evidencias de una misión.
+1986: accidente nuclear, evacuación e información pública.
 
-- **Llegar a la Luna**. Fuente: [NASA · Apolo 11](https://www.nasa.gov/mission/apollo-11/).
-- **Una misión es trabajo compartido**. Fuente: [NASA · Apolo 11](https://www.nasa.gov/mission/apollo-11/).
+- **El accidente de 1986**. Fuente: [Central de Chornóbil · Accidente de 1986](https://www.chnpp.gov.ua/en/about/history-of-the-chnpp/accident-of-1986).
+- **La información y la protección**. Fuente: [OIEA · Estudios y cooperación sobre Chernóbil](https://www.iaea.org/sites/default/files/21/04/iaea-background-document-chornobyl.pdf).
+
+## G.4 · Ypres · la amenaza de los gases
+
+Bélgica, 1915: guerra química y protección de las personas.
+
+- **Una nueva amenaza en Ypres**. Fuente: [National WWI Museum · Uso de gases](https://www.theworldwar.org/learn/about-wwi/spotlight-first-usage-poison-gas).
+- **Protección frente a la guerra química**. Fuente: [Australian War Memorial · Respiradores de la Primera Guerra](https://www.awm.gov.au/3dtreasures/items/small-box-respirator/).
 
 ## Campaña y expansión argentina
 
@@ -341,7 +369,7 @@ En los mapas con jefe, resolver al menos un archivo de ese mapa prolonga 0,8 seg
 
 ## Patrimonio y tradiciones
 
-### Un dedo convertido en ala
+### Ala de pterosaurio
 
 El ala de un pterosaurio no era igual a la de un ave: observa el dedo que sostiene la membrana.
 
@@ -349,7 +377,7 @@ Los pterosaurios eran reptiles voladores, distintos de los dinosaurios. Sus alas
 
 Fuente: [Natural History Museum · Pterosaurios](https://www.nhm.ac.uk/discover/the-truth-about-pterosaurs.html).
 
-### Una pisada también cuenta
+### Huella fósil
 
 Un fósil no tiene que ser un hueso. Una huella puede conservar una actividad del pasado.
 
@@ -357,7 +385,7 @@ Huesos y dientes son restos del cuerpo. Huellas y otras señales de actividad ta
 
 Fuente: [Natural History Museum · Fósiles](https://www.nhm.ac.uk/discover/how-are-fossils-formed.html).
 
-### Dinosaurios que siguen aquí
+### Plumas y aves
 
 La extinción no acabó con toda la vida: las aves conservan una conexión con aquel mundo.
 
@@ -365,7 +393,7 @@ La extinción del final del Cretácico no eliminó toda la vida. Desaparecieron 
 
 Fuente: [Natural History Museum · Extinción](https://www.nhm.ac.uk/discover/dinosaur-extinction.html).
 
-### Orejas pequeñas contra el frío
+### Mamut lanudo
 
 El pelo no era la única adaptación del mamut lanudo. Mira también el tamaño de sus orejas.
 
@@ -373,7 +401,7 @@ El mamut lanudo tenía pelaje y orejas pequeñas, rasgos relacionados con la vid
 
 Fuente: [Natural History Museum · Mamuts](https://www.nhm.ac.uk/discover/were-all-mammoths-woolly.html).
 
-### Una piedra se vuelve herramienta
+### Herramienta de piedra
 
 Una herramienta tallada es una pista sobre las actividades de las personas.
 
@@ -381,7 +409,7 @@ Los humanos y sus antepasados fabricaron herramientas de piedra mucho antes de l
 
 Fuente: [Smithsonian · Herramientas y alimento](https://humanorigins.si.edu/human-characteristics/tools-food).
 
-### Una pared guarda una mirada
+### Pintura rupestre
 
 Las pinturas permiten estudiar cómo las personas representaban su entorno. Este pequeño panel es una interpretación artística.
 
@@ -389,7 +417,7 @@ En el valle del Vézère, en Francia, hay cuevas con arte paleolítico. En Lasca
 
 Fuente: [UNESCO · Cuevas del Vézère](https://whc.unesco.org/en/list/85/).
 
-### Un soporte nacido de una planta
+### Papiro egipcio
 
 Antes del papel industrial, en Egipto se escribía también sobre papiro.
 
@@ -397,7 +425,7 @@ La escritura egipcia empleaba signos con funciones distintas, incluidos sonidos.
 
 Fuente: [Fitzwilliam Museum · Escritura egipcia](https://fitzmuseum.cam.ac.uk/explore-our-collection/highlights/context/tradition-and-change/egyptian-writing).
 
-### Una obra de muchas tareas
+### Construcción de pirámides
 
 Una piedra colocada en una pirámide pasó antes por extracción y transporte: la obra exigía organización.
 
@@ -409,11 +437,11 @@ Fuente: [UNESCO · Menfis y su necrópolis](https://whc.unesco.org/en/list/86/).
 
 En la tradición bíblica, Moisés guía la salida de los israelitas de Egipto. La apertura del mar es uno de los episodios del Éxodo representados a lo largo de los siglos en el arte religioso.
 
-El reloj proyecta aquí una ilustración de ese relato. No es una inscripción egipcia auténtica ni una escena fechada por la arqueología. Las pirámides de Guiza y los templos del Reino Nuevo corresponden a períodos distintos; este recorrido no identifica al faraón del Éxodo con un gobernante concreto.
+El British Museum conserva una estampa de Sebald Beham, de 1533, que representa este episodio. Es una fuente para estudiar el arte religioso europeo del siglo XVI, no una inscripción egipcia antigua.
 
 Fuente: [British Museum · El paso del mar en el arte](https://www.britishmuseum.org/collection/object/P_1875-0710-270).
 
-### ¿Quién podía tomar la palabra?
+### Ciudadanía ateniense
 
 El objeto recuerda una pregunta esencial del ágora: quién tenía derecho a participar y quién quedaba fuera.
 
@@ -421,7 +449,7 @@ En Atenas, las mujeres, los residentes extranjeros y las personas esclavizadas e
 
 Fuente: [British Museum · Atenas y ciudadanía](https://www.britishmuseum.org/sites/default/files/2023-04/Luxury_and_power_large_print_guide.pdf).
 
-### Una vasija puede viajar muy lejos
+### Ánfora griega
 
 La cerámica conservada ayuda a conocer intercambios entre ciudades mediterráneas.
 
@@ -429,7 +457,7 @@ La cerámica pintada de Atenas se exportó por el Mediterráneo. Los objetos de 
 
 Fuente: [British Museum · Atenas y el Mediterráneo](https://www.britishmuseum.org/collection/galleries/greece-athens-and-lycia).
 
-### Cuatro años de espera
+### Juegos de Olimpia
 
 El calendario del encuentro de Olimpia tenía un ritmo propio: observa los cuatro tramos del círculo.
 
@@ -437,7 +465,7 @@ Los juegos de la antigua Olimpia se celebraban cada cuatro años. El lugar era u
 
 Fuente: [UNESCO · Olimpia](https://whc.unesco.org/en/list/517/).
 
-### La lana también sostenía abadías
+### Lana de Byland Abbey
 
 Una madeja puede contar historia económica. En Byland, criar ovejas y vender lana aportaba ingresos.
 
@@ -445,7 +473,7 @@ La abadía inglesa de Byland obtenía ingresos de criar ovejas y vender lana. Un
 
 Fuente: [English Heritage · Byland Abbey](https://www.english-heritage.org.uk/visit/places/byland-abbey/history/).
 
-### Un permiso para celebrar el mercado
+### Carta de mercado
 
 Un documento puede revelar cómo se organizaban los encuentros comerciales.
 
@@ -453,7 +481,7 @@ En la Inglaterra y el Gales medievales existían mercados y ferias. Sus concesio
 
 Fuente: [The National Archives · Mercados y ferias](https://www.nationalarchives.gov.uk/help-with-your-research/research-guides/markets-fairs).
 
-### La luz atraviesa el color
+### Rosetón gótico
 
 El pequeño rosetón muestra cómo el vidrio transforma la luz que entra en un edificio.
 
@@ -461,7 +489,7 @@ Las grandes vidrieras y los rosetones son rasgos del arte gótico. Los marcos de
 
 Fuente: [Victoria and Albert Museum · El gótico](https://www.vam.ac.uk/articles/the-gothic-style-an-introduction).
 
-### Una máquina para sacar agua
+### Motor de Newcomen
 
 Este modelo recuerda el problema de las minas que ayudó a resolver el motor de Newcomen.
 
@@ -469,7 +497,7 @@ Newcomen desarrolló en 1712 un motor empleado para bombear agua de minas. El va
 
 Fuente: [National Museums Scotland · Motor de Newcomen](https://www.nms.ac.uk/discover-catalogue/the-newcomen-engine-and-its-role-in-britains-industrial-revolution).
 
-### La locomotora puesta a prueba
+### Locomotora Rocket
 
 Una innovación también se conoce por las pruebas y documentos que la acompañan.
 
@@ -477,7 +505,7 @@ La locomotora Rocket ganó las pruebas de Rainhill de 1829. El concurso buscaba 
 
 Fuente: [Science Museum Group · Rocket](https://collection.sciencemuseumgroup.org.uk/objects/co26704).
 
-### La luz no llegó de golpe
+### Lámpara incandescente
 
 Que exista un invento no significa que todas las casas puedan usarlo al mismo tiempo.
 
@@ -485,7 +513,7 @@ Londres tuvo iluminación eléctrica en el siglo XIX, pero no se volvió común 
 
 Fuente: [London Museum · Electricidad](https://www.londonmuseum.org.uk/collections/london-stories/when-did-london-get-electricity/).
 
-### La guerra también tiene vida civil
+### Carta de la Primera Guerra Mundial
 
 Esta carta es una representación de los documentos que permiten estudiar experiencias fuera del combate.
 
@@ -493,15 +521,39 @@ En las dos guerras mundiales, civiles participaron en tareas de abastecimiento y
 
 Fuente: [Parlamento británico · La población civil](https://www.parliament.uk/about/living-heritage/transformingsociety/private-lives/yourcountry/overview/homefront/).
 
-### Un archivo detrás del refugio
+### Douaumont y Vaux
+
+Los fuertes de Douaumont y Vaux permiten localizar lugares concretos de la batalla de Verdún.
+
+La batalla de Verdún enfrentó a los ejércitos alemán y francés en 1916. Comenzó el 21 de febrero y se prolongó durante meses. Los fuertes de Douaumont y Vaux formaron parte de los combates.
+
+Fuente: [Ministerio de las Fuerzas Armadas de Francia · 1916](https://www.defense.gouv.fr/chemins-memoire/histoire-memoires/ressources-historiques/premiere-guerre-mondiale/combattre-combats/fronts-32).
+
+### El vagón de Compiègne
+
+El armisticio se firmó en un vagón de ferrocarril; su firma y la entrada en vigor no ocurrieron a la misma hora.
+
+El armisticio con Alemania se firmó en un vagón de ferrocarril en Compiègne, Francia, el 11 de noviembre de 1918. El cese del fuego entró en vigor a las once de la mañana en el frente occidental.
+
+Fuente: [National Army Museum · 1918](https://www.nam.ac.uk/explore/1918-victory).
+
+### Documento de abastecimiento
 
 Conservar documentos cotidianos ayuda a investigar cómo cambian el trabajo y la organización social.
 
-Los gobiernos tomaron medidas que afectaron la vida civil durante las guerras. Analizar sus documentos permite investigar cómo cambiaron el trabajo y la organización social.
+Durante los ataques aéreos, las sirenas advertían del peligro. En Londres se utilizaron distintos refugios, incluidas estaciones del metro y estructuras Anderson. Bomberos, servicios de emergencia y comunidades participaron en la protección y asistencia.
 
-Fuente: [Parlamento británico · La población civil](https://www.parliament.uk/about/living-heritage/transformingsociety/private-lives/yourcountry/overview/homefront/).
+Fuente: [RAF Museum · El frente interno](https://www.rafmuseum.org.uk/research/online-exhibitions/history-of-the-battle-of-britain/the-home-front/).
 
-### Un documento para todas las personas
+### El Volga y los suministros
+
+La ubicación junto al Volga ayuda a comprender la importancia de las rutas y los suministros de la ciudad.
+
+La batalla de Stalingrado se desarrolló en 1942–1943 en el frente oriental de la Segunda Guerra Mundial. La ciudad, hoy Volgogrado, está junto al río Volga. Los combates causaron enorme destrucción y sufrimiento.
+
+Fuente: [United States Holocaust Memorial Museum · Frente oriental](https://encyclopedia.ushmm.org/content/en/article/the-soviet-union-and-the-eastern-front).
+
+### Declaración Universal de Derechos Humanos
 
 La reconstrucción también incluyó acuerdos sobre derechos y dignidad.
 
@@ -517,11 +569,11 @@ La Guerra Fría fue una rivalidad política, económica, militar e ideológica e
 
 Fuente: [Berlín · historia del muro](https://www.berlin.de/sehenswuerdigkeiten/3561866-3558930-berliner-mauer.html).
 
-### Una huella en el regolito
+### Bota de traje espacial
 
 La superficie lunar permite estudiar materiales y condiciones distintas de las terrestres. La gravedad sigue actuando.
 
-En la superficie lunar la gravedad es aproximadamente una sexta parte de la terrestre. Los objetos siguen teniendo masa y peso, pero su peso es menor. La misión del juego ajusta el impulso del traje para permitir saltos largos controlables; no es una simulación física completa.
+En la superficie lunar la gravedad es aproximadamente una sexta parte de la terrestre. Los objetos siguen teniendo masa y peso, pero su peso es menor. La menor atracción gravitatoria modifica la caída de los cuerpos y la forma de desplazarse.
 
 Fuente: [NASA Science · preguntas sobre la Luna](https://science.nasa.gov/moon/top-moon-questions/).
 
@@ -533,7 +585,7 @@ La apertura del muro de Berlín en 1989 y la disolución de la Unión Soviética
 
 Fuente: [Office of the Historian · Berlín y la URSS](https://history.state.gov/departmenthistory/short-history/berlinwall).
 
-### Conectar es más que tender cables
+### Red informática
 
 Una red puede unir equipos; para que las personas la aprovechen también necesitan acceso y conocimientos.
 
@@ -541,7 +593,7 @@ La cooperación digital busca que las personas puedan acceder a Internet de form
 
 Fuente: [ONU · Cooperación digital](https://www.un.org/en/content/digital-cooperation-roadmap/).
 
-### Energía que vuelve a llegar
+### Panel solar
 
 El modelo solar invita a distinguir una fuente de energía de los dispositivos que la transforman.
 
@@ -549,7 +601,7 @@ La energía renovable puede provenir del Sol, el viento y el agua. Las tecnolog�
 
 Fuente: [ONU · Energía renovable](https://www.un.org/en/climatechange/what-is-renewable-energy).
 
-### La ciencia cruza fronteras
+### Laboratorio científico
 
 El pequeño laboratorio recuerda que afrontar problemas de salud requiere cooperación.
 
@@ -561,7 +613,7 @@ Fuente: [OMS · Historia de la cooperación en salud](https://www.who.int/about/
 
 La devoción a la Virgen de Luján se vincula con una imagen llegada desde Brasil en 1630. La tradición de la carreta relata que la imagen permaneció junto al río Luján. Es patrona de la Argentina y forma parte de su historia religiosa, artística y de peregrinaciones.
 
-Esta hornacina es una ilustración del juego: no sitúa la basílica actual en el Buenos Aires de 1810. El manto celeste, las manos unidas y la corona distinguen esta representación.
+El manto celeste, las manos unidas y la corona distinguen esta representación.
 
 Fuente: [Santuario de Luján · Historia](https://santuariodelujan.org.ar/historia/).
 
@@ -569,11 +621,11 @@ Fuente: [Santuario de Luján · Historia](https://santuariodelujan.org.ar/histor
 
 La Virgen de Itatí es patrona de Corrientes. Su devoción está ligada a la localidad de Itatí, fundada en 1615 junto al Paraná. Su imagen y las peregrinaciones tienen un lugar destacado en la cultura religiosa del nordeste argentino.
 
-Esta representación lleva manto azul, túnica clara, corona y manos unidas. Es una referencia cultural traída por el reloj; no significa que Itatí se encuentre en Tucumán o en Buenos Aires. Su basílica actual es del siglo XX.
+Esta representación lleva manto azul, túnica clara, corona y manos unidas. El santuario se encuentra en Itatí, Corrientes. Su basílica actual es del siglo XX.
 
 Fuente: [Argentina · Basílica de Itatí](https://www.argentina.gob.ar/viaja-por-argentina/que-hacer/visitar-la-basilica-de-la-virgen-de-itati).
 
-### Las cadenas del Paraná
+### Cadenas de la Vuelta de Obligado
 
 Una cadena en un río puede ser parte de una estrategia; también es una pista para investigar el conflicto de Obligado.
 
@@ -581,7 +633,7 @@ El combate de la Vuelta de Obligado ocurrió el 20 de noviembre de 1845 sobre el
 
 Fuente: [Archivo General de la Nación · Obligado](https://www.argentina.gob.ar/noticias/174deg-aniversario-de-la-batalla-de-vuelta-de-obligado-que-documentos-existen-en-el-archivo).
 
-### La urna devuelve la palabra
+### Urna electoral de 1983
 
 Las elecciones del 30 de octubre de 1983 marcaron el retorno del voto democrático antes de la asunción del 10 de diciembre.
 
@@ -593,13 +645,13 @@ Fuente: [Dirección Nacional Electoral · 1983](https://www.argentina.gob.ar/din
 
 El 5 de enero de 1817, antes del Cruce de los Andes, se proclamó a la Virgen del Carmen de Cuyo como Patrona y Generala del Ejército de los Andes. San Martín le entregó su bastón de mando. Esa es la advocación directamente vinculada con este ejército.
 
-Nuestra Señora del Rosario de Río Blanco y Paypaya es patrona de Jujuy. Se incluye aquí como una referencia cultural diferente, sin atribuirle el título de la Virgen del Carmen ni situar su santuario en el paso cordillerano.
+Nuestra Señora del Rosario de Río Blanco y Paypaya es patrona de Jujuy. Su santuario y su tradición tienen un contexto geográfico distinto del mendocino.
 
-El reloj reúne ambas ilustraciones para distinguir tradiciones, lugares y fuentes. No representa una aparición documentada durante el cruce. La preparación de rutas y provisiones sigue siendo indispensable para comprender la expedición.
+La preparación de rutas y provisiones sigue siendo indispensable para comprender la expedición.
 
 Fuente: [Gobierno de Mendoza · Bandera y Patrona del Ejército de los Andes](https://www.mendoza.gov.ar/prensa/se-conmemoro-el-dia-de-la-bandera-provincial/).
 
-### Una brújula no decide sola
+### Brújula naval
 
 Orientarse y coordinar una escuadra requería recursos y decisiones además de instrumentos.
 
@@ -607,23 +659,23 @@ Guillermo Brown dirigió la escuadra rioplatense durante el conflicto. La navega
 
 Fuente: [Armada Argentina · Guerra del Brasil](https://www.argentina.gob.ar/node/215022).
 
-### Una luz para encontrar el puerto
+### Faro de Alejandría
 
 El Faro de Alejandría pertenece al mundo helenístico; este modelo no reproduce sus dimensiones exactas.
 
-El antiguo faro de Alejandría se levantó en la época de los Ptolomeos, en el siglo III a. C. Su contexto helenístico es posterior a la Atenas clásica del recorrido principal.
+El antiguo faro de Alejandría se levantó en la época de los Ptolomeos, en el siglo III a. C. Su contexto helenístico es posterior a la Atenas clásica.
 
 Fuente: [Bibliotheca Alexandrina · Pharos](https://www.bibalex.org/alexmed/Projects/Details.aspx?ID=ddd8bbc7-4462-4fcf-ae2c-29da134de5f7).
 
-### El valor de una señal
+### Señal ferroviaria
 
 Organizar el ferrocarril también significa coordinar la circulación y comprobar nuevas tecnologías.
 
-Un ferrocarril necesita coordinar circulación y recursos, además de una locomotora. Las señales de esta misión son una mecánica de ficción para explorar esa necesidad de organización.
+Un ferrocarril necesita coordinar circulación y recursos, además de una locomotora. La señalización permite ordenar la circulación y reducir riesgos.
 
 Fuente: [Science Museum Group · Rocket](https://collection.sciencemuseumgroup.org.uk/objects/co26704).
 
-### La ayuda deja documentos
+### Medicina de campaña
 
 Los objetos y testimonios de atención médica permiten estudiar experiencias de la guerra.
 
@@ -655,7 +707,7 @@ La antigua biblioteca de Alejandría reunió textos y personas dedicadas al estu
 
 Fuente: [Bibliotheca Alexandrina · preguntas frecuentes](https://www.bibalex.org/fr/page/faq).
 
-### Una letra puede volver a imprimirse
+### Tipos móviles de imprenta
 
 Un tipo móvil es una pieza reutilizable: la tecnología también necesita trabajo y revisión.
 
@@ -663,11 +715,11 @@ Hacia mediados del siglo XV, Gutenberg desarrolló en Maguncia un sistema europe
 
 Fuente: [Biblioteca Nacional Alemana · Gutenberg](https://mediengeschichte.dnb.de/DBSMZBN/Content/EN/Printing/04-gutenberg-johannes-en.html).
 
-### El punto de apoyo importa
+### Palanca
 
 Mover el apoyo cambia las distancias y el esfuerzo necesario: experimenta antes de concluir.
 
-Arquímedes estudió problemas de equilibrio y geometría. Una palanca permite relacionar fuerza, distancia y punto de apoyo: no produce energía de la nada. Los modelos del mapa son herramientas de aprendizaje y no réplicas exactas de su taller.
+Arquímedes estudió problemas de equilibrio y geometría. Una palanca permite relacionar fuerza, distancia y punto de apoyo: no produce energía de la nada. Sus obras se estudian mediante textos, modelos y análisis de sus principios mecánicos.
 
 Fuente: [Museo Galileo · ciencia del equilibrio](https://catalogue.museogalileo.it/section/ScienceOfEquilibrium.html).
 
@@ -679,7 +731,7 @@ Tombuctú, en el actual Mali, fue un importante centro de comercio y aprendizaje
 
 Fuente: [Library of Congress · manuscritos de Mali](https://www.loc.gov/exhibits/mali/mali-overview.html).
 
-### Un rotor no trabaja solo
+### Rotor de una máquina de cifrado
 
 Personas, máquinas y procedimientos formaban una red de trabajo: una cifra no se interpreta sin contexto.
 
@@ -687,15 +739,15 @@ En Bletchley Park se trabajó para descifrar comunicaciones durante la Segunda G
 
 Fuente: [The National Museum of Computing · Bombe](https://www.tnmoc.org/bombe).
 
-### La voz que busca contacto
+### Radio de campaña
 
-Este equipo de radio representa la importancia de comunicar y ayudar en un conflicto. La misión de rescate es ficticia.
+La radio permite transmitir mensajes por ondas electromagnéticas. Las comunicaciones militares y civiles pueden estudiarse mediante registros y testimonios.
 
-La guerra de Malvinas ocurrió entre el 2 de abril y el 14 de junio de 1982. La excursión se centra en memoria, ayuda y comunicación; sus rescates son ficticios.
+La guerra de Malvinas ocurrió entre el 2 de abril y el 14 de junio de 1982. Los testimonios y documentos permiten estudiar sus efectos sobre combatientes y civiles.
 
 Fuente: [Argentina · Material educativo sobre Malvinas](https://www.argentina.gob.ar/sites/default/files/2023-05-09-icm02-malvinas_0.pdf).
 
-### Una ciudad debajo de la ceniza
+### Mosaico romano
 
 Un fragmento de decoración invita a estudiar la vida cotidiana y los cambios de una ciudad romana.
 
@@ -703,13 +755,21 @@ Las investigaciones arqueológicas estudian edificios, objetos y cambios de ocup
 
 Fuente: [Parque Arqueológico de Pompeya](https://pompeiisites.org/en/pompeii-map/analysis/pompeii-after-the-eruption/).
 
-### Una muestra de otro mundo
+### Registro de Chernóbil · 1986
 
-Recoger, registrar y estudiar muestras forma parte de la investigación; los planes e imágenes de Apolo 11 son fuentes de su misión.
+Las mediciones y los documentos permiten estudiar el accidente de Chernóbil de 1986 y sus consecuencias.
 
-El viaje requirió vehículos, comunicaciones, control de misión y cooperación. Los planes, registros e imágenes permiten investigar cómo se organizó.
+El 26 de abril de 1986 ocurrió un accidente en el reactor 4 de la central de Chernóbil, en la entonces Unión Soviética, hoy Ucrania. Una prueba derivó en explosiones e incendio y se liberó material radiactivo.
 
-Fuente: [NASA · Apolo 11](https://www.nasa.gov/mission/apollo-11/).
+Fuente: [Central de Chornóbil · Accidente de 1986](https://www.chnpp.gov.ua/en/about/history-of-the-chnpp/accident-of-1986).
+
+### Los primeros respiradores
+
+La protección respiratoria cambió durante la guerra; las máscaras no eliminaron el peligro químico.
+
+El 22 de abril de 1915, fuerzas alemanas liberaron cloro a gran escala cerca de Ypres, Bélgica. El gas causó graves daños a quienes estaban expuestos. Los ataques químicos se convirtieron en una amenaza en las trincheras.
+
+Fuente: [National WWI Museum · Uso de gases](https://www.theworldwar.org/learn/about-wwi/spotlight-first-usage-poison-gas).
 
 ## Referencias para la ambientación argentina
 

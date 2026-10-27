@@ -14,6 +14,9 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
+import android.widget.Toast;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.Voice;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import java.io.*;
@@ -32,6 +35,28 @@ public final class MainActivity extends Activity {
     private static final int SAVE_LIMIT=32*1024*1024;
     private String pendingFileJob;
     private String pendingExport;
+    private TextToSpeech speech;
+    private boolean speechReady;
+    private String pendingSpeech;
+
+    private void say(String value) {
+        pendingSpeech=value;
+        if(speech==null){
+            speech=new TextToSpeech(this,status->web.post(()->{
+                if(isFinishing()||isDestroyed())return;
+                Voice selected=null;
+                if(status==TextToSpeech.SUCCESS&&speech!=null&&speech.getVoices()!=null){
+                    for(Voice voice:speech.getVoices()){
+                        if(!"es".equals(voice.getLocale().getLanguage())||voice.isNetworkConnectionRequired()||voice.getFeatures()!=null&&voice.getFeatures().contains("notInstalled"))continue;
+                        selected=voice;if("AR".equals(voice.getLocale().getCountry()))break;
+                    }
+                }
+                if(selected!=null){speech.setVoice(selected);speechReady=true;speech.speak(pendingSpeech,TextToSpeech.QUEUE_FLUSH,null,"crono-help");}
+                else Toast.makeText(this,"No hay voz española instalada. Puedes seguir las señales de la pantalla.",Toast.LENGTH_LONG).show();
+            }));
+        }else if(speechReady)speech.speak(value,TextToSpeech.QUEUE_FLUSH,null,"crono-help");
+        else Toast.makeText(this,"La voz aún no está disponible.",Toast.LENGTH_SHORT).show();
+    }
 
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
@@ -126,6 +151,14 @@ public final class MainActivity extends Activity {
     }
 
     public final class Bridge {
+        @JavascriptInterface public boolean performanceLogging(){return getIntent().getBooleanExtra("crono_performance",false);}
+        @JavascriptInterface public boolean speak(String contents){
+            try{
+                String value=decoded(contents);
+                if(value.length()>3500)return false;
+                runOnUiThread(()->say(value));return true;
+            }catch(Exception error){return false;}
+        }
         @JavascriptInterface public String loadFiles() {
             JSONObject result=new JSONObject();
             for(String path:new String[]{"saves/perfiles.json","saves/docente.json"}){
@@ -228,6 +261,6 @@ public final class MainActivity extends Activity {
         super.onWindowFocusChanged(focused);
         if(focused)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
-    @Override protected void onDestroy(){network.shutdownNow();if(web!=null){web.removeJavascriptInterface("CronoAndroid");web.destroy();}super.onDestroy();}
-    @Override protected void onPause(){if(web!=null)web.evaluateJavascript("window.dispatchEvent(new Event('blur'))",null);super.onPause();}
+    @Override protected void onDestroy(){network.shutdownNow();if(speech!=null)speech.shutdown();if(web!=null){web.removeJavascriptInterface("CronoAndroid");web.destroy();}super.onDestroy();}
+    @Override protected void onPause(){if(speech!=null)speech.stop();if(web!=null)web.evaluateJavascript("window.dispatchEvent(new Event('blur'))",null);super.onPause();}
 }

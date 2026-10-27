@@ -22,6 +22,10 @@ def set_render_width(width,clear=False):
                 if callable(value) and hasattr(value,'cache_clear'):value.cache_clear()
 
 class ViewportUI:
+    def follow_camera_target(self):
+        width=self.viewport_width;padding=280 if self.touch_enabled() else 0
+        return max(-padding,min(self.world.width-width+(360 if padding else 0),self.world.player.rect.centerx-width*.38+self.world.player.facing*55))
+
     def configure_viewport(self,aspect=None):
         if aspect is None:
             w,h=self.display.get_size();aspect=w/max(1,h)

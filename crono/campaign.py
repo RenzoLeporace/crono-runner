@@ -1,18 +1,20 @@
 """Stable campaign boundaries; Argentina is independent of the main journey."""
-MAIN_ERA_IDS=(0,1,8,2,3,4,5,15,6)
+MAIN_ERA_IDS=(0,1,8,2,3,4,5,16,15,6)
+WW1_LEVEL_IDS=(15,46,47)
+WW2_LEVEL_IDS=(16,48,17)
 COLD_WAR_LEVEL_IDS=(43,44,45)
 MAIN_ERAS=len(MAIN_ERA_IDS)
-TOTAL_ERAS=16
+TOTAL_ERAS=17
 MAIN_LEVELS=MAIN_ERAS*3
-TOTAL_LEVELS=46
+TOTAL_LEVELS=50
 DLC_START=21  # Stable IDs: existing maps and teachers' questions never move.
-MAIN_LEVEL_IDS=tuple(n for e in MAIN_ERA_IDS for n in (COLD_WAR_LEVEL_IDS if e==15 else tuple(e*3+s for s in range(3))))
+MAIN_LEVEL_IDS=tuple(n for e in MAIN_ERA_IDS for n in (WW1_LEVEL_IDS if e==5 else WW2_LEVEL_IDS if e==16 else COLD_WAR_LEVEL_IDS if e==15 else tuple(e*3+s for s in range(3))))
 DLC_LEVEL_IDS=(21,22,27,23)
 BONUS_LEVEL_IDS=(28,29,30,31,32,36,37,38,39,40,41,42)
-RIFT_LEVEL_IDS=(33,34,35)
+RIFT_LEVEL_IDS=(33,34,35,49)
 CHAPTER_ORDER=MAIN_ERA_IDS+(7,9,10,11,12,13,14)
 DISPLAY_LEVEL_IDS=MAIN_LEVEL_IDS+DLC_LEVEL_IDS+BONUS_LEVEL_IDS+RIFT_LEVEL_IDS
-ERA_LABELS=('Primigenio','Deshielo','Grecia','Medievo','Industria','Guerras mundiales','Actualidad','Argentina · DLC','Antiguo Egipto','Argentina · bonus','Otros rescates','Grietas históricas','Brasil · DLC','Nuevas historias','Saberes y cooperación','Guerra Fría')
+ERA_LABELS=('Primigenio','Deshielo','Grecia','Medievo','Industria','Primera Guerra Mundial','Actualidad','Argentina · DLC','Antiguo Egipto','Argentina · bonus','Otros rescates','Grietas históricas','Brasil · DLC','Nuevas historias','Saberes y cooperación','Guerra Fría','Segunda Guerra Mundial')
 DIFFICULTIES=('Explorador · mínima','Aventurero · media','Experto · alta')
 
 def is_dlc(level):
@@ -40,7 +42,9 @@ def unlocked(level,frontier):
 
 def level_label(level):
     era,stage=divmod(level,3)
-    if level in COLD_WAR_LEVEL_IDS:return f'8.{COLD_WAR_LEVEL_IDS.index(level)+1}'
+    if level in WW1_LEVEL_IDS:return f'7.{WW1_LEVEL_IDS.index(level)+1}'
+    if level in WW2_LEVEL_IDS:return f'8.{WW2_LEVEL_IDS.index(level)+1}'
+    if level in COLD_WAR_LEVEL_IDS:return f'9.{COLD_WAR_LEVEL_IDS.index(level)+1}'
     if level==36:return 'BR.1'
     if level==37:return 'AR.B3'
     if level in DLC_LEVEL_IDS:return f'AR.{DLC_LEVEL_IDS.index(level)+1}'
@@ -49,6 +53,8 @@ def level_label(level):
     return f'{MAIN_ERA_IDS.index(era)+1}.{stage+1}'
 
 def chapter_for_level(level):
+    if level in WW1_LEVEL_IDS:return 5
+    if level in WW2_LEVEL_IDS:return 16
     if level in COLD_WAR_LEVEL_IDS:return 15
     if level in DLC_LEVEL_IDS:return 7
     if level in (28,29,37):return 9
@@ -60,6 +66,8 @@ def chapter_for_level(level):
     return level//3
 
 def chapter_levels(era):
+    if era==5:return WW1_LEVEL_IDS
+    if era==16:return WW2_LEVEL_IDS
     if era==15:return COLD_WAR_LEVEL_IDS
     if era==7:return DLC_LEVEL_IDS
     if era==9:return (28,29,37)

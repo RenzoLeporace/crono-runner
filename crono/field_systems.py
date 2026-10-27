@@ -24,13 +24,15 @@ PICKUPS.update(supply=('Carga de abastecimiento','Reúne las cargas y entrégala
                printing=('Caja de tipos','Recoge las letras y prepara una página en la prensa'),
                manuscripts=('Manuscrito protegido','Recupera los documentos y acompaña a su guardiana'))
 
-PICKUPS.update(moonrepair=('Pieza del módulo','Recupera las tres piezas y repara la nave con ↓'),dialogue=('Documento de perspectiva','Reúne las fuentes y contrástalas en la mesa final'))
+PICKUPS.update(moonrepair=('Pieza del módulo','Recupera las tres piezas y repara la nave manteniendo E'),dialogue=('Documento de perspectiva','Reúne las fuentes y contrástalas en la mesa final'))
 
 class FieldSystem:
     def __init__(self,m):
         self.m=m;self.world=m.world;self.kind=m.kind
         self.collected=set();self.marks=[];self.clock=0.;self.distance=0.;self.goal=0.;self.started=False
         self.lifts=[];self.beams=[];self.sheltered_time=0.;self.crossed=set()
+        self.work_elapsed=0.;self.work_key=None
+        self.impacts=[]
         floors=[p for p in self.world.platforms if not p.moving and p.rect.w>=180 and (self.kind!='chain' or not p.oneway)]
         self.points=[]
         for fraction in (.26,.57,.85):
@@ -83,6 +85,21 @@ class FieldSystem:
         if self.kind in ('warmth','wind'):return len(self.crossed)>=3
         return self.m.state['step']>=3
 
+    def work_target(self):
+        if not self.m.state['step'] or self.done:return None
+        p=self.world.player.rect;candidates=[]
+        if self.kind in ('supply','catalogue','printing','dialogue','moonrepair') and len(self.collected)==3:
+            point=self.world.data['repair_ship'] if self.kind=='moonrepair' else self.m.devices[0 if self.kind=='catalogue' else 2]
+            labels=dict(supply='Entrega las cajas',catalogue='Ordena las fichas',printing='Prepara la página',dialogue='Compara los documentos',moonrepair='Arregla la nave')
+            candidates=[(0,point,labels[self.kind],3 if self.kind=='moonrepair' else 1.5,True)]
+        elif self.kind in ('chain','cipher'):
+            candidates=[(i,(x,y+40),'Prepara la cadena' if self.kind=='chain' else 'Lee la señal',1.5 if self.kind=='chain' else .6,self.kind=='chain' or (self.clock+i)%3<1.2)
+                        for i,(x,y) in enumerate(self.points[:2] if self.kind=='chain' else self.points) if i not in self.crossed]
+        for i,point,label,duration,ready in candidates:
+            if abs(p.centerx-point[0])<95 and abs(p.bottom-point[1])<80:
+                return dict(key=(self.kind,i),point=point,label=label,duration=duration,ready=ready,progress=min(1,self.work_elapsed/duration) if self.work_key==(self.kind,i) else 0)
+        return None
+
     def update(self,dt,controls):
         events=[]
         w=self.world;m=self.m;p=w.player;step=m.state['step'];self.clock+=dt
@@ -99,16 +116,17 @@ class FieldSystem:
             if self.kind=='trade' and len(self.collected)<3:m.speed=.93
             if self.kind=='provisions':
                 m.wind=-35 if w.difficulty==0 else -65; m.speed=.92 if len(self.collected)<2 else 1.
-            if self.kind=='telescope' and controls.drop and p.grounded:p.cooldown=max(0,p.cooldown-dt*.5)
-        if self.kind in ('supply','catalogue','printing','dialogue','moonrepair') and len(self.collected)==3:
-            target=w.data['repair_ship'] if self.kind=='moonrepair' else m.devices[0 if self.kind=='catalogue' else 2]
-            if abs(p.rect.centerx-target[0])<95 and abs(p.rect.bottom-target[1])<80 and controls.drop and p.grounded:
-                self.sheltered_time+=dt
-                if self.sheltered_time>=(3 if self.kind=='moonrepair' else 1.5) and not self.goal:self.goal=1;w.say('Trabajo registrado y entrega completada.');events.append('checkpoint')
-        if self.kind=='cipher':
-            for i,(x,y) in enumerate(self.points):
-                if i not in self.crossed and abs(p.rect.centerx-x)<90 and abs(p.rect.bottom-y-40)<80 and controls.drop and p.grounded and (self.clock+i)%3<1.2:
-                    self.crossed.add(i);w.say(f'Señal {i+1} contrastada.');events.append('checkpoint')
+            if self.kind=='telescope' and controls.work and p.grounded:p.cooldown=max(0,p.cooldown-dt*.5)
+        target=self.work_target()
+        if target and controls.work and p.grounded and target['ready']:
+            if self.work_key!=target['key']:self.work_elapsed=0.
+            self.work_key=target['key'];self.work_elapsed+=dt
+            if self.work_elapsed>=target['duration']:
+                if self.kind in ('chain','cipher'):self.crossed.add(target['key'][1])
+                else:self.goal=1
+                self.work_elapsed=0.;self.work_key=None
+                w.say('¡Listo! '+target['label']+' · completado');events.append('checkpoint')
+        else:self.work_elapsed=0.;self.work_key=None
         if self.kind in ('naval','train','rail','canal','tide') and m.state['vehicle']:
             self.distance+=abs(p.vx)*dt
             if self.kind=='train' and controls.axis<0:p.vx*=.65
@@ -126,7 +144,8 @@ class FieldSystem:
             if floor:self.escort_y=floor.rect.top
             # Civilian follows an abstract safe route across gaps, never a target.
             if p.rect.centerx-self.escort_x>800:w.say('Tu acompañante espera: vuelve y despeja los ecos cercanos.') if int(w.time*120)%600==0 else None
-        if self.kind in HAZARDS:
+        bombardment=w.level_id in (15,16,46,48,49) or w.level_id==17 and p.rect.centerx<w.width*.55
+        if self.kind in HAZARDS or bombardment:
             if m.sheltered:self.sheltered_time+=dt
             for i,(x,y) in enumerate(m.devices):
                 if abs(p.rect.centerx-x)<110:self.crossed.add(i)
@@ -134,24 +153,21 @@ class FieldSystem:
                 self.marks.append([p.rect.centerx,p.rect.bottom,1.2])
             for mark in self.marks:
                 mark[2]-=dt
-                if mark[2]<=0 and not m.sheltered and abs(p.rect.centerx-mark[0])<38:
-                    events.extend(w.damage(mark[0]))
+                if mark[2]<=0:
+                    self.impacts.append([mark[0],mark[1],.7])
+                    if not (m.sheltered or w.traits.safe()) and abs(p.rect.centerx-mark[0])<38:events.extend(w.damage(mark[0]))
             self.marks=[mark for mark in self.marks if mark[2]>0]
-        if self.kind=='chain':
-            near=next((i for i,(x,y) in enumerate(self.points[:2]) if abs(p.rect.centerx-x)<90 and abs(p.rect.bottom-y-40)<55),None)
-            if near is not None and controls.drop and p.grounded and near not in self.crossed:
-                self.sheltered_time+=dt
-                if self.sheltered_time>=1.5:self.crossed.add(near);self.sheltered_time=0;w.say('Batería coordinada: cadena y defensa ribereña preparadas.');events.append('checkpoint')
+        self.impacts=[[x,y,life-dt] for x,y,life in self.impacts if life>dt][-8:]
         self.persist()
         return events
 
     def description(self):
         if self.kind in ('supply','catalogue','printing','dialogue','moonrepair'):
             place='la nave de Crono' if self.kind=='moonrepair' else 'el escritorio inicial' if self.kind=='catalogue' else 'el último puesto'
-            return f'Recupera 3 elementos ({len(self.collected)}/3) y mantén ↓ en {place} · '+('HECHO' if self.goal else 'pendiente')
+            return f'Recupera 3 elementos ({len(self.collected)}/3) y mantén E en {place} · '+('HECHO' if self.goal else 'pendiente')
         if self.kind=='manuscripts':return f'Manuscritos {len(self.collected)}/3; después acompaña a la guardiana al depósito.'
-        if self.kind=='cipher':return f'Mantén ↓ junto a cada señal cuando esté iluminada · {len(self.crossed)}/3'
-        if self.kind=='chain':return f'En las dos baterías señaladas, mantén ↓ para coordinar la defensa · {len(self.crossed)}/2'
+        if self.kind=='cipher':return f'Mantén E junto a cada señal cuando esté iluminada · {len(self.crossed)}/3'
+        if self.kind=='chain':return f'En las dos baterías señaladas, mantén E para coordinar la defensa · {len(self.crossed)}/2'
         if self.kind in ('naval','canal','tide'):return 'Travesía marítima completada' if self.done else 'Entra en la grieta del segundo puesto y completa el convoy marítimo.'
         if self.kind in PICKUPS:return PICKUPS[self.kind][1]+f' · {len(self.collected)}/3'
         if self.kind in LIFTS:return f'Usa dos elevadores activados · {len(self.crossed)}/2'
@@ -170,14 +186,14 @@ class FieldSystem:
                 active=i in self.crossed or (self.clock+i)%3<1.2
                 rect(s,(28,43,53),(x-28,y-39,56,68),5)
                 for n in range(3):circle(s,CYAN if active else (105,109,102),(x-15+n*15,y-14),5)
-                text(s,'↓ · SEÑAL '+str(i+1),(x,y-62),12,CYAN if active else GOLD,True,'center')
+                text(s,'E · SEÑAL '+str(i+1),(x,y-62),12,CYAN if active else GOLD,True,'center')
             if self.kind=='chain' and i<2:
                 rect(s,(111,92,68),(x-19,y+12,38,25),4)
                 circle(s,CYAN if i in self.crossed else GOLD,(x,y-1),16,3)
                 for n in range(12):
                     px=x+28+n*13;py=y-3+math.sin(n/11*math.pi)*(7 if i in self.crossed else 25)
                     pg.draw.ellipse(s,(181,173,142),pg.Rect(px,py,18,9),2)
-                text(s,'↓ COORDINAR BATERÍA',(x,y-41),12,GOLD,True,'center')
+                text(s,'MANTÉN E · COORDINAR BATERÍA',(x,y-41),12,GOLD,True,'center')
             if self.kind in PICKUPS and i not in self.collected:
                 color=GOLD if self.kind not in ('lunar','radio') else CYAN
                 if self.kind=='moonrepair':
@@ -201,5 +217,17 @@ class FieldSystem:
                 for dx in (-29,29):circle(s,(44,55,61),(x+dx,y-10),7)
                 text(s,'CUIDAR Y ACOMPAÑAR',(x,y-79),11,CYAN,True,'center')
         for x,y,remaining in self.marks:
-            x-=camera;circle(s,GOLD,(x,y-8),36,2);text(s,'CENIZA' if self.kind=='ash' else 'IMPACTO',(x,y-55),12,GOLD,True,'center')
-            line(s,(219,140,83),(x+40,y-260),(x,y-30),2)
+            x-=camera
+            if not -130<x<s.get_width()+130:continue
+            circle(s,GOLD,(x,y-8),36,2);text(s,'CENIZA' if self.kind=='ash' else 'BOMBARDEO' if self.world.combat_era==5 else 'METEORITO',(x,y-55),12,GOLD,True,'center')
+            fall=1-max(0,remaining)/1.2
+            yy=y-260+fall*250;circle(s,(219,140,83),(x+40*(1-fall),yy),7)
+            line(s,(242,181,103),(x+40*(1-fall)+7,yy-30),(x+40*(1-fall),yy),3)
+        for wx,y,life in self.impacts:
+            x=wx-camera
+            if not -140<x<s.get_width()+140:continue
+            progress=1-life/.7
+            pg.draw.ellipse(s,(215,154,83),pg.Rect(x-18-progress*62,y-8-progress*9,36+progress*124,13+progress*18),2)
+            for n in range(7):
+                dx=(n-3)*11*progress;dy=-math.sin(progress*math.pi)*(16+n%3*13)
+                polygon(s,(227,178,103) if n%2 else (125,119,106),[(x+dx,y+dy),(x+dx+5,y+dy-7),(x+dx+9,y+dy+2)])

@@ -47,7 +47,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.init_school_settings()
         self.fullscreen=self.save.data['fullscreen'] and not headless
         self.display=pg.display.set_mode((W,H),pg.FULLSCREEN if self.fullscreen else pg.RESIZABLE)
-        pg.display.set_caption('CRONO · Ecos del tiempo | Beta educativa 0.9.2')
+        pg.display.set_caption('CRONO · Ecos del tiempo | Beta educativa 0.9.3')
         icon=pg.Surface((48,48),pg.SRCALPHA)
         clock_icon(icon,24,24,19,CYAN)
         pg.display.set_icon(icon)
@@ -55,6 +55,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.artist=Artist()
         self.audio=Audio()
         self.audio.enabled=self.save.data['sound']
+        self.audio.set_volumes(self.save.data['music_volume'],self.save.data['effects_volume'])
         self.world=World(0)
         self.init_learning()
         self.init_teacher(bank_file or (Path(save_file).parent/'preguntas.json' if save_file else None))
@@ -67,6 +68,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.jump_pending=self.dash_pending=False
         self.shoot_pending=False
         if hasattr(self,'fingers'):self.fingers.clear()
+        self.work_lock=False;self.joy_work=False
         self.joy_jump=False
         self.joystick=None
         self.connect_controller()
@@ -92,16 +94,33 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             self.joystick=None
 
     def set_state(self,state):
+        previous=getattr(self,'state','menu')
+        history=getattr(self,'navigation',[])
+        if state in ('menu','play'):history=[]
+        elif state!=previous:
+            if state in history:history=history[:history.index(state)]
+            else:history=history+[previous]
+        self.navigation=history[-12:]
         self.state=state
         self.selection=0
         self.buttons=[]
         self.jump_pending=self.dash_pending=False
         self.shoot_pending=False
         if hasattr(self,'fingers'):self.fingers.clear()
+        self.work_lock=False;self.joy_work=False
         self.accumulator=0
         if state not in ('teacher','question_edit','profile_create','room_join','teacher_access','school_settings','reflection'):
             pg.key.stop_text_input()
             pg.key.set_repeat()
+
+    def go_back(self):
+        if self.state=='quiz':self.close_quiz()
+        elif self.state=='intro':self.begin()
+        elif self.state in ('pause','help_play'):self.set_state('play')
+        elif getattr(self,'navigation',[]):self.set_state(self.navigation[-1])
+        elif self.state not in ('menu','ending'):
+            self.set_state('play' if getattr(self,'session_started',False) else 'menu')
+        elif self.confirm_new:self.confirm_new=False
 
     def load(self,index,stage=0,restore=False):
         self.chapter_era=chapter_for_level(index*3+stage)
@@ -115,7 +134,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             self.world.data['stations']=[s for s in original if s[2] in topics] or original[:1]
         if restore:
             self.save.restore(self.world)
-        self.camera=max(0,min(self.world.width-W,self.world.player.rect.centerx-W*.37))
+        self.camera=self.follow_camera_target()
         self.particles=[]
         self.flash=0
         self.intro_time=0
@@ -158,10 +177,12 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             self.tutorial_active=True;self.tutorial_step=0
 
     def new_game(self):
+        preferences={key:self.save.data[key] for key in ('music_volume','effects_volume','key_bindings','reading_size','touch_controls','motor_band')}
         sound,full=self.save.data['sound'],self.save.data['fullscreen']
         age=self.save.data['age_band']
         self.save.data=defaults()
         self.save.data.update(sound=sound,fullscreen=full,age_band=age)
+        self.save.data.update(preferences)
         self.save.write()
         self.load(0)
 
@@ -280,33 +301,20 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
                     elif key==self.key_for('attack'):
                         self.shoot_pending=True
                     elif key==self.key_for('interact'):
-                        self.interact()
+                        self.press_interact()
                     elif key==pg.K_u:
                         self.open_panel('workshop')
                     elif key==pg.K_c:
                         self.open_panel('notebook')
                     elif key==pg.K_v:
                         self.open_atlas()
-                    elif key==self.key_for('pause'):
+                    elif key in (pg.K_ESCAPE,self.key_for('pause')):
                         self.set_state('pause')
                     elif key==pg.K_r:
                         self.world.respawn()
                         self.flash=.2
                 elif key==pg.K_ESCAPE:
-                    if self.state=='quiz':
-                        self.close_quiz()
-                    elif self.state in ('workshop','notebook','bestiary','heritage'):
-                        self.close_panel()
-                    elif self.state=='atlas':
-                        self.set_state(self.atlas_return)
-                    elif self.state in ('pause','help_play'):
-                        self.set_state('play')
-                    elif self.state=='intro':
-                        self.begin()
-                    elif self.state not in ('menu','ending'):
-                        self.set_state('menu')
-                    elif self.confirm_new:
-                        self.confirm_new=False
+                    self.go_back()
                 elif key in (pg.K_DOWN,pg.K_s,pg.K_TAB):
                     self.navigate(1)
                 elif key in (pg.K_UP,pg.K_w):
@@ -315,6 +323,8 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
                     self.activate()
                 elif self.state=='quiz' and self.quiz_mode=='question' and key in (pg.K_1,pg.K_2,pg.K_3):
                     self.answer_question(key-pg.K_1)
+            elif event.type==pg.KEYUP and event.key==self.key_for('interact'):
+                self.work_lock=False
             elif event.type==pg.JOYBUTTONDOWN:
                 if event.button==0:
                     self.joy_jump=True
@@ -327,7 +337,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
                 elif event.button==1 and self.state=='play':
                     self.shoot_pending=True
                 elif event.button==3 and self.state=='play':
-                    self.interact()
+                    self.joy_work=True;self.press_interact()
                 elif event.button in (6,7):
                     if self.state=='play':
                         self.set_state('pause')
@@ -335,6 +345,8 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
                         self.set_state('play')
             elif event.type==pg.JOYBUTTONUP and event.button==0:
                 self.joy_jump=False
+            elif event.type==pg.JOYBUTTONUP and event.button==3:
+                self.joy_work=False;self.work_lock=False
             elif event.type==pg.JOYHATMOTION and self.state!='play':
                 if event.value[1]:
                     self.navigate(-event.value[1])
@@ -400,7 +412,9 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         tick=1/60 if self.touch_enabled() else STEP
         while self.accumulator>=tick:
             down=bool(keys[self.key_for('drop')] or keys[pg.K_DOWN] or self.touch_down('drop'))
-            controls=Controls(axis,self.jump_pending,held,self.dash_pending,self.shoot_pending or bool(keys[self.key_for('attack')] or self.touch_down('attack')),down,descend=down and self.jump_pending)
+            working=bool(keys[self.key_for('interact')] or self.touch_down('interact') or self.joy_work)
+            if not working:self.work_lock=False
+            controls=Controls(axis,self.jump_pending,held,self.dash_pending,self.shoot_pending or bool(keys[self.key_for('attack')] or self.touch_down('attack')),down,descend=down,work=working)
             self.jump_pending=self.dash_pending=False
             self.shoot_pending=False
             old_player=self.world.player
@@ -416,7 +430,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
                 if e in ('checkpoint','shard','boss','field_complete'):
                     self.save.capture(self.world)
             if old_player is not self.world.player:
-                self.camera=max(0,min(self.world.width-W,self.world.player.rect.centerx-W*.37))
+                self.camera=self.follow_camera_target()
             self.accumulator-=tick
             if self.world.complete:
                 self.save.completed(self.world)
@@ -425,7 +439,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
                 self.set_state('complete')
                 break
         vw=self.viewport_width
-        target=max(0,min(self.world.width-vw,self.world.player.rect.centerx-vw*.38+self.world.player.facing*55))
+        target=self.follow_camera_target()
         if self.world.boss and self.world.boss.active and self.world.boss.alive:
             target=self.world.width-vw
         self.camera+=(target-self.camera)*(1-math.exp(-5*dt))
@@ -442,6 +456,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             self.autosave=0
 
     def hud(self):
+        if self.touch_enabled():return self.mobile_hud()
         s=self.canvas
         panel=getattr(self,'hud_panel',None)
         if panel is None:
@@ -471,7 +486,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         text(s,'ENERGÍA',(948,59),10,MUTED,True,'center')
         ready=self.world.player.dash_ready and self.world.player.cooldown<=0
         rect(s,(38,59,65),(1025,24,77,7),3)
-        fraction=1 if ready else max(0,1-self.world.player.cooldown/.46) if self.world.player.grounded else 0
+        fraction=1 if ready else max(0,1-self.world.player.cooldown/(.65 if 'dash' in self.world.player.upgrades else 1.15)) if self.world.player.grounded else 0
         if fraction>0:
             rect(s,CYAN if ready else (66,129,127),(1025,24,77*fraction,7),3)
         text(s,'IMPULSO',(1064,59),10,CYAN if ready else MUTED,True,'center')
@@ -510,6 +525,11 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             self.button('C  Cuaderno',(1040,H-51,206,35),lambda:self.open_panel('notebook'),small=True,arrow=False)
         if self.world.message_time<=0 and not fighting:
             text(s,self.world.traits.description(),(36,138),13,CYAN)
+        if self.world.traits.exposure_kind:
+            traits=self.world.traits;value=100-traits.resource if traits.exposure_kind=='cold' else traits.resource
+            rect(s,(35,57,67),(36,206,180,10),4)
+            if value>0:rect(s,GOLD if traits.resource<30 else CYAN,(36,206,max(1,value*1.8),10),4)
+            text(s,{'cold':'FRÍO','oxygen':'OXÍGENO','gas':'PROTECCIÓN'}[traits.exposure_kind],(36,184),12,PAPER,True)
         station=self.world.near_station()
         from .heritage import near_site
         site=near_site(self.world)
@@ -564,8 +584,8 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.age_switch(66,363)
         self.button('Expansiones · Argentina y Brasil',(850,549,360,49),lambda:self.set_state('dlc_menu'),True,small=True)
         line(s,(62,83,83),(66,640),(1214,640))
-        for i,label in enumerate(('ORÍGENES','DESHIELO','EGIPTO','GRECIA','MEDIEVO','INDUSTRIA','GUERRAS','G. FRÍA','PRESENTE')):
-            x=66+i*130
+        for i,label in enumerate(('ORÍGENES','DESHIELO','EGIPTO','GRECIA','MEDIEVO','INDUSTRIA','1ª GM','2ª GM','G. FRÍA','PRESENTE')):
+            x=66+i*117
             color=CYAN if unlocked(chapter_levels(MAIN_ERA_IDS[i])[0],self.save.data['unlocked']) else (112,129,133)
             diamond(s,(x,669),5,color)
             tracked(s,label,(x+18,660),10,color,2)
@@ -589,6 +609,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.canvas.blit(overlay,(0,0))
 
     def intro(self):
+        if self.touch_enabled():return self.mobile_intro()
         self.artist.scene(self.canvas,self.world,self.camera,self.time)
         self.dim(195)
         era=ERAS[chapter_for_level(self.world.level_id)]
@@ -597,8 +618,9 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         from .journeys import date_for
         text(self.canvas,era.name+' · '+date_for(self.world.level_id),(88,233),14,GOLD,True)
         line(self.canvas,(66,92,95),(88,285),(710,285))
-        wrapped(self.canvas,self.world.data['meta'].focus,(88,317),770,24,PAPER,True,leading=35)
-        wrapped(self.canvas,self.world.data['route_name']+'. V abre el plano. E permite aprender; U abre las mejoras.',(88,390),770,16,MUTED,leading=25)
+        from .story_ui import map_summary
+        wrapped(self.canvas,map_summary(self.world.level_id),(88,300),770,21,PAPER,leading=29)
+        wrapped(self.canvas,self.world.data['route_name']+'. V abre el plano. E permite aprender; U abre las mejoras.',(88,422),770,15,MUTED,leading=22)
         text(self.canvas,self.world.traits.description(),(88,450),13,GOLD)
         text(self.canvas,'Completa la misión histórica, comprende un archivo y reúne 3 fragmentos.',(88,478),16,CYAN)
         self.button('Entrar en este mapa',(88,519,344,57),self.begin,True)
@@ -618,14 +640,15 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         s=self.canvas
         self.artist.background(s,0,0,self.time)
         self.dim(220)
-        tracked(s,'27 MAPAS DE CAMPAÑA · ARGENTINA · BRASIL · 10 RESCATES · 3 GRIETAS',(65,28),11,CYAN,3)
+        tracked(s,'ELIGE UNA ÉPOCA O UNA EXCURSIÓN',(65,28),11,CYAN,3)
         text(s,'Las huellas del tiempo',(62,61),39,PAPER,True,serif=True)
-        text(s,'Cada ruta tiene desniveles, galerías y atajos. Argentina conserva su propio progreso.',(65,117),16,MUTED)
-        for i,era_id in enumerate(CHAPTER_ORDER):
-            label=ERA_LABELS[era_id]
-            x=65+i%6*195
-            y=146+i//6*40
-            self.button(label,(x,y,185,35),lambda n=era_id:setattr(self,'chapter_era',n),primary=self.chapter_era==era_id,small=True,arrow=False)
+        groups=(('Historia principal',MAIN_ERA_IDS),('Argentina',(7,9)),('Brasil',(12,)),('Bonus',(10,13,14)),('Excursiones',(11,)))
+        for i,(label,ids) in enumerate(groups):
+            self.button(label,(65+i*234,127,220,44),lambda v=ids:setattr(self,'chapter_era',v[0]),primary=self.chapter_era in ids,small=True,arrow=False)
+        group=next(ids for label,ids in groups if self.chapter_era in ids);pos=group.index(self.chapter_era)
+        self.button('‹',(65,190,75,55),lambda:setattr(self,'chapter_era',group[(pos-1)%len(group)]),arrow=False)
+        text(s,ERA_LABELS[self.chapter_era],(640,214),28,CYAN,True,'center')
+        self.button('›',(1135,190,75,55),lambda:setattr(self,'chapter_era',group[(pos+1)%len(group)]),arrow=False)
         era=self.chapter_era
         levels=chapter_levels(era)
         for position,level_id in enumerate(levels):
@@ -641,7 +664,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             record=self.save.data['records'].get(str(level_id))
             label='Volver a explorar' if record else 'Entrar' if available else 'Sin descubrir'
             self.button(label,(x+16,537,card_width-52,49),lambda e=map_era,n=stage:self.load(e,n,restore=True),enabled=available,small=True)
-        self.button('Volver al inicio',(65,631,260,48),lambda:self.set_state('menu'),small=True)
+        self.button('Volver',(65,631,260,48),self.go_back,small=True)
         text(s,f'{len(self.save.data["records"])} / {TOTAL_LEVELS} mapas completados',(1210,655),15,CYAN,False,'midright')
 
     def help(self):
@@ -659,7 +682,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
               ('F','Pulso temporal','Dispara. Los jefes reciben daño cuando exponen su núcleo.'),
               ('E','Aprender','Activa archivos, lee y responde una pregunta al azar.'),
               ('U / C','Mejoras / cuaderno','Usa el conocimiento para mejorar tu equipo o repasa tus hallazgos.'),
-              ('V · S / ↓','Plano / trabajo de campo','Abajo aplica herramientas o cobertura. Abajo + salto baja por pasarelas delgadas.'),
+              ('V · S / ↓','Plano / bajar','Abajo baja por pasarelas. Mantén E para aplicar herramientas o cubrirte.'),
               ('ESC / P · R','Pausa / ancla','Pausa la partida o reaparece en tu último punto de control.')]
         for i,(key,action,description) in enumerate(rows):
             y=150+i*48
@@ -791,6 +814,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         elif self.state=='skins':self.skins()
         elif self.state=='skin_card':self.skin_card()
         elif self.state=='accessibility':self.accessibility()
+        elif self.state=='sound_settings':self.sound_settings()
         elif self.state=='school_settings':self.school_settings()
         elif self.state=='reflection':self.reflection()
         elif self.state=='teacher_tools':self.teacher_tools()
@@ -800,6 +824,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         elif self.state=='credits':
             from .credits import draw
             draw(self)
+        elif self.state=='mobile_more':self.mobile_more()
         else:
             self.artist.scene(self.world_canvas,self.world,self.camera,self.time)
             self.canvas.fill((0,0,0,0))
@@ -844,7 +869,7 @@ def main():
     parser.add_argument('--capture',type=Path,help='Write a deterministic screenshot and exit')
     parser.add_argument('--scene',choices=['menu','play','intro','chapters','help','pause','complete','ending','quiz','workshop','notebook','bestiary','boss','settings','teacher','question_edit','scenarios','atlas','heritage','community','school_settings','accessibility','activity','achievements','skins','skin_card','credits','teacher_tools','story','dlc_menu','voyage'],default='menu')
     parser.add_argument('--aspect',type=float,default=16/9,help='Preview a real camera aspect ratio without stretching')
-    parser.add_argument('--era',type=int,choices=range(1,17),default=1)
+    parser.add_argument('--era',type=int,choices=range(1,18),default=1)
     parser.add_argument('--map',type=int,choices=range(1,4),default=1)
     parser.add_argument('--camera',type=float,default=0)
     parser.add_argument('--touch',action='store_true',help='Preview multitouch controls')

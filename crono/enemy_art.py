@@ -7,7 +7,7 @@ from .art import rect,line,circle,polygon,glow,text,mix,PAPER,INK,GOLD,W
 from .visuals import palette_for
 
 FAMILY_NAMES=('Reptiles del Cretácico','Fauna de la estepa','Hoplitas y bronce','Caballeros y ballesteros',
-              'Autómatas y máquinas de vapor','Infantería y blindajes','Robots bípedos y drones','Argentina · figuras históricas',
+              'Guardias y máquinas de vapor','Infantería y blindajes','Vigilantes y drones','Argentina · figuras históricas',
               'Guardias del Nilo y criaturas de ficción')
 
 def _draw_enemy(s,e,camera,t,era,stage=0):
@@ -210,7 +210,22 @@ def draw_enemy(s,e,camera,t,era,stage=0):
     else:
         angle=t*9 if era==8 else t*10+e.left
         frame=round(angle*16/math.tau)%16
-    timer=0 if e.timer<.4 else 1 if e.timer<.5 else 2
+    timer,mode,label,cache_moving=visible_state(e,era,human,moving)
     picture,offset=enemy_picture(era,stage,e.kind,getattr(e,'variant',''),getattr(e,'faction',''),
-        frame,human,e.direction,e.mode,timer,e.hp,e.max_hp,bool(e.hit_flash),getattr(e,'show_label',False),moving)
+        frame,human,e.direction,mode,timer,e.hp,e.max_hp,bool(e.hit_flash),label,cache_moving)
     s.blit(picture,(round(x)+offset[0],round(y)+offset[1]))
+
+
+def visible_state(enemy,era,human,moving):
+    """Do not regenerate outlines for a timer/mode that changes no pixels.
+
+    The Argentina musket warns below .4 s; other visible ranged warnings use
+    .5 s. Keep those distinctions, while a walker's countdown is invisible.
+    """
+    if era==7:warning=enemy.kind=='sentry' and enemy.timer<.4
+    elif human:warning=enemy.kind=='sentry' and enemy.timer<.5
+    elif era==8:warning=enemy.timer<.5
+    else:warning=enemy.kind in ('sentry','flyer') and not (enemy.kind=='flyer' and era in (4,5)) and enemy.timer<.5
+    timer=0 if warning else 2
+    mode='warning' if enemy.mode=='warning' else 'patrol'
+    return timer,mode,getattr(enemy,'show_label',False) if era==7 else False,moving if era==7 else False

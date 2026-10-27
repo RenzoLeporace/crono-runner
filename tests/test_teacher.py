@@ -35,7 +35,7 @@ class BankTests(unittest.TestCase):
         return d
 
     def test_all_324_questions_and_correct_answers_visible_without_student_unlocks(self):
-        self.assertEqual(len(self.bank.filtered()),1656)
+        self.assertEqual(len(self.bank.filtered()),1800)
         for q in self.bank.records:
             self.assertEqual(len(q['options']),3)
             self.assertTrue(q['options'][q['correct']])
@@ -44,7 +44,7 @@ class BankTests(unittest.TestCase):
         key=self.bank.upsert(self.draft())
         self.assertEqual(key,max(q["id"] for q in builtin_records())+1)
         loaded=QuestionBank(self.path)
-        self.assertEqual(len(loaded.records),1657)
+        self.assertEqual(len(loaded.records),1801)
         seen=set()
         for seed in range(60):
             q=loaded.choose(0,0,random.Random(seed))
@@ -207,7 +207,7 @@ class TeacherInterfaceTests(unittest.TestCase):
         g.edit_question(0,duplicate=True)
         g.teacher_fields[0].set_value('Una nueva pregunta para mi clase')
         g.save_question()
-        self.assertEqual(len(g.bank.records),1657)
+        self.assertEqual(len(g.bank.records),1801)
         self.assertEqual(g.save.data['knowledge'],0)
         q=g.bank.get(g.teacher_selected)
         self.assertEqual(q['prompt'],'Una nueva pregunta para mi clase')
@@ -302,7 +302,7 @@ class TeacherInterfaceTests(unittest.TestCase):
         g.render()
         g.teacher_picker=True
         g.render()
-        self.assertEqual(len(g.buttons),47)
+        self.assertEqual(len(g.buttons),51)
         g.teacher_picker=False
         g.teacher_discard=True
         g.render()
@@ -317,9 +317,9 @@ class TeacherInterfaceTests(unittest.TestCase):
 
 class MapAppearanceTests(unittest.TestCase):
     def test_each_map_has_a_distinct_weather_or_visual_story(self):
-        self.assertEqual(len(MOODS),46)
-        self.assertEqual(len({m.weather for m in MOODS}),46)
-        self.assertEqual(len({(m.sky,m.horizon,m.weather) for m in MOODS}),46)
+        self.assertEqual(len(MOODS),50)
+        self.assertEqual(len({m.weather for m in MOODS}),50)
+        self.assertEqual(len({(m.sky,m.horizon,m.weather) for m in MOODS}),50)
         self.assertEqual(palette_for(0,2).kind,'ash')
         self.assertNotEqual(palette_for(0,0).top,palette_for(0,2).top)
         self.assertEqual(palette_for(1,1).kind,'cave')

@@ -61,13 +61,13 @@ class StoryAndWaterTests(unittest.TestCase):
             shot.update(STEP)
         self.assertFalse(shot.alive);self.assertLessEqual(shot.travelled,335)
         from crono.combat import Enemy
-        expected={2:'arrow',3:'bolt',4:'rivet',5:'bullet',6:'laser',7:'musket',8:'arrow'}
+        expected={2:'arrow',3:'bolt',4:'rivet',5:'bullet',6:'bullet',7:'musket',8:'arrow'}
         for era,kind in expected.items():
             w=World(0);e=Enemy(dict(x=300,y=550,left=250,right=600,kind='sentry'),era);e.timer=0
             e.update(STEP,w);self.assertEqual(w.projectiles[0].kind,kind)
 
     def test_ground_enemy_models_start_on_actual_surfaces(self):
-        for level in range(46):
+        for level in range(50):
             w=World(*divmod(level,3))
             for e in w.enemies:
                 if e.kind!='flyer':self.assertTrue(any(abs(e.rect.bottom-p.rect.top)<1 and p.rect.left<=e.rect.centerx<=p.rect.right for p in w.platforms),f'{level}: {e.kind}')

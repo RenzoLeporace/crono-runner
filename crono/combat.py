@@ -97,9 +97,9 @@ class Enemy:
             if p and distance<650 and self.timer<=0:
                 self.direction=1 if p.rect.centerx>self.rect.centerx else -1
                 for vy in ((-85,0,85) if self.difficulty==2 else (0,)):
-                    kind=('spore','ice','arrow','bolt','rivet','bullet','laser','musket','arrow')[self.era]
+                    kind=('spore','ice','arrow','bolt','rivet','bullet','bullet','musket','arrow')[self.era]
                     world.projectiles.append(Projectile(self.rect.centerx,self.rect.centery,self.direction*235*rate,vy,kind=kind))
-                self.timer=2.4/rate
+                self.timer=(3.6 if self.difficulty==2 else 2.4)/rate
         elif self.kind=='hopper':
             if p and distance<470 and self.timer<=0 and self.rect.y>=self.base_y:
                 self.vy=-360*(1+self.difficulty*.08)

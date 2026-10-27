@@ -108,6 +108,7 @@ class ExpansionUI:
         else:self.activity_message=result
 
     def activity(self):
+        if self.touch_enabled():return self.mobile_activity()
         s=self.canvas;self.artist.scene(s,self.world,self.camera,self.time);self.dim(235)
         m=self.world.mechanic
         tracked(s,'TRABAJO DE CAMPO · PUESTO '+str(self.activity_index+1)+' / 3',(65,38),13,CYAN,2)
@@ -210,7 +211,7 @@ class ExpansionUI:
             old=getattr(self.world.player,'skin','crono');self.world.player.skin=item['id']
             self.artist.player(s,self.world.player,0,self.time,1,(x+39,y+113));self.world.player.skin=old
             wrapped(s,item['name'],(x+83,y+15),173,19,PAPER,True,leading=25)
-            label='Equipar' if available(self.save,item['id']) else '60 logros' if item['id']=='cronista' else 'Completa su mapa' if not unlocked_for_purchase(self.save,item['id']) else f'{item["cost"]} ecos'
+            label='Equipado' if self.save.data['skin']==item['id'] else 'Equipar' if available(self.save,item['id']) else '60 logros' if item['id']=='cronista' else 'Completa su mapa' if not unlocked_for_purchase(self.save,item['id']) else f'{item["cost"]} ecos'
             self.button(label,(x+82,y+83,171,50),lambda k=item['id']:self.skin_action(k),enabled=available(self.save,item['id']) or item['id']!='cronista' and unlocked_for_purchase(self.save,item['id']),small=True,arrow=False)
             self.button('Ficha',(x+10,y+118,65,30),lambda k=item['id']:self.open_skin_card(k),small=True,arrow=False)
         self.button('Volver',(65,638,240,50),lambda:self.set_state(self.reward_return),True,small=True)

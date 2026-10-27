@@ -8,8 +8,8 @@ import zipfile
 
 ROOT=Path(__file__).resolve().parents[1]
 DELIVERY=ROOT/'Entrega'
-VERSION='0.9.2'
-APK_VERSION='0.9.2'
+VERSION='0.9.3'
+APK_VERSION='0.9.3'
 
 def inside(path):
     path=path.resolve()

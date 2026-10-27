@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path[:0]=[str(ROOT),str(ROOT/'.vendor')]
 from crono.education import SOURCES,STAGES,LESSONS
 from crono.campaign import DISPLAY_LEVEL_IDS,level_label
-rows=['# Contenidos y fuentes de la beta educativa 0.9','',
+rows=['# Contenidos y fuentes de la beta educativa 0.9.3','',
       'Las explicaciones son paráfrasis originales. Cada archivo del juego enlaza su fuente en el cuaderno.',
       'Los mapas son escenarios de ficción inspirados en temas concretos, no reconstrucciones exactas ni una historia universal. Los jefes y los enemigos son ficticios.','',
       'El banco inicial contiene 1656 registros para 92 temas y tres edades: 552 preguntas y 1104 tareas de aplicación sobre fuentes, imágenes, razones y cronología. Cada tema y edad tiene seis alternativas; no equivalen a 1656 hechos históricos distintos. Desde Configuración, los docentes pueden consultar todas las respuestas, agregar preguntas y modificar las existentes, incluida su explicación y referencia. Las referencias de esta página corresponden al contenido original; las incorporaciones del docente usan la referencia que este indique. Al abrir un archivo se elige una pregunta al azar y se mezclan las respuestas. Si hay varias, no se repite inmediatamente la anterior del mismo perfil.','',

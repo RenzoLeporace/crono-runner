@@ -141,14 +141,14 @@ def extend_content(Stage,lesson,stages,lessons,sources):
         ('¿Qué explicación es más cuidadosa?','Relacionar decisiones, contextos y continuidades','Reducir todo a una fecha aislada','Ignorar los conflictos'))),
       ('El regreso de la democracia','El 10 de diciembre de 1983, Raúl Alfonsín asumió la presidencia tras las elecciones. Argentina recuperó el gobierno democrático después de la dictadura de 1976–1983.',9,(
         ('¿En qué año volvió el gobierno democrático?','1983','1810','1914'),
-        ('¿Cómo se eligieron las autoridades en 1983?','Mediante elecciones','Por un sorteo de videojuegos','Por el color de su ropa'),
+        ('¿Cómo se eligieron las autoridades en 1983?','Mediante elecciones','Por herencia del cargo','Por el color de su ropa'),
         ('¿Qué fecha marca la asunción presidencial?','10 de diciembre de 1983','9 de julio de 1816','25 de mayo de 1810'),
         ('¿Qué etapa precedió a la recuperación democrática?','La dictadura de 1976–1983','La Grecia clásica','La Revolución Industrial inglesa'),
         ('¿Qué diferencia política central expresa la transición?','El retorno a autoridades elegidas y al estado de derecho','La eliminación de toda participación','La continuación del mismo régimen sin cambios'),
         ('¿Qué exige estudiar esta transición?','Distinguir dictadura y gobierno democrático','Tratar ambos como instituciones idénticas','Omitir las elecciones'))),
       ('Participar y conservar memoria','La recuperación democrática de 1983 abrió una etapa de instituciones elegidas. Los archivos y testimonios ayudan a estudiar ese proceso y sus desafíos posteriores.',10,(
         ('¿Qué ayuda a recordar nuestra historia?','Conservar archivos y testimonios','Borrar todos los documentos','No hacer preguntas'),
-        ('¿En democracia las personas pueden participar?','Sí','Nunca','Solo en juegos'),
+        ('¿En democracia las personas pueden participar?','Sí','Nunca','Solo durante una guerra'),
         ('¿Qué fuente permite estudiar la transición?','Discursos y documentos de 1983','Una máquina de vapor sin documentos','Un fósil marino'),
         ('¿Por qué conservar testimonios diferentes?','Aportan experiencias y perspectivas','Todos son idénticos','Reemplazan la necesidad de contrastar'),
         ('¿Qué práctica fortalece un estudio de la memoria?','Contrastar archivos y testimonios en contexto','Aceptar todo rumor como prueba','Eliminar las voces diferentes'),

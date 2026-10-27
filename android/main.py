@@ -12,6 +12,8 @@ async def main():
     import platform
     from crono.mobile import initialize
     initialize()
+    from crono.mobile import bridge
+    native=bridge();diagnostics=bool(native and native.performanceLogging())
     from crono.game import Game
     from crono.viewport import width_for_aspect
     game=Game();game.save.data['touch_controls']=True
@@ -29,12 +31,14 @@ async def main():
             stable_size=stable_size+1 if pending_width==width else 1
             pending_width=width
             if stable_size>=3 and abs(width-game.viewport_width)>28 and aspect>1:game.configure_viewport(aspect)
-        dt=min(game.clock.tick(0)/1000,.1)
+        real_dt=game.clock.tick(0)/1000
+        dt=min(real_dt,.1)
         game.events();game.update(dt);game.render()
-        frame_samples.append(dt);render_samples.append(time.perf_counter()-frame_start)
+        frame_samples.append(real_dt);render_samples.append(time.perf_counter()-frame_start)
         if len(frame_samples)==120:
-            metrics=dict(fps=round(len(frame_samples)/max(.001,sum(frame_samples)),1),render_ms_p95=round(sorted(render_samples)[113]*1000,2),viewport=game.viewport_width)
+            metrics=dict(fps=round(len(frame_samples)/max(.001,sum(frame_samples)),1),render_ms_p95=round(sorted(render_samples)[113]*1000,2),viewport=game.viewport_width,state=game.state,level=game.world.level_id,projectiles=len(game.world.projectiles))
             platform.window.eval('window.CronoFrameStats='+json.dumps(metrics))
+            if diagnostics:platform.window.console.log('CRONO_FRAME_STATS '+json.dumps(metrics))
             frame_samples.clear();render_samples.clear()
         await asyncio.sleep(max(0,1/60-(time.perf_counter()-frame_start)))
     if getattr(game,'session_started',False) and not game.world.complete:game.save.capture(game.world)

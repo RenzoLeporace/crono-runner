@@ -48,6 +48,7 @@ def learning_objects(s,world,camera,time):
 def boss_art(s,boss,camera,time):
     from .boss_feedback import draw
     draw(s,boss,camera,time,_boss_body)
+    if boss and boss.alive:boss_warnings(s,boss,camera)
 
 
 def _boss_body(s,boss,camera,time):
@@ -131,6 +132,8 @@ def _boss_body(s,boss,camera,time):
         circle(s,core,(x,y-190),11,2)
         text(s,'!',(x,y-192),17,core,True,'center')
         line(s,core,(x-90,y+3),(x+90,y+3),3)
+def boss_warnings(s,boss,camera):
+    # World-space warnings stay live and never become part of a cached body.
     for wx,remaining in boss.telegraphs:
         xx=wx-camera
         line(s,(238,151,111),(xx,214),(xx,580),1)

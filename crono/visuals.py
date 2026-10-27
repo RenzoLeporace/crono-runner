@@ -51,7 +51,7 @@ MOODS=(
  Mood('Suministros y rutas de evacuación','hospital',(49,66,73),(148,165,150),'journey'),
  Mood('Viento atlántico, radio y memoria','malvinas',(40,62,79),(145,163,165),'journey'),
  Mood('Ciudad romana y ceniza del Vesubio','volcano',(54,37,45),(173,122,86),'journey'),
- Mood('Baja gravedad y luz sobre la superficie lunar','lunar',(6,13,32),(65,74,89),'journey'),
+ Mood('Ciudad, avisos y rutas de evacuación','chernobyl',(43,61,73),(155,174,173),'journey'),
 )
 
 
@@ -59,6 +59,7 @@ from .new_histories import NEW_MAPS
 MOODS+=tuple(Mood(row['focus'],row['landmark'],sky,horizon,'journey') for row,sky,horizon in zip(NEW_MAPS,((43,75,76),(57,68,96),(49,85,111),(65,53,77),(44,89,111),(108,74,63),(24,37,55)),((210,197,133),(204,173,133),(219,200,144),(188,159,125),(211,205,159),(226,188,128),(118,151,155))))
 
 MOODS+=(Mood('Berlín: voces, fronteras y señales','berlin',(33,48,76),(163,173,173),'journey'),Mood('Cráteres, regolito y baja gravedad','moonrepair',(5,11,29),(58,69,85),'journey'),Mood('Documentos y espacios de diálogo','detente',(44,75,93),(190,201,182),'journey'))
+MOODS+=(Mood('Fuertes, trincheras y abastecimiento','verdun',(45,51,57),(147,146,122),'journey'),Mood('Vagón, pueblos y cese del fuego','armistice',(74,94,104),(200,196,160),'journey'),Mood('Ruinas, nieve y el Volga','stalingrad',(45,57,73),(154,178,190),'journey'),Mood('Trincheras y avisos de gas','ypres',(58,65,53),(159,165,132),'journey'))
 
 @lru_cache(maxsize=46)
 def palette_for(era,stage=0):

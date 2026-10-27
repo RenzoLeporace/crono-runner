@@ -10,9 +10,10 @@ NAMES={0:'Barro y vegetación',1:'Frío y abrigo',2:'Esfuerzo y recuperación',3
 class EraTraits:
     def __init__(self,world):
         self.world=world;self.era=10 if world.level_id==44 else 9 if world.level_id in (43,45) else world.combat_era;self.clock=0.;self.coat=False;self.resource=100.;self.damage_clock=0.
+        self.exposure_kind='cold' if world.combat_era==1 or world.level_id in (28,33,48) else 'oxygen' if world.level_id==44 else 'gas' if world.level_id==49 else None
         floors=[world.platforms[i] for i in world.data['main_nodes'] if world.platforms[i].rect.w>=220]
         self.points=[]
-        for f in (.04,.29,.53,.78):
+        for f in ((.04,.12,.19,.40,.62,.83) if self.exposure_kind else (.04,.29,.53,.78)):
             floor=min(floors,key=lambda p:abs(p.rect.centerx-world.width*f))
             self.points.append((floor.rect.left+min(260,floor.rect.w*.5),floor.rect.top))
         self.coat_pos=(min(335,floors[0].rect.right-45),floors[0].rect.top)
@@ -31,24 +32,29 @@ class EraTraits:
         w=self.world
         return any(abs(w.player.rect.centerx-x)<90 and abs(w.player.rect.bottom-y)<100 for x,y in self.points)
 
+    def can_work(self):return self.era in (7,9) and self.safe()
+
     def update(self,dt,controls):
         w=self.world;p=w.player;events=[]
         if getattr(w,'practice_mode',False) or w.boss and w.boss.active:return events
         self.clock+=dt;near=self.safe();era=self.era
-        if era==1 and not self.coat:
+        if self.exposure_kind:
             x,y=self.coat_pos
-            if abs(p.rect.centerx-x)<55 and abs(p.rect.bottom-y)<95:
-                self.coat=True;w.say('Abrigo equipado: puedes recorrer el hielo sin perder calor.');events.append('checkpoint')
+            if not self.coat and abs(p.rect.centerx-x)<55 and abs(p.rect.bottom-y)<95:
+                self.coat=True
+                name={'cold':'Abrigo','oxygen':'Tanque de reserva','gas':'Máscara'}[self.exposure_kind]
+                w.say(name+' equipado: dura más la protección. Sigue usando los puntos de recarga.');events.append('checkpoint')
+            autonomy=max(65,w.width*.70/160) if self.coat else max(30,w.width*.24/170)
+            rate=100/autonomy*(1,1.12,1.25)[w.difficulty]
+            self.resource=min(100,self.resource+dt*22) if near else max(0,self.resource-dt*rate)
+            if self.resource<=0:
+                if self.exposure_kind=='cold':w.checkpoint=-1;w.spawn=w.data['spawn']
+                w.respawn();w.say({'cold':'Te congelaste. Vuelves al inicio: entra a las hogueras y refugios para recuperar calor.','oxygen':'Oxígeno agotado. Busca las estaciones de recarga y el tanque de reserva.','gas':'Protección agotada. Busca la máscara y las zonas de resguardo.'}[self.exposure_kind])
+                return events+['death']
+            return events
         if era==0:
             in_mud=any(abs(p.rect.centerx-x)<65 and abs(p.rect.bottom-y)<35 for x,y in self.points[1:])
             if in_mud and p.grounded:w.mechanic.speed*=.82
-        elif era==1:
-            if near or self.coat:self.damage_clock=0.
-            else:
-                self.damage_clock+=dt
-                if self.damage_clock>(30,23,17)[w.difficulty]:
-                    self.damage_clock=0.;events+=w.damage(p.rect.centerx)
-                    w.say('El frío te alcanza: vuelve al abrigo de la primera posta o busca un refugio.')
         elif era==8:
             self.resource=min(100,self.resource+dt*32) if near else max(0,self.resource-dt*(1.6,2.1,2.6)[w.difficulty])
             if self.resource<=0:
@@ -70,26 +76,31 @@ class EraTraits:
             if near:
                 p.cooldown=max(0,p.cooldown-dt*2);p.dash_ready=True
                 if not controls.axis:p.recovery_clock+=dt
-        elif era==9 and near and controls.drop and p.grounded:
+        elif era==9 and near and controls.work and p.grounded:
             p.cooldown=max(0,p.cooldown-dt);p.shot_cooldown=max(0,p.shot_cooldown-dt)
-        elif era==7 and near and controls.drop and p.grounded:
+        elif era==7 and near and controls.work and p.grounded:
             p.invincible=max(p.invincible,.06)
         return events
 
     def description(self):
         era=self.era
+        if self.exposure_kind:
+            label={'cold':'Frío','oxygen':'Oxígeno','gas':'Protección respiratoria'}[self.exposure_kind]
+            amount=100-self.resource if self.exposure_kind=='cold' else self.resource
+            return f'{label}: {amount:.0f}% · '+('equipo puesto; usa refugios y recargas' if self.coat else 'busca el equipo y usa los puntos de resguardo')
         if era==10:return 'Gravedad lunar · mantén salto para cruzar cráteres; frena antes de aterrizar. Recoge piezas y repara la nave.'
-        if era==9:return 'Señal y comunicación · mantén ↓ junto a las antenas para sincronizar el equipo.'
+        if era==9:return 'Señal y comunicación · mantén E junto a las antenas para sincronizar el equipo.'
         if era==1:return 'Frío · '+('abrigo equipado' if self.coat else 'recoge el abrigo de la primera posta; los refugios protegen')
         if era==8:return f'Agua {self.resource:.0f}% · repón en los pozos y zonas de sombra'
         if era==2:return f'Esfuerzo {self.resource:.0f}% · descansa entre impulsos'
         if era==3:return f'Lámpara {self.resource:.0f}% · recarga junto a los faroles'
         return {0:'El barro frena al caminar; salta o busca las pasarelas.',4:'Las rejillas avisan antes de expulsar vapor.',
                 5:'Las alarmas anuncian impactos: entra en los refugios.',6:'Las placas de energía recargan el impulso, incluso en el aire.',
-                7:'Mantén ↓ junto a los parapetos para cubrirte de los disparos.'}[era]
+                7:'Mantén E junto a los parapetos para cubrirte de los disparos.'}[era]
 
     def draw(self,s,camera,t):
         w=self.world;era=self.era
+        if self.exposure_kind:return self.draw_exposure(s,camera,t)
         for x,y in self.points:
             x-=camera
             if not -90<x<s.get_width()+90:continue
@@ -136,6 +147,36 @@ class EraTraits:
         p=self.world.player.rect;cx=round(p.centerx-camera);cy=round(p.centery)
         width,height=s.get_size();mask=lamp_mask(width,height,radius)
         s.blit(mask,(cx-width,cy-height))
+
+    def draw_exposure(self,s,camera,t):
+        kind=self.exposure_kind
+        for wx,y in self.points:
+            x=wx-camera
+            if not -100<x<s.get_width()+100:continue
+            if kind=='cold':
+                polygon(s,(111,92,73),[(x-42,y-2),(x,y-64),(x+42,y-2)])
+                polygon(s,(221,221,197),[(x-42,y-2),(x,y-64),(x-10,y-32),(x-33,y-2)])
+                rect(s,(43,56,62),(x-13,y-29,26,27),3)
+                for side in (-1,1):line(s,(143,88,48),(x+side*24,y-4),(x+side*37,y-12),4)
+                polygon(s,(230,145,65),[(x+17,y-7),(x+26,y-33-math.sin(t*5)*5),(x+37,y-7)])
+                polygon(s,(249,212,116),[(x+24,y-8),(x+28,y-23),(x+32,y-8)])
+            else:
+                rect(s,(54,80,87),(x-33,y-52,66,49),5)
+                for dx in (-19,7):
+                    rect(s,(170,188,178),(x+dx,y-47,17,40),7);line(s,(45,69,78),(x+dx+8,y-55),(x+dx+8,y-47),3)
+                line(s,CYAN,(x-17,y-28),(x-3,y-28),3);line(s,CYAN,(x-10,y-35),(x-10,y-21),3)
+            text(s,'CALOR' if kind=='cold' else 'RECARGA',(x,y-83),12,GOLD,True,'center')
+        if not self.coat:
+            x,y=self.coat_pos;x-=camera
+            if -70<x<s.get_width()+70:
+                if kind=='cold':
+                    polygon(s,(188,137,88),[(x-15,y-51),(x+15,y-51),(x+29,y-12),(x+9,y-16),(x,y-9),(x-9,y-16),(x-29,y-12)])
+                    pg.draw.arc(s,(233,223,194),(x-16,y-64,32,26),0,math.pi,6)
+                elif kind=='oxygen':
+                    rect(s,(183,210,207),(x-17,y-53,34,45),12);rect(s,(62,114,132),(x-17,y-34,34,9));line(s,(155,166,137),(x,y-65),(x,y-53),5)
+                else:
+                    pg.draw.ellipse(s,(96,116,96),(x-25,y-51,50,39));circle(s,(185,213,204),(x-11,y-38),8);circle(s,(185,213,204),(x+11,y-38),8);circle(s,(42,58,56),(x,y-14),11)
+                text(s,{'cold':'ABRIGO','oxygen':'TANQUE DE RESERVA','gas':'MÁSCARA'}[kind],(x,y-89),13,GOLD,True,'center')
 
 @lru_cache(maxsize=1)
 def lamp_mask(width,height,radius):

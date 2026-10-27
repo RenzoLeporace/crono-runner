@@ -6,8 +6,46 @@ from .argentina_art import Painter
 from .humanoid_roster import HEIGHTS
 from .art import text,circle,glow,GOLD,PAPER
 
+@lru_cache(maxsize=128)
+def civilian_guard(era,kind,frame,variant):
+    p=Painter(112,112);ink=(29,36,43);skin=(190,139,101)
+    historic=variant in ('berlin','detente');industrial=era==4
+    cloth=(124,105,79) if industrial else (100,119,91) if historic else (47,81,120)
+    trim=(205,178,117);gait=math.sin(frame*math.tau/8)*5
+    for dx in (-9,9):
+        p.l(ink,(54+dx,72),(54+dx+gait*(1 if dx>0 else -1),103),10)
+        p.l(cloth,(54+dx,73),(54+dx+gait*.5,92),7)
+        p.r(ink,(49+dx+gait*(1 if dx>0 else -1),99,16,8),2)
+    p.r(ink,(38,36,34,42),5);p.r(cloth,(41,38,28,36),4)
+    p.l(trim,(44,42),(64,65),3);p.r((78,61,45),(38,66,35,6),1)
+    for y in (45,52,59):p.c(trim,(55,y),1)
+    for x in (43,61):p.r((72,75,67),(x,68,7,9),1)
+    p.r(skin,(49,29,13,11),2);p.e(skin,(44,12,24,25));p.c(ink,(62,24),1)
+    p.p(skin,[(65,22),(72,27),(65,29)])
+    if industrial:
+        p.e((88,71,58),(39,9,32,14));p.r(ink,(41,18,33,5),2)
+        p.r((142,114,75),(44,40,4,26));p.r((142,114,75),(64,40,4,26))
+    elif historic:
+        p.p(cloth,[(38,14),(44,7),(64,7),(72,16),(67,21),(40,21)])
+        p.r((54,65,52),(40,20,34,5),1);p.c(trim,(55,15),2)
+    else:
+        p.e((43,62,81),(40,9,31,17));p.r((29,42,58),(40,20,35,5),1)
+        p.r((184,200,206),(49,42,11,7),1)
+    p.l(ink,(43,43),(31,62),9);p.l(cloth,(43,43),(32,61),6)
+    p.l(skin,(32,62),(42,69),5);p.l(cloth,(66,44),(76,56),8);p.l(skin,(76,56),(83,52),5)
+    if industrial:
+        p.l((112,82,49),(85,44),(85,100),5);p.r((183,152,85),(81,35,9,15),2)
+    else:
+        p.l((88,66,47),(57,66),(82,53),6);p.l(ink,(78,55),(105,44),4)
+        p.l((160,168,164),(101,46),(109,42),2)
+    if kind=='armored':
+        p.p((64,76,85),[(15,46),(43,46),(46,81),(29,94),(13,80)])
+        p.p((184,192,187),[(15,46),(43,46),(46,81),(29,94),(13,80)],2)
+    return pg.transform.smoothscale(p.image(),(90,90))
+
 @lru_cache(maxsize=512)
 def figure(era,kind,stage,frame,warning=False,variant=''):
+    if era in (4,6):return civilian_guard(era,kind,frame,variant)
     if variant=='timbuktu':
         p=Painter(112,112);step=math.sin(frame*math.tau/8)*5;ink=(37,47,55);cloth=(72,103,129);trim=(206,177,115)
         for dx in (-7,7):p.l(ink,(54+dx,79),(54+dx+step*(1 if dx>0 else -1),103),8)

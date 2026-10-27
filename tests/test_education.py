@@ -27,9 +27,9 @@ class EducationTests(unittest.TestCase):
         self.folder.cleanup()
 
     def test_324_authored_questions_cover_every_age_and_map(self):
-        self.assertEqual(len(STAGES),46)
-        self.assertEqual(len(LESSONS),92)
-        self.assertEqual(sum(len(l.questions) for l in LESSONS),552)
+        self.assertEqual(len(STAGES),50)
+        self.assertEqual(len(LESSONS),100)
+        self.assertEqual(sum(len(l.questions) for l in LESSONS),600)
         positions=set()
         for topic,lesson in enumerate(LESSONS):
             for band in range(3):
@@ -222,7 +222,7 @@ class GuardianTests(unittest.TestCase):
                 danger=[m[0] for m in boss.telegraphs if m[1]<.8]+[s.rect.centerx for s in w.projectiles if s.kind=='fall' and s.rect.top<584]
                 for x in danger:
                     if abs(p.rect.centerx-x)<120:axis=-1 if p.rect.centerx<=x else 1
-                w.update(STEP,Controls(drop=True,axis=axis,jump=p.grounded and incoming,held=True,dash=emergency,attack=boss.phase=='exposed'))
+                w.update(STEP,Controls(work=True,axis=axis,jump=p.grounded and incoming,held=True,dash=emergency,attack=boss.phase=='exposed'))
                 if not w.boss.alive:
                     break
             self.assertFalse(w.boss.alive,f'Boss {era} not defeated: hp={w.boss.hp}, deaths={w.deaths}')

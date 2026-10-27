@@ -185,7 +185,7 @@ class Artist:
 
     def scenery(self, surface, world, camera, time):
         era = palette_for(world.index,world.stage)
-        if world.level_id==0:
+        if world.level_id==0 and not getattr(world,'mobile_render',False):
             for wx,label in ((315,'ESPACIO · MANTÉN PARA SALTAR'),(682,'SHIFT · IMPULSO TEMPORAL')):
                 if abs(world.player.rect.centerx-wx)<280:
                     text(surface,label,(wx-camera,351),11,mix(era.accent,PAPER,.3),True,'center')
@@ -221,9 +221,11 @@ class Artist:
         for hazard in world.hazards:
             if hazard.right<camera-20 or hazard.left>camera+W+20:continue
             x,y=hazard.x-camera,hazard.y
+            icy=world.combat_era==1 or world.level_id in (28,33,48)
+            colors=((146,207,230),(225,246,249)) if icy else ((123,128,119),(199,195,159)) if world.combat_era in (4,5,6,7) else ((205,108,105),(243,165,135))
             for xx in range(0,int(hazard.w)-6,13):
-                polygon(surface,(205,108,105),[(x+xx,y+14),(x+xx+6,y-2),(x+xx+13,y+14)])
-                line(surface,(243,165,135),(x+xx+6,y),(x+xx+10,y+10))
+                polygon(surface,colors[0],[(x+xx,y+14),(x+xx+6,y-2),(x+xx+13,y+14)])
+                line(surface,colors[1],(x+xx+6,y),(x+xx+10,y+10))
         echoes=[];image=echo_image(era.accent)
         for i,(wx,wy) in enumerate(world.data['echoes']):
             if i in world.echoes or not camera-30<wx<camera+surface.get_width()+30:

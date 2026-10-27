@@ -40,7 +40,7 @@ class FieldControlTests(unittest.TestCase):
         self.assertEqual(field.kind,'supply')
         world.mechanic.state['step']=3;field.collected={0,1,2}
         floor=stand_at(world,world.mechanic.devices[2])
-        for _ in range(240):world.update(STEP,Controls(drop=True))
+        for _ in range(240):world.update(STEP,Controls(work=True))
         self.assertTrue(field.done)
         self.assertEqual(world.player.rect.bottom,floor.rect.top)
         self.assertEqual(world.player.drop_time,0)
@@ -49,7 +49,7 @@ class FieldControlTests(unittest.TestCase):
         world=World(9,0);field=world.mechanic.field
         self.assertEqual(field.kind,'chain');world.mechanic.state['step']=3
         point=field.points[0];floor=stand_at(world,(point[0],point[1]+40))
-        for _ in range(210):world.update(STEP,Controls(drop=True))
+        for _ in range(210):world.update(STEP,Controls(work=True))
         self.assertIn(0,field.crossed)
         self.assertEqual(world.player.rect.bottom,floor.rect.top)
 
@@ -63,29 +63,27 @@ class FieldControlTests(unittest.TestCase):
         self.assertGreater(player.vy,0);self.assertNotIn('jump',events)
         self.assertTrue(player.air_jump)
 
-    def test_keyboard_down_is_safe_and_down_plus_jump_descends(self):
+    def test_keyboard_down_descends_without_pressing_jump(self):
         g=self.g;g.load(0);g.begin();g.tutorial_active=False
         floor=next(p for p in g.world.platforms if p.oneway and not p.moving)
         stand_at(g.world,(floor.rect.centerx,floor.rect.top))
-        with patch('pygame.key.get_pressed',return_value=defaultdict(bool,{pg.K_DOWN:True})):
-            g.update(1/60);self.assertEqual(g.world.player.drop_time,0)
-            g.jump_pending=True;g.update(1/60)
+        with patch('pygame.key.get_pressed',return_value=defaultdict(bool,{pg.K_DOWN:True})):g.update(1/60)
         self.assertGreater(g.world.player.drop_time,0)
         self.assertGreater(g.world.player.rect.bottom,floor.rect.top)
 
-    def test_android_two_finger_chord_descends_but_action_alone_does_not(self):
-        g=self.g;g.configure_viewport(1600/720);g.load(0);g.begin();g.tutorial_active=False
-        g.save.data['touch_controls']=True
-        floor=next(p for p in g.world.platforms if p.oneway and not p.moving)
-        stand_at(g.world,(floor.rect.centerx,floor.rect.top));g.render()
-        def touch(action,finger):
-            box=pg.Rect(boxes_for_width(1600)[action])
-            g.touch_event(pg.event.Event(pg.FINGERDOWN,finger_id=finger,x=box.centerx/1600,y=box.centery/720))
+    def test_android_held_use_completes_a_task_without_falling(self):
+        g=self.g;g.save.data['touch_controls']=True;g.configure_viewport(1600/720)
+        g.load(12,0);g.begin();g.tutorial_active=False;field=g.world.mechanic.field
+        g.world.mechanic.state['step']=3;field.collected={0,1,2}
+        floor=stand_at(g.world,g.world.mechanic.devices[2]);g.render()
+        box=pg.Rect(boxes_for_width(1600)['interact'])
+        g.touch_event(pg.event.Event(pg.FINGERDOWN,finger_id=1,x=box.centerx/1600,y=box.centery/720))
+        self.assertEqual(g.state,'play')
         with patch('pygame.key.get_pressed',return_value=defaultdict(bool)):
-            touch('drop',1);g.update(1/60)
-            self.assertEqual(g.world.player.rect.bottom,floor.rect.top)
-            touch('jump',2);g.update(1/60)
-        self.assertGreater(g.world.player.drop_time,0)
+            for _ in range(110):g.update(1/60)
+        self.assertTrue(field.done)
+        self.assertEqual(g.world.player.rect.bottom,floor.rect.top)
+        self.assertEqual(g.world.player.drop_time,0)
 
     def test_dense_pickups_keep_every_orb_with_bounded_cosmetic_particles(self):
         g=self.g;g.load(0);g.world.enemies=[];g.world.hazards=[]
