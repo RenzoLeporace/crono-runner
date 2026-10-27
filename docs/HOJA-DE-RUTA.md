@@ -258,3 +258,36 @@ El pedido de interfaz intuitiva abarca Android y PC. Android ya tiene el HUD
 nuevo; falta llevar la guía contextual simplificada al HUD de PC. Renzo indicó
 que le encantó la interfaz Android y autorizó seguir con rendimiento, sobre
 todo con muchas entidades y jefes. No considerar cerrado ese rendimiento.
+
+## Último seguimiento de rendimiento en J6
+
+Checkpoint inicial subido a GitHub: **fcd7e54**. Después se añadieron diagnósticos
+por etapas en android/main.py y crono/viewport.py, y una corrección de formato:
+la UI usaba BGRA mientras pantalla/mundo usan RGBA. En menú 1480×720 se midió
+p95 de eventos0,2ms, actualización0,3ms, render458,9ms, composición360ms,
+copia20,4ms y flip11,7ms (percentiles independientes). No era coste de enemigos.
+
+La UI ahora usa los mismos canales que la pantalla y los menús opacos no hacen
+mezcla alfa. **12 regresiones de render aprobadas en2,928s** tras el cambio.
+Se recompiló y firmó el APK de prueba. Los siguientes registros muestran canales
+coincidentes, pero el teléfono se bloqueó y el viewport pasó a960: no presentar
+sus8–9FPS como comparación válida con el ensayo anterior a1480.
+
+Para evitar ese problema, MainActivity mantiene la pantalla encendida solo en
+primer plano mediante FLAG_KEEP_SCREEN_ON. Renzo recibió una petición para
+mantener el J6 desbloqueado durante un minuto; la medición comparable permanece
+pendiente. La última APK está verificada, pero esta última variante debe
+instalarse de nuevo con `adb -d install --no-incremental --no-streaming -r ...`.
+La huella vigente está en APK-CHECK.json, no en los informes anteriores.
+
+Prioridad al retomar: (1) instalar esa APK y dejar la pantalla encendida,
+(2) capturar métricas a1480×720 en menú/mapa, (3) activar prueba docente y medir
+un jefe recibiendo daño/salvas, (4) medir una escena con muchas entidades. Si los
+blits de jefes/enemigos/fondos dominan, revisar también los formatos BGRA de
+imágenes cached (Painter.image, enemy_picture, body_image) antes de ampliar
+cachés. Conservar avisos, feedback de daño, colores y memoria acotada.
+
+La telemetría de diagnóstico toma60cuadros y muestra phases_p95: events,
+update,render,compose,display_copy,flip,present; además de entidades visibles,
+proyectiles,jefe activo y máscaras de píxel. El modo normal conserva120muestras.
+Descartar ventanas de transición, bloqueo o cambio de resolución.

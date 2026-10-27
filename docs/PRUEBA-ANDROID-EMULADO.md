@@ -43,7 +43,7 @@ no deben citarse como FPS reales. El agente principal corrigió la telemetría y
 recompiló después; no se repitió esta prueba emulada con la corrección.
 
 Los registros/capturas están en build/verification/0.9.3-desarrollo/android-emulator.
-La última APK verificada tiene SHA256
+La APK verificada antes de los ajustes posteriores de composición tenía SHA256
 42753d09201efb51839e3b173df6cab91c5e7fd51d1c6df3ea5f9e08e4e09377;
 sus 77 módulos y entrada Android coinciden con las fuentes.
 

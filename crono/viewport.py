@@ -1,6 +1,7 @@
 """A wider camera and continuous parallax, with cached individual art assets."""
 import importlib
 import pygame as pg
+from time import perf_counter
 
 RENDER_MODULES=('art','period_art','argentina_art','egypt_art','journey_art','educational_art','enemy_art','heritage','humanoid_art')
 
@@ -33,13 +34,19 @@ class ViewportUI:
         if getattr(self,'viewport_width',None)==width:return
         self.viewport_width=width;self.ui_scale=min(1,width/1280)
         self.ui_offset=((width-1280*self.ui_scale)/2,(720-720*self.ui_scale)/2)
-        self.ui_canvas=pg.Surface((1280,720),pg.SRCALPHA);self.canvas=self.ui_canvas
+        # WebAssembly's display is RGBA while a default alpha Surface is BGRA.
+        # Matching channels avoids swapping a million pixels every composition.
+        rgb=self.display.get_masks()[:3]
+        alpha=0xffffffff ^ (rgb[0]|rgb[1]|rgb[2])
+        self.ui_canvas=pg.Surface((1280,720),pg.SRCALPHA,32,(*rgb,alpha));self.canvas=self.ui_canvas
         self.world_canvas=pg.Surface((width,720));self.display=pg.display.set_mode((width,720),pg.RESIZABLE)
         set_render_width(width,True)
         self.menu_world_background=None;self.mobile_menu_background=None
         if hasattr(self,'artist'):self.artist.mobile_layer=None
 
     def present(self):
+        profiling=getattr(self,'perf_enabled',False)
+        started=perf_counter() if profiling else 0
         width=self.viewport_width;world=self.world_canvas
         if self.state not in ('play','voyage'):
             if self.touch_enabled():
@@ -51,13 +58,21 @@ class ViewportUI:
                 world.blit(cached[1],(0,0))
             else:self.artist.background(world,self.world.index,self.camera,self.time,self.world.stage)
         ui=self.ui_canvas
+        # Menu pages paint an opaque canvas; only gameplay/voyage need blending.
+        ui.set_alpha(255 if self.state in ('play','voyage') else None)
         if self.ui_scale!=1:ui=pg.transform.scale(ui,(width,round(720*self.ui_scale)))
         world.blit(ui,self.ui_offset)
+        composed=perf_counter() if profiling else 0
         dw,dh=self.display.get_size();ratio=min(dw/width,dh/720)
         size=(max(1,round(width*ratio)),max(1,round(720*ratio)))
         self.display.fill((8,24,33))
         picture=world if size==world.get_size() else pg.transform.scale(world,size) if self.touch_enabled() else pg.transform.smoothscale(world,size)
-        self.display.blit(picture,((dw-size[0])//2,(dh-size[1])//2));pg.display.flip()
+        self.display.blit(picture,((dw-size[0])//2,(dh-size[1])//2))
+        copied=perf_counter() if profiling else 0
+        pg.display.flip()
+        if profiling:
+            ended=perf_counter()
+            self.perf_present=dict(compose=(composed-started)*1000,display_copy=(copied-composed)*1000,flip=(ended-copied)*1000,present=(ended-started)*1000)
 
 def mobile_backdrop(artist,s,world,camera):
     # Keep sky and landmarks in their own coordinate spaces. Flattening them
