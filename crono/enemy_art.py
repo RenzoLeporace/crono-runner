@@ -196,7 +196,8 @@ def enemy_picture(era,stage,kind,variant,faction,frame,human,direction,mode,time
     for dx,dy in ((-2,0),(2,0),(0,-2),(0,2),(-2,-2),(2,2),(-2,2),(2,-2)):outlined.blit(dark,(dx,dy))
     for dx,dy in ((-1,0),(1,0),(0,-1),(0,1)):outlined.blit(light,(dx,dy))
     outlined.blit(picture,(0,0))
-    return outlined,(bounds.x-origin,bounds.y-150)
+    from .art import display_alpha
+    return display_alpha(outlined,True),(bounds.x-origin,bounds.y-150)
 
 
 def draw_enemy(s,e,camera,t,era,stage=0):

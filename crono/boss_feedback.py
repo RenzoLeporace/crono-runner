@@ -17,7 +17,8 @@ def body_image(render_body,era,variant,phase,direction,hit,alive,width,height,fr
     bounds=layer.get_bounding_rect(min_alpha=1).inflate(6,6).clip(layer.get_rect())
     image=layer.subsurface(bounds).copy()
     flash=image.copy();flash.fill((85,85,85),special_flags=pg.BLEND_RGB_ADD)
-    return image,flash,(bounds.x-280,bounds.y-340)
+    from .art import display_alpha
+    return display_alpha(image,True),display_alpha(flash,True),(bounds.x-280,bounds.y-340)
 
 
 def animation_phase(boss,time):
@@ -42,12 +43,12 @@ def draw(s,boss,camera,time,render_body):
         kick=round(math.sin(progress*math.pi*6)*7*(1-progress))
         recoil=round(math.sin(progress*math.pi)*6)
         if boss.alive:
-            layer.set_alpha(255)
+            layer.set_alpha(255,pg.RLEACCEL)
             s.blit(layer,(position[0]+kick,position[1]-recoil))
-            flash.set_alpha(round(145*(1-progress)))
+            flash.set_alpha(round(145*(1-progress)),pg.RLEACCEL)
             s.blit(flash,(position[0]+kick,position[1]-recoil))
         else:
-            layer.set_alpha(round(255*(1-progress)))
+            layer.set_alpha(round(255*(1-progress)),pg.RLEACCEL)
             s.blit(layer,(position[0]+kick,position[1]-recoil))
         color=GOLD if boss.alive else CYAN
         radius=18+progress*54
@@ -59,4 +60,4 @@ def draw(s,boss,camera,time,render_body):
             line(s,color,start,end,2)
         text(s,f'−{boss.last_damage}' if boss.alive else 'LIBERADO',(x,y-211-progress*26),21,color,True,'center')
     else:
-        layer.set_alpha(255);s.blit(layer,position)
+        layer.set_alpha(255,pg.RLEACCEL);s.blit(layer,position)

@@ -2,16 +2,17 @@
 
 Actualizada el **27 de octubre de 2026**. Leer este archivo antes de continuar.
 
-> **Punto inmediato de reanudación:** fuentes y hoja de ruta subidas a GitHub.
-> Último cambio de código: **b61a838**. La APK con canales RGBA coincidentes y
-> FLAG_KEEP_SCREEN_ON se instaló correctamente en el J6. Su SHA256 es
-> **1e8a837253e3aaf487394becd7912e8f327c19537f2edcd4dce0600d93c37e42**.
-> Falta completar la medición en primer plano: Renzo recibió una pregunta para
-> dejar el teléfono desbloqueado con CRONO abierto durante un minuto. No hay
-> comparación válida final de FPS ni prueba real de jefe/escena densa todavía.
-> Priorizar esos dos escenarios, como reiteró Renzo. Después portar la guía
-> contextual al HUD de PC y terminar compilaciones/entrega. No repetir los
-> cambios de contenido ya aprobados ni anunciar la optimización como cerrada.
+> **Punto inmediato de reanudación:** APK de prueba actualizado e instalado en el
+> J6; 197 pruebas aprobadas. Se verificó minimizar/volver: sesión conservada,
+> pausa al regresar y Continuar funcional. Se liberan controles retenidos,
+> también en travesías navales. La vista Android pausa sus temporizadores.
+> La composición rápida del HUD y sprites RLE redujeron el primer mapa de
+> ~1,3 FPS a 6,6–6,7 FPS (1480×720, sin enemigos visibles): mejora real pero
+> **rendimiento todavía insuficiente**, no terminado. Faltan medir jefes y
+> escenas con muchas entidades. Priorizar esos escenarios y los costes de
+> dibujo/copia; luego portar la guía contextual al HUD de PC y cerrar paquetes.
+> La APK vigente coincide con 77 módulos y android/main.py; SHA256 y registros
+> en build/verification/0.9.3-desarrollo/APK-CHECK.json. Entrega sigue en 0.9.2.
 
 ## Estado exacto al cerrar el punto de trabajo
 
@@ -19,8 +20,8 @@ Actualizada el **27 de octubre de 2026**. Leer este archivo antes de continuar.
   `RenzoLeporace/crono-runner` (repositorio privado).
 - Fuentes actuales: **0.9.3 en desarrollo**, con cambios de ayer y del 27 de
   octubre. No hay publicación v0.9.3 ni un Windows recompilado de esta versión.
-- **194 pruebas funcionales aprobadas en 69,228 s**. Registro persistente:
-  `build/verification/0.9.3-desarrollo/suite-ready-android.txt`.
+- **197 pruebas funcionales aprobadas en 50,841 s**. Registro persistente:
+  `build/verification/0.9.3-desarrollo/suite-minimize-final.txt`.
 - Se generó un APK de prueba firmado: `build/android/CRONO-Beta-Educativa-0.9.3-Android.apk`.
   No presentarlo como entrega final ni confundirlo con `Entrega/APK`.
   Recompilado con `real_dt` corregido; tar y entrada Android coinciden con
@@ -302,3 +303,39 @@ La telemetría de diagnóstico toma60cuadros y muestra phases_p95: events,
 update,render,compose,display_copy,flip,present; además de entidades visibles,
 proyectiles,jefe activo y máscaras de píxel. El modo normal conserva120muestras.
 Descartar ventanas de transición, bloqueo o cambio de resolución.
+
+## Actualización posterior: minimizar y dibujo en el J6
+
+Pedido más reciente: comprobar qué pasa al minimizar. Se ensayó HOME durante
+8 segundos desde una partida activa y se volvió a la misma Activity: mismo
+proceso, pantalla de pausa, partida conservada, sin traceback Python y Continuar
+vuelve al mapa. Se repitió tras recompilar/instalar las correcciones. No equivale
+a comprobar que Android mate el proceso por falta de memoria; eso sigue pendiente.
+
+MainActivity llama onPause/pauseTimers al salir y onResume/resumeTimers al volver,
+y detiene la lectura en voz. El juego atiende pérdida de foco y minimización;
+limpia dedos, posiciones, acciones pendientes e impulso/uso de mando, guarda y
+pausa. Esto corrige un timón/disparo que podían quedar retenidos al suspender una
+travesía naval. Las regresiones verifican que tiempo, posición y disparos no
+avanzan durante la pausa. La suite completa pasó 197 pruebas en 50,841 segundos;
+16 pruebas focales de navegación y render también pasaron.
+
+El cuello de botella inicial del mapa era mezclar alfa en un HUD de pantalla
+completa: p95 de composición ~333 ms, 1,3 FPS. El HUD táctil ahora utiliza recortes
+opacos y transparencia por clave; conserva exactamente los píxeles de referencia
+en seis mapas consecutivos. Los sprites finales, plataformas y cuerpos de jefes
+usan RLE y canales de pantalla; las composiciones intermedias no usan RLE para
+conservar los halos. No se aumentaron límites de caché ni se borraron detalles.
+El flash móvil de daño se dibuja sobre el mundo y mantiene legible el HUD.
+
+Última medición física comparable del primer mapa a1480×720: 6,6–6,7 FPS,
+p95 del cuadro147ms, actualización13,5–13,8ms, render135ms, composición20–23ms,
+copia19,6–19,7ms y flip10,5ms. Menú8,3–8,5FPS, cuadro114–117ms. Son registros de
+mapa sin enemigos visibles ni jefe: **no cierran el pedido de optimización**.
+No confundir las mediciones previas de viewport960 con estas.
+
+Próximo trabajo de rendimiento: activar modo docente sin alterar registros,
+abrir tercer mapa de la primera era, usar herramientas para ir al jefe y medir
+sus salvas/daño con crono_performance=true. Después escena densa. Examinar copias
+de pantalla y dibujo de fondo antes de ampliar cachés; mantener controles, arte,
+avisos y formato ancho. Los informes locales conservan fases y entidades visibles.

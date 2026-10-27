@@ -264,5 +264,10 @@ public final class MainActivity extends Activity {
         if(focused)getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
     @Override protected void onDestroy(){network.shutdownNow();if(speech!=null)speech.shutdown();if(web!=null){web.removeJavascriptInterface("CronoAndroid");web.destroy();}super.onDestroy();}
-    @Override protected void onPause(){if(speech!=null)speech.stop();if(web!=null)web.evaluateJavascript("window.dispatchEvent(new Event('blur'))",null);super.onPause();}
+    @Override protected void onResume(){super.onResume();if(web!=null){web.onResume();web.resumeTimers();}}
+    @Override protected void onPause(){
+        if(speech!=null)speech.stop();
+        if(web!=null){web.evaluateJavascript("window.dispatchEvent(new Event('blur'))",null);web.onPause();web.pauseTimers();}
+        super.onPause();
+    }
 }

@@ -72,4 +72,25 @@ class SettingsNavigationTests(unittest.TestCase):
             g.save.data['reading_size']=size;g.render();images.append(pg.image.tobytes(g.canvas.subsurface((90,182,1070,250)),'RGB'))
         self.assertNotEqual(*images)
 
+    def test_minimizing_pauses_world_and_releases_touch_and_pending_actions(self):
+        g=self.g;before=g.world.player.rect.copy();elapsed=g.world.time
+        g.fingers={1:'right',2:'jump'};g.finger_positions={1:(20,40)}
+        g.jump_pending=g.dash_pending=g.shoot_pending=g.work_lock=True
+        pg.event.clear();pg.event.post(pg.event.Event(pg.WINDOWMINIMIZED));g.events()
+        self.assertEqual(g.state,'pause');self.assertFalse(g.fingers or g.finger_positions)
+        self.assertFalse(g.jump_pending or g.dash_pending or g.shoot_pending or g.work_lock)
+        g.update(.1)
+        self.assertEqual(g.world.player.rect,before);self.assertEqual(g.world.time,elapsed)
+        self.escape();self.assertEqual(g.state,'play')
+
+    def test_focus_loss_pauses_voyage_without_stuck_helm_after_return(self):
+        g=self.g;g.start_voyage();v=g.voyage
+        g.fingers={1:'right',2:'attack'};g.finger_positions={1:(20,40)}
+        pg.event.clear();pg.event.post(pg.event.Event(pg.WINDOWFOCUSLOST));g.events()
+        self.assertTrue(v.paused);self.assertFalse(g.fingers or g.finger_positions)
+        before=(v.x,v.y,v.time,len(v.shots));g.voyage_update(.1)
+        self.assertEqual((v.x,v.y,v.time,len(v.shots)),before)
+        v.paused=False;g.voyage_update(.05)
+        self.assertEqual((v.x,v.y),before[:2]);self.assertFalse(v.shots)
+
 if __name__=='__main__':unittest.main()

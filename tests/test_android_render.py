@@ -24,6 +24,16 @@ class AndroidRenderTests(unittest.TestCase):
     def tearDown(self):
         pg.quit();self.temp.cleanup()
 
+    def test_touch_hud_fast_composition_preserves_pixels_across_map_changes(self):
+        g=self.g
+        for level in (0,2,3,23,44,48):
+            g.load(*divmod(level,3));g.begin();g.tutorial_active=False;g.render()
+            source=g.ui_canvas
+            reference=pg.Surface(source.get_size());reference.fill((83,96,112));actual=reference.copy()
+            source.set_colorkey(None);source.set_alpha(255);reference.blit(source,(0,0))
+            source.set_alpha(None);source.set_colorkey((0,0,0,0));actual.blit(source,(0,0))
+            self.assertEqual(pg.image.tobytes(reference,'RGB'),pg.image.tobytes(actual,'RGB'),level)
+
     def test_sky_does_not_slide_or_snap_at_old_buffer_boundaries(self):
         g=self.g
         for level in (0,24,44):

@@ -28,7 +28,9 @@ class Painter:
         pg.draw.arc(self.s,col,pg.Rect(*(round(v*2) for v in box)),start,end,width*2)
     def label(self,value,x,y,size,col):
         self.s.blit(pg.font.SysFont('georgia',size*2,True).render(value,True,col),(int(x*2),int(y*2)))
-    def image(self):return pg.transform.smoothscale(self.s,(self.w,self.h))
+    def image(self):
+        from .art import display_alpha
+        return display_alpha(pg.transform.smoothscale(self.s,(self.w,self.h)))
 
 def arch(p,x,y,w,h,wall,inside,trim):
     p.e(trim,(x-3,y-3,w+6,w+6))

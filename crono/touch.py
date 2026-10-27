@@ -45,7 +45,8 @@ def control_image(name,size,active,ready):
     if name not in ('left','right'):
         label=dict(drop='BAJAR',jump='SALTAR',attack='PULSO',dash='RAYO',interact='USAR')[name]
         text(image,label,(cx,cy+(45 if primary else 32)),22 if primary else 13,color,True,'center')
-    return image
+    from .art import display_alpha
+    return display_alpha(image,True)
 
 
 class TouchUI:

@@ -8,7 +8,7 @@ import math
 import random
 import pygame as pg
 from .argentina_art import Painter,arch,roof,window
-from .art import W,H,mix,line,rect,circle,polygon,glow,text,PAPER,GOLD
+from .art import W,H,mix,line,rect,circle,polygon,glow,text,PAPER,GOLD,display_alpha
 from .visuals import palette_for
 
 def blocks(p,box,col,bw=43,bh=22):
@@ -292,7 +292,7 @@ def landmark(era,stage):
                 for a in range(3):
                     for b in range(3):p.r((124,216,208),(x+12+a*48,317+b*26,31,15),2)
             p.label('OBSERVATORIO',372,347,19,(55,82,99))
-    return p.image()
+    return display_alpha(p.image(),True)
 
 @lru_cache(maxsize=126)
 def module(era,stage,seed):
@@ -371,7 +371,7 @@ def module(era,stage,seed):
                 p.r((80+rng.randrange(34),147+rng.randrange(30),172),(xx,yy,24,15),2)
         p.r((115,160,166),(5,355,319,5))
         for yy in range(int(376-h),350,54):p.l((52,94,118),(15,yy),(313,yy),3)
-    return p.image()
+    return display_alpha(p.image(),True)
 
 @lru_cache(maxsize=21)
 def sky(era,stage):
@@ -489,7 +489,7 @@ def tile(era,stage,w,h,seed,moving):
     if moving:
         p.r((119,233,217),(0,0,w,3))
         for x in (11,w-11):p.c((119,233,217),(x,10),3,1)
-    return p.image()
+    return display_alpha(p.image(),True)
 
 def props(s,world,camera,t):
     era=world.index;stage=world.stage

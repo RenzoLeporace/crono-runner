@@ -246,6 +246,17 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
                 self.audio.play('ui')
                 action()
 
+    def pause_for_background(self):
+        # A finger/key release can be lost while another app owns the screen.
+        self.jump_pending=self.dash_pending=self.shoot_pending=False
+        self.joy_jump=self.joy_work=self.work_lock=False
+        self.fingers.clear();self.finger_positions.clear();self.accumulator=0
+        if self.state=='voyage':
+            self.voyage.paused=True;self.persist_voyage()
+        elif self.state=='play':
+            self.save.capture(self.world)
+            self.set_state('pause')
+
     def events(self):
         for event in pg.event.get():
             # SDL also emits a mouse event for each finger. Discard it before
@@ -260,16 +271,13 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             if event.type==pg.QUIT:
                 if self.state=='voyage':self.persist_voyage()
                 self.running=False
-            elif event.type==pg.WINDOWFOCUSLOST and self.state=='voyage':
-                self.voyage.paused=True;self.persist_voyage()
+            elif event.type in (pg.WINDOWFOCUSLOST,pg.WINDOWMINIMIZED):
+                self.pause_for_background()
             elif event.type==pg.JOYDEVICEADDED:
                 self.connect_controller()
             elif event.type==pg.JOYDEVICEREMOVED:
                 self.joystick=None
                 self.joy_jump=False
-            elif event.type==pg.WINDOWFOCUSLOST and self.state=='play':
-                self.save.capture(self.world)
-                self.set_state('pause')
             elif event.type==pg.MOUSEMOTION:
                 self.mouse=self.logical_mouse(event.pos)
                 for i,(box,_,enabled) in enumerate(self.buttons):
@@ -771,6 +779,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
 
     def render(self):
         self.canvas=self.ui_canvas
+        self.canvas.set_colorkey(None);self.canvas.set_alpha(255)
         self.buttons=[]
         if self.state=='menu':
             self.menu()
@@ -834,9 +843,15 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             self.story_hud()
             if self.touch_enabled():self.draw_touch()
             if self.flash>0:
-                overlay=pg.Surface((W,H),pg.SRCALPHA)
-                overlay.fill((205,92,83,int(80*self.flash/.22)))
-                self.canvas.blit(overlay,(0,0))
+                if self.touch_enabled():
+                    overlay=getattr(self,'mobile_flash_layer',None)
+                    if overlay is None or overlay.get_width()!=self.viewport_width:
+                        overlay=pg.Surface((self.viewport_width,H));overlay.fill((205,92,83));self.mobile_flash_layer=overlay
+                    overlay.set_alpha(int(80*self.flash/.22));self.world_canvas.blit(overlay,(0,0))
+                else:
+                    overlay=pg.Surface((W,H),pg.SRCALPHA)
+                    overlay.fill((205,92,83,int(80*self.flash/.22)))
+                    self.canvas.blit(overlay,(0,0))
         if self.notice_time>0:
             rect(self.canvas,(17,33,43),(W/2-390,H-78,780,42),5)
             text(self.canvas,self.notice,(W/2,H-57),15,GOLD,False,'center')

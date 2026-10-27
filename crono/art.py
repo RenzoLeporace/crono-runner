@@ -18,6 +18,16 @@ CYAN = (116, 237, 219)
 GOLD = (242, 189, 112)
 
 
+def display_alpha(image,rle=False):
+    """Prepare cached art once for software blits, preserving every RGBA pixel."""
+    screen=pg.display.get_surface()
+    if screen and screen.get_bitsize()==32:
+        rgb=screen.get_masks()[:3];masks=(*rgb,0xffffffff^(rgb[0]|rgb[1]|rgb[2]))
+        if image.get_masks()!=masks:image=image.convert(masks,pg.SRCALPHA)
+    image.set_alpha(255,pg.RLEACCEL if rle else 0)
+    return image
+
+
 def mix(a, b, t):
     return tuple(round(x + (y - x) * t) for x, y in zip(a, b))
 
@@ -45,7 +55,7 @@ def font(size, bold=False, serif=False):
 
 @lru_cache(maxsize=1200)
 def rendered_text(value,size,color,bold,serif):
-    return font(size,bold,serif).render(value,True,color)
+    return display_alpha(font(size,bold,serif).render(value,True,color))
 
 def text(surface, value, pos, size=20, color=PAPER, bold=False, anchor='topleft', serif=False):
     image = rendered_text(str(value),size,tuple(color),bold,serif)
@@ -71,7 +81,7 @@ def glow_image(radius, color):
     for r in range(radius, 0, -3):
         alpha = int(28 * (1 - r / radius) ** 1.3)
         circle(s, (*color, alpha), (radius + 1, radius + 1), r)
-    return s
+    return display_alpha(s)
 
 
 def glow(surface, pos, radius=60, color=CYAN):
@@ -84,7 +94,7 @@ def echo_image(color):
     glow(image,(21,21),21,color)
     circle(image,color,(21,21),5,1)
     circle(image,PAPER,(21,21),2)
-    return image
+    return display_alpha(image)
 
 
 def diamond(surface, pos, size, color, filled=True):
@@ -173,15 +183,18 @@ class Artist:
         args=(stage,int(p.rect.w),int(p.rect.h),int(p.origin),p.moving)
         if index<7:
             from .period_art import tile
-            return tile(index,*args)
-        if index==7:
+            image=tile(index,*args)
+        elif index==7:
             from .argentina_art import platform_tile
-            return platform_tile(*args)
-        if index==8:
+            image=platform_tile(*args)
+        elif index==8:
             from .egypt_art import tile
-            return tile(*args)
-        from .journey_art import tile
-        return tile(index,*args)
+            image=tile(*args)
+        else:
+            from .journey_art import tile
+            image=tile(index,*args)
+        image.set_alpha(255,pg.RLEACCEL)
+        return image
 
     def scenery(self, surface, world, camera, time):
         era = palette_for(world.index,world.stage)

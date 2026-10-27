@@ -58,8 +58,11 @@ class ViewportUI:
                 world.blit(cached[1],(0,0))
             else:self.artist.background(world,self.world.index,self.camera,self.time,self.world.stage)
         ui=self.ui_canvas
-        # Menu pages paint an opaque canvas; only gameplay/voyage need blending.
-        ui.set_alpha(255 if self.state in ('play','voyage') else None)
+        # Touch HUD panels are opaque cut-outs. A color key skips empty pixels
+        # without the expensive per-pixel alpha path on older WebAssembly CPUs.
+        touch_hud=self.touch_enabled() and self.state in ('play','voyage')
+        ui.set_colorkey((0,0,0,0) if touch_hud else None)
+        ui.set_alpha(255 if self.state in ('play','voyage') and not touch_hud else None)
         if self.ui_scale!=1:ui=pg.transform.scale(ui,(width,round(720*self.ui_scale)))
         world.blit(ui,self.ui_offset)
         composed=perf_counter() if profiling else 0

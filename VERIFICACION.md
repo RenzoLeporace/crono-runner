@@ -1,7 +1,7 @@
 # Verificación funcional · desarrollo 0.9.3
 
-El último cierre completo de fuentes aprobó **194 pruebas en 69,228 segundos**.
-Registro: `build/verification/0.9.3-desarrollo/suite-ready-android.txt`.
+El último cierre completo de fuentes aprobó **197 pruebas en 50,841 segundos**.
+Registro: `build/verification/0.9.3-desarrollo/suite-minimize-final.txt`.
 Las pruebas incluyen los 50 mapas y recorridos con física real, misiones,
 configuración, retornos con Escape, migraciones de banco y guardado, redes LAN,
 exposición, skins, logros y feedback de daño.
@@ -59,3 +59,18 @@ es muy baja y no cierra la optimización. Aún faltan jefe y escena densa.
 **Windows no se recompiló en esta sesión. Entrega y la publicación de GitHub
 siguen siendo0.9.2.** El APK de prueba vive en build/android, todavía no es una
 entrega final. Próximos pasos exactos en docs/HOJA-DE-RUTA.md.
+
+## Seguimiento físico: pausa y composición
+
+La APK de prueba más reciente se instaló correctamente en el J6, sin borrar datos.
+Minimizar ocho segundos y volver conservó el proceso y regresó en pausa;
+Continuar reanudó la partida, sin traceback Python. MainActivity suspende los
+temporizadores de WebView; pérdida de foco/minimización también libera controles
+retenidos en plataforma y navegación. No se ensayó muerte del proceso por Android.
+
+Tras retirar la mezcla alfa de pantalla completa del HUD táctil y preparar sprites
+RLE, el primer mapa a1480×720 subió de~1,3 a6,6–6,7FPS; composición p95 bajó de
+~333 a20–23ms. Sigue siendo insuficiente y todavía no se midieron jefe/escena densa.
+La regresión de píxeles del HUD pasa en seis mapas consecutivos; 197 pruebas totales.
+La APK coincide con77módulos y la entrada Android. Huella vigente: APK-CHECK.json.
+Entrega y Windows permanecen en0.9.2; esto es una compilación de prueba.
