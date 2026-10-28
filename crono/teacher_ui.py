@@ -8,14 +8,16 @@ from .question_bank import QuestionBank,builtin_records
 from .text_field import TextField
 from .campaign import chapter_levels
 from .campaign import ERA_LABELS,TOTAL_ERAS,TOTAL_LEVELS,DIFFICULTIES,level_label,CHAPTER_ORDER,DISPLAY_LEVEL_IDS
+from .i18n import tr,literal,language,LANGUAGES
 
 
 def shortened(value,width,size=16):
+    value=tr(value)
     if font(size).size(value)[0]<=width:
         return value
     while value and font(size).size(value+'…')[0]>width:
         value=value[:-1]
-    return value+'…'
+    return literal(value+'…')
 
 
 class TeacherUI:
@@ -65,6 +67,7 @@ class TeacherUI:
         text(s,'Partida y presentación',(88,184),24,PAPER,True)
         self.button('Música y sonidos',(88,241,491,50),lambda:self.set_state('sound_settings'),small=True)
         self.button('Pantalla: '+('completa' if self.fullscreen else 'ventana'),(88,307,491,50),self.toggle_fullscreen,small=True)
+        self.button('Idioma · '+dict(LANGUAGES)[language()],(88,369,491,40),lambda:self.set_state('language_settings'),small=True)
         self.age_switch(88,423,491)
         wrapped(s,'La edad cambia preguntas y combate: 6–9 mínima, 10–14 media y 15+ alta. Los jefes ganan patrones y los enemigos reaccionan más rápido.',(88,487),481,15,MUTED,leading=23)
         rect(s,(19,35,45),(627,160,588,445),8)
@@ -112,6 +115,7 @@ class TeacherUI:
             self.select_teacher_question(results[0]['id'])
         visible=results[self.teacher_page*6:self.teacher_page*6+6]
         for n,q in enumerate(visible):
+            q=self.bank.display_record(q)
             y=241+n*59
             selected=q['id']==self.teacher_selected
             self.button('',(65,y,693,53),lambda key=q['id']:self.select_teacher_question(key),primary=selected,arrow=False)
@@ -123,7 +127,7 @@ class TeacherUI:
             wrapped(s,'No hay preguntas con esos filtros. Puedes cambiar la búsqueda o crear una nueva.',(89,291),641,22,MUTED)
         rect(s,(20,36,47),(784,126,431,481),7)
         if results:
-            q=self.bank.get(self.teacher_selected)
+            q=self.bank.display_record(self.bank.get(self.teacher_selected))
             text(s,'VISTA CON RESPUESTA',(805,145),11,CYAN,True)
             old_clip=s.get_clip()
             s.set_clip(pg.Rect(801,175,402,302))
@@ -131,7 +135,7 @@ class TeacherUI:
             yy=wrapped(s,q['prompt'],(805,top),389,21,PAPER,True,leading=28)
             yy=max(yy+18,top+104)
             for n,option in enumerate(q['options']):
-                label=('[Correcta] ' if n==q['correct'] else '')+'ABC'[n]+'. '+option
+                label=literal(str(tr('[Correcta] ' if n==q['correct'] else ''))+'ABC'[n]+'. '+str(tr(option)))
                 yy=wrapped(s,label,(805,yy),389,16,CYAN if n==q['correct'] else MUTED,leading=23)+12
             self.teacher_detail_height=yy-top
             s.set_clip(old_clip)
@@ -156,6 +160,7 @@ class TeacherUI:
             self.teacher_message='No se pudo crear el respaldo en esta carpeta.'
 
     def edit_question(self,question_id,duplicate=False):
+        self.teacher_edit_language=language()
         if question_id is None:
             era=max(0,self.teacher_era)
             stage=max(0,self.teacher_stage)
@@ -166,10 +171,14 @@ class TeacherUI:
             if duplicate:
                 draft['id']=None
         self.teacher_draft=deepcopy(draft)
-        self.teacher_original=deepcopy(draft)
-        self.teacher_fields=[TextField(draft['prompt'],220,True),
-                             *[TextField(o,180,True) for o in draft['options']],
-                             TextField(draft['explanation'],700,True),TextField(draft['source'],300)]
+        self.teacher_edit_translation=question_id is not None and not duplicate and self.teacher_edit_language!=draft.get('language','es')
+        view=self.bank.display_record(self.bank.get(question_id)) if question_id is not None else draft
+        if question_id is None or duplicate:
+            if language()!='es':self.teacher_draft['language']=language()
+        self.teacher_fields=[TextField(str(tr(view['prompt'])),220,True),
+                             *[TextField(str(tr(o)),180,True) for o in view['options']],
+                             TextField(str(tr(view['explanation'])),700,True),TextField(str(tr(view['source'])),300)]
+        self.teacher_original=self.current_draft()
         self.teacher_fields[0].focused=True
         self.teacher_query.focused=False
         self.teacher_discard=self.teacher_quit=False
@@ -180,10 +189,10 @@ class TeacherUI:
 
     def current_draft(self):
         draft=deepcopy(self.teacher_draft)
-        draft['prompt']=self.teacher_fields[0].value
-        draft['options']=[f.value for f in self.teacher_fields[1:4]]
-        draft['explanation']=self.teacher_fields[4].value
-        draft['source']=self.teacher_fields[5].value
+        fields=dict(prompt=self.teacher_fields[0].value,options=[f.value for f in self.teacher_fields[1:4]],
+                    explanation=self.teacher_fields[4].value,source=self.teacher_fields[5].value)
+        if self.teacher_edit_translation:draft.setdefault('translations',{})[self.teacher_edit_language]=fields
+        else:draft.update(fields)
         return draft
 
     def teacher_dirty(self):
@@ -226,8 +235,9 @@ class TeacherUI:
 
     def restore_original_question(self):
         original=next(q for q in builtin_records() if q['id']==self.teacher_draft['id'])
-        self.teacher_draft=deepcopy(original)
-        values=[original['prompt'],*original['options'],original['explanation'],original['source']]
+        if not self.teacher_edit_translation:self.teacher_draft=deepcopy(original)
+        view=self.bank.display_record(original)
+        values=[str(tr(v)) for v in [view['prompt'],*view['options'],view['explanation'],view['source']]]
         for field,value in zip(self.teacher_fields,values):
             field.set_value(value)
         self.teacher_message='Original cargado en el formulario. Pulsa Guardar para aplicarlo.'
@@ -262,6 +272,7 @@ class TeacherUI:
             wrapped(s,self.teacher_message,(65,584),1147,14,GOLD,leading=19)
         self.button('Guardar pregunta',(65,632,293,49),self.save_question,True,small=True)
         self.button('Cancelar',(374,632,185,49),self.leave_editor,small=True)
+        text(s,'Idioma · '+dict(LANGUAGES)[self.teacher_edit_language],(1210,649),16,CYAN,False,'midright')
         if not new and any(q['id']==self.teacher_draft['id'] for q in builtin_records()):
             self.button('Cargar original',(575,632,245,49),self.restore_original_question,small=True)
         text(s,'Tab cambia de campo · Ctrl+Enter guarda · Ctrl+C/V copia y pega',(1210,701),12,MUTED,False,'bottomright')

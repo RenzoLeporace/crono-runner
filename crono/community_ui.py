@@ -6,6 +6,7 @@ from .rooms import Room,RoomClient,local_addresses
 from .text_field import TextField
 from .art import text,rect,line,tracked,PAPER,CYAN,GOLD,MUTED
 from .learning_ui import wrapped
+from .i18n import literal,tr
 
 class CommunityUI:
     def init_community(self,save_file=None):
@@ -53,6 +54,10 @@ class CommunityUI:
         from .physics import World
         if getattr(self,'session_started',False) and not self.world.complete:self.save.capture(self.world)
         self.save=self.school.select(key);self.audio.enabled=self.save.data['sound']
+        from .i18n import set_language
+        set_language(self.save.data['language'])
+        from .mobile import bridge
+        if bridge():bridge().setLanguage(self.save.data['language'])
         self.audio.set_volumes(self.save.data['music_volume'],self.save.data['effects_volume'])
         self.world=World(0,0,self.save.effective_upgrades(),self.save.data['solved'],self.save.combat_band())
         self.world.player.skin=self.save.data['skin']
@@ -210,14 +215,14 @@ class CommunityUI:
         self.poll_room();s=self.canvas;s.fill((13,27,37))
         profile=self.school.active
         tracked(s,'AULA · DATOS GUARDADOS EN ESTE EQUIPO',(65,25),12,CYAN,2)
-        text(s,profile['alias']+' · '+profile.get('classroom',''),(62,60),33,PAPER,True)
+        text(s,literal(profile['alias']+' · '+profile.get('classroom','')),(62,60),33,PAPER,True)
         for i,(label,mode) in enumerate((('Perfiles','profiles'),('Ranking de clase','class'),('De institución','institution'),('Salas LAN / WiFi','rooms'),('Docentes','teacher'))):
             self.button(label,(65+i*234,119,221,49),lambda m=mode:setattr(self,'community_mode',m),primary=self.community_mode==mode,small=True,arrow=False)
         mode=self.community_mode
         if mode=='profiles':
             profiles=self.school.data['profiles'];pages=max(1,(len(profiles)+4)//5);self.community_page=max(0,min(pages-1,self.community_page))
             for i,p in enumerate(profiles[self.community_page*5:self.community_page*5+5]):
-                self.button(p['alias']+' · '+p.get('classroom','')+(' · docente' if p.get('role')=='teacher' else ''),(65,193+i*65,750,54),lambda k=p['id']:self.select_profile(k),small=True)
+                self.button(literal(p['alias']+' · '+p.get('classroom','')+(' · '+str(tr('Docentes')) if p.get('role')=='teacher' else '')),(65,193+i*65,750,54),lambda k=p['id']:self.select_profile(k),small=True)
             self.button('+ Alumno',(850,193,360,54),lambda:(setattr(self,'community_mode','profiles'),self.open_form('profile_create')),True)
             self.button('Anterior',(850,264,170,48),lambda:setattr(self,'community_page',self.community_page-1),enabled=self.community_page>0,small=True)
             self.button('Siguiente',(1034,264,176,48),lambda:setattr(self,'community_page',self.community_page+1),enabled=self.community_page<pages-1,small=True)
@@ -230,8 +235,8 @@ class CommunityUI:
             else:rows=self.room_rankings.get('classroom' if mode=='class' else 'institution',[]) if self.room_rankings else rankings(self.school.rows(),profile.get('classroom') if mode=='class' else None,profile.get('institution'))
             text(s,'MEJORES PUNTUACIONES POR MAPA · SIN PARTIDAS DE PRUEBA',(65,190),15,GOLD,True)
             for i,row in enumerate(rows[self.community_page*7:self.community_page*7+7]):
-                y=232+i*44;text(s,f'{self.community_page*7+i+1:02d}  {row["alias"]}',(65,y),21,PAPER,True)
-                text(s,row['classroom'],(540,y),18,MUTED)
+                y=232+i*44;text(s,literal(f'{self.community_page*7+i+1:02d}  {row["alias"]}'),(65,y),21,PAPER,True)
+                text(s,literal(row['classroom']),(540,y),18,MUTED)
                 text(s,f'{row["maps"]} mapas · {row["score"]:,} puntos',(1208,y),21,CYAN,True,'topright')
             self.button('Anterior',(65,560,180,48),lambda:setattr(self,'community_page',max(0,self.community_page-1)),small=True)
             self.button('Siguiente',(263,560,190,48),lambda:setattr(self,'community_page',self.community_page+1),enabled=(self.community_page+1)*7<len(rows),small=True)

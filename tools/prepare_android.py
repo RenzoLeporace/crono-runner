@@ -60,10 +60,10 @@ def prepare():
     html='\n'.join(row for row in html.splitlines() if 'browserfs.min.js' not in row)
     html=html.replace('Ready to start ! Please click/touch page','CRONO · Toca para comenzar')
     html=html.replace('background-color:powderblue','background-color:#0d1b25').replace('background: green','background: #193b49').replace('color: blue','color: #b4f3e9')
-    html=html.replace('Loading, please wait','Cargando CRONO…')
+    html=html.replace('Loading, please wait','Cargando CRONO… / Carregando CRONO…')
     html=re.sub(r'<meta name="viewport"[^>]*>','',html)
     html=html.replace('<head>','<head><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">')
-    html+='\n<style>html,body{margin:0;padding:0;overflow:hidden;touch-action:none;background:#102a38}#canvas{touch-action:none;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important}#infobox{font:20px sans-serif;border-radius:12px}#html{display:none}#crono-rotate{display:none}@media(orientation:portrait){#crono-rotate{display:grid;position:fixed;inset:0;place-items:center;background:#102a38;color:#e4edda;font:24px sans-serif;z-index:90}}</style><div id="crono-rotate">Gira el dispositivo para explorar en horizontal.</div>'
+    html+='\n<style>html,body{margin:0;padding:0;overflow:hidden;touch-action:none;background:#102a38}#canvas{touch-action:none;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;max-height:none!important}#infobox{font:20px sans-serif;border-radius:12px}#html{display:none}#crono-rotate{display:none}@media(orientation:portrait){#crono-rotate{display:grid;position:fixed;inset:0;place-items:center;background:#102a38;color:#e4edda;font:24px sans-serif;z-index:90}}</style><div id="crono-rotate">Gira el dispositivo para explorar en horizontal.<br>Gire o dispositivo para jogar na horizontal.</div>'
     (assets/'index.html').write_text(html,encoding='utf-8')
     for relative in FILES+('index-0.9.3-cp312.json','cp312/'+WHEEL):
         target=assets/'runtime'/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(RUNTIME/relative,target)

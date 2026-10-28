@@ -4,7 +4,9 @@
 
 Crono viaja por el pasado para volver al presente. Explorar, comprender archivos y aplicar lo aprendido forman parte del avance: cada salida exige tres fragmentos, una misión contextual completa y al menos un archivo resuelto; en los mapas de cierre también hay que liberar un guardián ficticio.
 
-Estado de desarrollo y próximos pasos: [Hoja de ruta](docs/HOJA-DE-RUTA.md). La entrega publicada sigue siendo 0.9.2; el APK 0.9.3 actual es de prueba y Windows aún debe recompilarse.
+Estado de desarrollo y próximos pasos: [Hoja de ruta](docs/HOJA-DE-RUTA.md). La publicación de GitHub sigue siendo 0.9.2. Las compilaciones locales 0.9.3 son de prueba; el rendimiento Android con jefes y muchas entidades sigue pendiente.
+
+**Idiomas:** Configuración → Idioma permite elegir **Español** o **Português (Brasil)** en PC y Android, sin Internet. Incluye menús, tutorial, preguntas, explicaciones, curiosidades, skins y logros. Las preguntas propias del docente conservan su texto; el editor permite guardar traducciones independientes sin reemplazar la versión española. Más información en [Idiomas](docs/IDIOMAS.md).
 
 ## Entrega y ejecución
 

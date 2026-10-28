@@ -2,17 +2,30 @@
 
 Actualizada el **27 de octubre de 2026**. Leer este archivo antes de continuar.
 
-> **Punto inmediato de reanudación:** APK de prueba actualizado e instalado en el
-> J6; 197 pruebas aprobadas. Se verificó minimizar/volver: sesión conservada,
-> pausa al regresar y Continuar funcional. Se liberan controles retenidos,
-> también en travesías navales. La vista Android pausa sus temporizadores.
-> La composición rápida del HUD y sprites RLE redujeron el primer mapa de
-> ~1,3 FPS a 6,6–6,7 FPS (1480×720, sin enemigos visibles): mejora real pero
-> **rendimiento todavía insuficiente**, no terminado. Faltan medir jefes y
-> escenas con muchas entidades. Priorizar esos escenarios y los costes de
-> dibujo/copia; luego portar la guía contextual al HUD de PC y cerrar paquetes.
-> La APK vigente coincide con 77 módulos y android/main.py; SHA256 y registros
-> en build/verification/0.9.3-desarrollo/APK-CHECK.json. Entrega sigue en 0.9.2.
+> **Punto inmediato de reanudación:** español y portugués de Brasil integrados;
+> EXE/APK locales0.9.3 recompilados y carpetas Proyecto/Windows/APK actualizadas.
+> La APK coincide con78módulos, android/main.py y catálogo offline. La última
+> versión no se instaló en el J6 porque ahora está desconectado. Hash vigente
+> en build/verification/0.9.3-desarrollo/APK-CHECK.json. GitHub release sigue0.9.2.
+> Antes del cambio de idiomas se verificó minimizar/volver en el J6: pausa,
+> partida conservada y Continuar funcional; se liberan controles retenidos.
+> La composición rápida del HUD/RLE subió el primer mapa de~1,3 a6,6–6,7FPS
+> a1480×720 sin enemigos visibles. **Rendimiento todavía insuficiente**: faltan
+> jefe/escena densa, después guía contextual del HUD de PC y balance manual.
+
+> **Actualización posterior — idiomas:** español y portugués de Brasil ya están
+> integrados, incluidos tutorial, preguntas, objetivos, skins, logros y editor
+> con variantes independientes. El idioma persiste por perfil; no se alteran IDs
+> ni preguntas docentes.204 comprobaciones verificadas:203 pasaron en la suite
+> aislada y la única prueba HTTP de salas pasó al repetirla con acceso al socket.
+> EXE y APK recompilados. El J6 está desconectado: falta probar esta última APK
+> en el teléfono. Los resultados físicos anteriores corresponden a la APK previa.
+> La optimización con jefes/escenas densas sigue pendiente. Ver docs/IDIOMAS.md.
+
+36 comprobaciones del ejecutable verifican capturas, catálogo empaquetado,
+preguntas en dos idiomas y ambos modos de entrada. Las fuentes tuvieron204
+comprobaciones, más26 focales aprobadas tras los últimos ajustes de presentación.
+No publicar una release final todavía: falta el rendimiento físico Android.
 
 ## Estado exacto al cerrar el punto de trabajo
 

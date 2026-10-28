@@ -8,6 +8,7 @@ from pathlib import Path
 import secrets
 from .save import Save,save_path
 from .storage import atomic_replace
+from .i18n import literal
 
 def atomic_json(path,value):
     path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
@@ -18,7 +19,7 @@ def atomic_json(path,value):
     persist(path)
 
 def clean_label(value,limit=48):
-    return ' '.join(str(value).split())[:limit]
+    return literal(' '.join(str(value).split())[:limit])
 
 def valid_records(records):
     result={}

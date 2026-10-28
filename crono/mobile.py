@@ -11,7 +11,8 @@ def decode_text(value):return base64.b64decode(str(value),validate=True).decode(
 
 def speak(value):
     native=bridge()
-    return bool(native.speak(encode_text(value))) if native else False
+    from .i18n import tr,language
+    return bool(native.speak(encode_text(str(tr(value))),language())) if native else False
 
 def bridge():
     if sys.platform!='emscripten':return None

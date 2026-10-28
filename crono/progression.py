@@ -10,7 +10,7 @@ def extra_defaults():
         bonus_unlocked=[],rifts_completed=[],mechanics_completed=[],achievements=[],purchased_skins=[],
         skin_cards_seen=[],skin='crono',master_enabled=True,metrics={},attempts=[],reviews=[],
         bonus_progress={},rift_progress={},active_rift=None,rift_return=None,rift_finished=False,practice=False,
-        motor_band=None,reading_size=19,key_bindings={},touch_controls=False,music_volume=70,effects_volume=80,
+        motor_band=None,reading_size=19,key_bindings={},touch_controls=False,music_volume=70,effects_volume=80,language='es',
         practice_records={},lowest_difficulty=1,session_room=None,tutorial_done=False,
         sea_session=None,voyage_progress={},voyages_completed=[],story_seals=[])
 
@@ -24,6 +24,7 @@ def load_extra(raw):
         elif type(candidate) is type(value):result[key]=deepcopy(candidate)
     result['coins']=max(0,min(1000000,result['coins']))
     result['reading_size']=result['reading_size'] if result['reading_size'] in (19,22,25) else 19
+    result['language']=result['language'] if result['language'] in ('es','pt-BR') else 'es'
     for key in ('music_volume','effects_volume'):
         result[key]=max(0,min(100,result[key]))
     for key in ('banked_echoes','curiosities_seen','rescued_ids','achievements','purchased_skins','skin_cards_seen'):

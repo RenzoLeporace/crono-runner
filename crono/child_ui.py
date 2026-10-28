@@ -4,6 +4,7 @@ from functools import lru_cache
 import pygame as pg
 from .art import text,rect,line,circle,polygon,diamond,PAPER,CYAN,GOLD,MUTED,INK
 from .learning_ui import wrapped,wrap_rows
+from .i18n import tr,literal
 
 
 @lru_cache(maxsize=32)
@@ -200,7 +201,7 @@ class ChildUI:
         from .mobile import speak
         if speak(value):
             if self.state=='play':self.set_state('story')
-        else:self.notice='La voz está disponible en Android si hay una voz española instalada.';self.notice_time=4
+        else:self.notice='La voz está disponible en Android si hay una voz del idioma elegido instalada.';self.notice_time=4
 
     def mobile_intro(self):
         from .journeys import date_for
@@ -243,7 +244,7 @@ class ChildUI:
         fact=self.reading_fact() if self.quiz_mode=='read' else q.explanation or fact_for(self.quiz_topic,self.save.data['age_band'])
         title='Una pista de la historia' if self.quiz_mode=='read' else 'Elige una respuesta' if self.quiz_mode=='question' else '¡Muy bien!' if self.quiz_mode=='correct' else 'Vamos a pensarlo otra vez'
         text(s,title,(65,31),39,CYAN if self.quiz_mode=='correct' else PAPER,True)
-        spoken=(q.prompt+'. '+'. '.join(f'{i+1}: {value}' for i,value in enumerate(q.options))) if self.quiz_mode=='question' else fact
+        spoken=literal(str(tr(q.prompt))+'. '+'. '.join(f'{i+1}: {tr(value)}' for i,value in enumerate(q.options))) if self.quiz_mode=='question' else fact
         self.button('',(1125,20,80,65),lambda:self.read_aloud(spoken),arrow=False)
         self.draw_speaker((1165,52))
         reading_size=self.save.data['reading_size']+7;leading=reading_size+9
@@ -271,7 +272,7 @@ class ChildUI:
             wrapped(s,LESSONS[self.quiz_topic].title,(65,103),1135,28,GOLD,True)
             content=fact;top=182
         else:
-            content='Respuesta: '+q.options[q.correct]+'\n\n'+fact;top=128
+            content=literal(str(tr('Respuesta: '))+str(tr(q.options[q.correct]))+'\n\n'+str(tr(fact)));top=128
             if self.quiz_mode=='correct':
                 text(s,'+2 IDEAS' if self.quiz_reward else '¡Ya lo recuerdas!',(1205,86),25,GOLD,True,'topright')
         rows=wrap_rows(content,1070,reading_size);page_size=max(1,265//leading);pages=max(1,math.ceil(len(rows)/page_size))

@@ -30,6 +30,7 @@ class MobileUI(ChildUI):
 
     def mobile_settings(self):
         s=self.canvas;s.fill((13,27,37));text(s,'Configura tu viaje',(62,30),41,PAPER,True,serif=True)
+        self.button('Idioma / Idioma',(900,27,310,59),lambda:self.set_state('language_settings'),small=True,arrow=False)
         text(s,'Preguntas por edad',(65,109),24,CYAN,True)
         for i,label in enumerate(('6–9 años','10–14 años','15+ años')):
             self.button(label,(65+i*390,155,365,82),lambda b=i:self.set_age(b),primary=self.save.data['age_band']==i,arrow=False)

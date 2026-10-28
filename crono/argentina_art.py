@@ -27,7 +27,8 @@ class Painter:
     def a(self,col,box,start,end,width=1):
         pg.draw.arc(self.s,col,pg.Rect(*(round(v*2) for v in box)),start,end,width*2)
     def label(self,value,x,y,size,col):
-        self.s.blit(pg.font.SysFont('georgia',size*2,True).render(value,True,col),(int(x*2),int(y*2)))
+        from .i18n import tr
+        self.s.blit(pg.font.SysFont('georgia',size*2,True).render(tr(value),True,col),(int(x*2),int(y*2)))
     def image(self):
         from .art import display_alpha
         return display_alpha(pg.transform.smoothscale(self.s,(self.w,self.h)))

@@ -9,6 +9,7 @@ from functools import lru_cache
 import pygame as pg
 from .levels import ERAS
 from .visuals import palette_for,burnt_tree
+from .i18n import tr
 
 W, H = 1280, 720
 INK = (15, 23, 33)
@@ -58,13 +59,14 @@ def rendered_text(value,size,color,bold,serif):
     return display_alpha(font(size,bold,serif).render(value,True,color))
 
 def text(surface, value, pos, size=20, color=PAPER, bold=False, anchor='topleft', serif=False):
-    image = rendered_text(str(value),size,tuple(color),bold,serif)
+    image = rendered_text(tr(value),size,tuple(color),bold,serif)
     bounds = image.get_rect(**{anchor: (int(pos[0]), int(pos[1]))})
     surface.blit(image, bounds)
     return bounds
 
 
 def tracked(surface, value, pos, size=13, color=MUTED, spacing=3):
+    value=tr(value)
     x, y = pos
     f = font(size, True)
     for ch in value:

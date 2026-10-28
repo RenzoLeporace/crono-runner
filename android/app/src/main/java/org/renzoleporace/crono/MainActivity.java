@@ -39,24 +39,37 @@ public final class MainActivity extends Activity {
     private TextToSpeech speech;
     private boolean speechReady;
     private String pendingSpeech;
+    private String speechLanguage="es";
+    private volatile String uiLanguage="es";
 
-    private void say(String value) {
-        pendingSpeech=value;
+    private String label(String es,String pt){return "pt-BR".equals(uiLanguage)?pt:es;}
+
+    private void speakPending(){
+        Voice selected=null;
+        String lang="pt-BR".equals(speechLanguage)?"pt":"es";
+        String country="pt".equals(lang)?"BR":"AR";
+        if(speech!=null&&speech.getVoices()!=null){
+            for(Voice voice:speech.getVoices()){
+                if(!lang.equals(voice.getLocale().getLanguage())||voice.isNetworkConnectionRequired()||voice.getFeatures()!=null&&voice.getFeatures().contains("notInstalled"))continue;
+                if("pt".equals(lang)&&!"BR".equals(voice.getLocale().getCountry()))continue;
+                selected=voice;if(country.equals(voice.getLocale().getCountry()))break;
+            }
+        }
+        if(selected!=null){speech.setVoice(selected);speech.speak(pendingSpeech,TextToSpeech.QUEUE_FLUSH,null,"crono-help");}
+        else Toast.makeText(this,label("No hay voz del idioma elegido instalada. Puedes seguir las señales de la pantalla.","Não há voz instalada no idioma escolhido. Você pode seguir as indicações na tela."),Toast.LENGTH_LONG).show();
+    }
+
+    private void say(String value,String language) {
+        pendingSpeech=value;speechLanguage=language;
         if(speech==null){
             speech=new TextToSpeech(this,status->web.post(()->{
                 if(isFinishing()||isDestroyed())return;
-                Voice selected=null;
-                if(status==TextToSpeech.SUCCESS&&speech!=null&&speech.getVoices()!=null){
-                    for(Voice voice:speech.getVoices()){
-                        if(!"es".equals(voice.getLocale().getLanguage())||voice.isNetworkConnectionRequired()||voice.getFeatures()!=null&&voice.getFeatures().contains("notInstalled"))continue;
-                        selected=voice;if("AR".equals(voice.getLocale().getCountry()))break;
-                    }
-                }
-                if(selected!=null){speech.setVoice(selected);speechReady=true;speech.speak(pendingSpeech,TextToSpeech.QUEUE_FLUSH,null,"crono-help");}
-                else Toast.makeText(this,"No hay voz española instalada. Puedes seguir las señales de la pantalla.",Toast.LENGTH_LONG).show();
+                speechReady=status==TextToSpeech.SUCCESS;
+                if(speechReady)speakPending();
+                else Toast.makeText(this,label("La voz aún no está disponible.","A voz ainda não está disponível."),Toast.LENGTH_SHORT).show();
             }));
-        }else if(speechReady)speech.speak(value,TextToSpeech.QUEUE_FLUSH,null,"crono-help");
-        else Toast.makeText(this,"La voz aún no está disponible.",Toast.LENGTH_SHORT).show();
+        }else if(speechReady)speakPending();
+        else Toast.makeText(this,label("La voz aún no está disponible.","A voz ainda não está disponível."),Toast.LENGTH_SHORT).show();
     }
 
     @Override public void onCreate(Bundle saved) {
@@ -153,12 +166,13 @@ public final class MainActivity extends Activity {
     }
 
     public final class Bridge {
+        @JavascriptInterface public void setLanguage(String language){uiLanguage="pt-BR".equals(language)?"pt-BR":"es";}
         @JavascriptInterface public boolean performanceLogging(){return getIntent().getBooleanExtra("crono_performance",false);}
-        @JavascriptInterface public boolean speak(String contents){
+        @JavascriptInterface public boolean speak(String contents,String language){
             try{
                 String value=decoded(contents);
                 if(value.length()>3500)return false;
-                runOnUiThread(()->say(value));return true;
+                runOnUiThread(()->say(value,language));return true;
             }catch(Exception error){return false;}
         }
         @JavascriptInterface public String loadFiles() {
@@ -215,10 +229,10 @@ public final class MainActivity extends Activity {
                 EditText input=new EditText(MainActivity.this);input.setText(decoded(initial));input.setSelectAllOnFocus(true);
                 input.setSingleLine(!multiline);input.setInputType(password?129:multiline?131073:1);
                 input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.LengthFilter(Math.max(1,Math.min(1000,limit)))});
-                AlertDialog dialog=new AlertDialog.Builder(MainActivity.this).setTitle("CRONO · Escribir").setView(input)
-                    .setPositiveButton("Aceptar",(buttonDialog,which)->{
+                AlertDialog dialog=new AlertDialog.Builder(MainActivity.this).setTitle(label("CRONO · Escribir","CRONO · Escrever")).setView(input)
+                    .setPositiveButton(label("Aceptar","Confirmar"),(buttonDialog,which)->{
                         try{jobs.put(id,new JSONObject().put("ready",true).put("text",input.getText().toString()).toString());}catch(Exception ignored){}
-                    }).setNegativeButton("Cancelar",(ignored,which)->jobs.put(id,"{\"ready\":true}"))
+                    }).setNegativeButton(label("Cancelar","Cancelar"),(ignored,which)->jobs.put(id,"{\"ready\":true}"))
                     .setOnCancelListener(ignored->jobs.put(id,"{\"ready\":true}")).create();
                 dialog.show();input.requestFocus();dialog.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             });return id;

@@ -1,6 +1,7 @@
 """Pygame text editing with Unicode, selection, clipboard, wrapping and scrolling."""
 import pygame as pg
 from .art import font,rect,text,line,PAPER,MUTED,CYAN
+from .i18n import literal
 
 
 class TextField:
@@ -177,7 +178,7 @@ class TextField:
                 xx=self.box.x+12+font(size).size(self.value[start:left])[0]
                 ww=font(size).size(self.value[left:right])[0]
                 rect(surface,(54,105,111),(xx,y,ww,23))
-            text(surface,'*'*(end-start) if self.password else self.value[start:end],(self.box.x+12,y),size,PAPER)
+            text(surface,literal('*'*(end-start) if self.password else self.value[start:end]),(self.box.x+12,y),size,PAPER)
             if self.focused and row==caret_row and pg.time.get_ticks()%1000<650:
                 xx=self.box.x+12+font(size).size(self.value[start:self.cursor])[0]
                 line(surface,CYAN,(xx,y),(xx,y+21),2)

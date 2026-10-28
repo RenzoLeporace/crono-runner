@@ -25,7 +25,20 @@ for scene,era,stage in (('menu',1,1),('dlc_menu',13,1),('skins',1,1),('workshop'
         raise RuntimeError(f'Executable smoke failed: {scene}, exit {result.returncode}')
     print(f'{scene}: exit 0, PNG {path.stat().st_size} bytes, {time.perf_counter()-start:.2f}s',flush=True)
 
-files=[exe,*[ROOT/name for name in ('Jugar.bat','README.md','FUENTES.md','VERIFICACION.md','LICENCIAS.txt','COPYRIGHT.txt','docs/CAMBIOS-0.9.md','docs/CAMBIOS-0.9.1.md','docs/CAMBIOS-0.9.1-ANDROID.md','docs/CAMBIOS-0.9.3.md','docs/GUIA-DOCENTE.md')],
+# Exercise the packaged locale asset, both question layouts and new war routes.
+for language in ('es','pt-BR'):
+    for scene,era,stage,touch in (('language_settings',1,1,False),('quiz',1,1,False),('quiz',1,1,True),
+                                ('play',16,2,True),('play',17,1,True),('play',12,3,True)):
+        path=out/f'{language}-{scene}-{era}-{stage}-{int(touch)}.png'
+        command=[str(exe),'--headless','--scene',scene,'--era',str(era),'--map',str(stage),
+                 '--capture',str(path),'--language',language]
+        if touch:command.extend(['--touch','--aspect','2.2222222222'])
+        result=subprocess.run(command,cwd=ROOT,timeout=40)
+        if result.returncode or not path.exists() or path.stat().st_size<1000:
+            raise RuntimeError(f'Locale executable check failed: {language}, {scene}')
+        print(f'{language}/{scene}/{era}.{stage}: exit 0, locale and PNG checked',flush=True)
+
+files=[exe,*[ROOT/name for name in ('Jugar.bat','README.md','FUENTES.md','VERIFICACION.md','LICENCIAS.txt','COPYRIGHT.txt','docs/CAMBIOS-0.9.md','docs/CAMBIOS-0.9.1.md','docs/CAMBIOS-0.9.1-ANDROID.md','docs/CAMBIOS-0.9.3.md','docs/GUIA-DOCENTE.md','docs/IDIOMAS.md','docs/CAMBIOS-2026-10-27.md','docs/HOJA-DE-RUTA.md')],
        ROOT/'contenido'/'LEEME.txt']
 for folder in ('_internal','licencias'):
     files.extend(p for p in (ROOT/folder).rglob('*') if p.is_file())

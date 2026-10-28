@@ -22,6 +22,7 @@ from .mobile_ui import MobileUI
 from .sea_journey import SeaUI
 from .story_ui import StoryUI
 from .viewport import ViewportUI
+from .i18n import tr,set_language
 from .campaign import chapter_for_level
 from .campaign import MAIN_LEVEL_IDS,MAIN_ERAS,MAIN_LEVELS,TOTAL_LEVELS,DLC_START,ERA_LABELS,DIFFICULTIES,MAIN_ERA_IDS,CHAPTER_ORDER,rank,successor,final_level,unlocked,level_label,chapter_levels,is_rift,is_bonus,DLC_LEVEL_IDS
 
@@ -41,6 +42,9 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         rendered_text.cache_clear()
         self.save=Save(save_file)
         self.init_community(save_file)
+        set_language(self.save.data['language'])
+        from .mobile import bridge
+        if bridge():bridge().setLanguage(self.save.data['language'])
         self.init_expansion()
         self.init_story()
         self.init_touch()
@@ -177,7 +181,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             self.tutorial_active=True;self.tutorial_step=0
 
     def new_game(self):
-        preferences={key:self.save.data[key] for key in ('music_volume','effects_volume','key_bindings','reading_size','touch_controls','motor_band')}
+        preferences={key:self.save.data[key] for key in ('music_volume','effects_volume','key_bindings','reading_size','touch_controls','motor_band','language')}
         sound,full=self.save.data['sound'],self.save.data['fullscreen']
         age=self.save.data['age_band']
         self.save.data=defaults()
@@ -204,6 +208,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         self.save.write()
 
     def button(self,label,box,action,primary=False,enabled=True,small=False,arrow=True,wrap=False):
+        label=tr(label)
         bounds=pg.Rect(box)
         index=len(self.buttons)
         hover=bounds.collidepoint(self.mouse) or self.selection==index
@@ -224,7 +229,9 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
                 size-=1
             wrapped(self.canvas,label,(bounds.x+19,bounds.y+10),bounds.w-38,size,color,True,leading=size+5)
         else:
-            text(self.canvas,label,(bounds.centerx,bounds.centery) if bounds.w<80 or not arrow else (bounds.x+22,bounds.centery),17 if small else 20,color,True,'center' if bounds.w<80 or not arrow else 'midleft')
+            size=17 if small else 20
+            while size>13 and bounds.w>=80 and font_width(label,size)>bounds.w-(56 if arrow else 24):size-=1
+            text(self.canvas,label,(bounds.centerx,bounds.centery) if bounds.w<80 or not arrow else (bounds.x+22,bounds.centery),size,color,True,'center' if bounds.w<80 or not arrow else 'midleft')
         if enabled and bounds.w>=80 and arrow:
             x=bounds.right-23
             line(self.canvas,color,(x-5,bounds.centery-4),(x,bounds.centery),2)
@@ -824,6 +831,7 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         elif self.state=='skin_card':self.skin_card()
         elif self.state=='accessibility':self.accessibility()
         elif self.state=='sound_settings':self.sound_settings()
+        elif self.state=='language_settings':self.language_settings()
         elif self.state=='school_settings':self.school_settings()
         elif self.state=='reflection':self.reflection()
         elif self.state=='teacher_tools':self.teacher_tools()
@@ -875,14 +883,15 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
 
 def font_width(value,size):
     from .art import font
-    return font(size).size(value)[0]
+    return font(size).size(tr(value))[0]
 
 
 def main():
     parser=argparse.ArgumentParser(description='CRONO · Ecos del tiempo')
     parser.add_argument('--headless',action='store_true',help='Render without opening a window')
     parser.add_argument('--capture',type=Path,help='Write a deterministic screenshot and exit')
-    parser.add_argument('--scene',choices=['menu','play','intro','chapters','help','pause','complete','ending','quiz','workshop','notebook','bestiary','boss','settings','teacher','question_edit','scenarios','atlas','heritage','community','school_settings','accessibility','activity','achievements','skins','skin_card','credits','teacher_tools','story','dlc_menu','voyage'],default='menu')
+    parser.add_argument('--scene',choices=['menu','play','intro','chapters','help','pause','complete','ending','quiz','workshop','notebook','bestiary','boss','settings','teacher','question_edit','scenarios','atlas','heritage','community','school_settings','accessibility','activity','achievements','skins','skin_card','credits','teacher_tools','story','dlc_menu','voyage','language_settings'],default='menu')
+    parser.add_argument('--language',choices=('es','pt-BR'),help='Preview a language without changing the saved preference')
     parser.add_argument('--aspect',type=float,default=16/9,help='Preview a real camera aspect ratio without stretching')
     parser.add_argument('--era',type=int,choices=range(1,18),default=1)
     parser.add_argument('--map',type=int,choices=range(1,4),default=1)
@@ -893,6 +902,7 @@ def main():
         os.environ['SDL_VIDEODRIVER']='dummy'
         os.environ['SDL_AUDIODRIVER']='dummy'
     game=Game(args.headless)
+    if args.language:set_language(args.language)
     game.configure_viewport(args.aspect)
     if args.capture:
         game.world=World(args.era-1,args.map-1)

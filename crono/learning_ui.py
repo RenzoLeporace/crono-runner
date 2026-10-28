@@ -5,11 +5,17 @@ from functools import lru_cache
 from .education import AGE_BANDS, LESSONS, SOURCES, STAGES, UPGRADES, fact_for
 from .art import text, tracked, rect, line, circle, diamond, clock_icon, PAPER, MUTED, CYAN, GOLD, INK, W, H
 from .combat import ENEMY_NAMES, ENEMY_HINTS, BOSS_NAMES, BOSS_HINTS, Enemy
+from .i18n import tr,Verbatim,Localized
+
+
+def wrap_rows(value,width,size=18,bold=False):
+    return _wrap_rows(tr(value),width,size,bold)
 
 
 @lru_cache(maxsize=512)
-def wrap_rows(value,width,size=18,bold=False):
+def _wrap_rows(value,width,size=18,bold=False):
     from .art import font
+    row_type=Verbatim if isinstance(value,Verbatim) else Localized
     words=[]
     for word in value.split():
         while font(size,bold).size(word)[0]>width:
@@ -31,7 +37,7 @@ def wrap_rows(value,width,size=18,bold=False):
             row=test
     if row:
         rows.append(row)
-    return rows
+    return [row_type(row) for row in rows]
 
 
 def wrapped(surface,value,pos,width,size=18,color=PAPER,bold=False,leading=None):
@@ -123,9 +129,9 @@ class LearningUI:
             if record:
                 from .education import Question
                 order=list(range(3));random.shuffle(order)
-                self.question=Question(record['id'],topic,record['prompt'],tuple(record['options'][i] for i in order),order.index(record['correct']),record['explanation'],record['source'],'curiosity')
+                self.question=self.learning_bank().question(record,order)
         self.quiz_read_record_id=self.question.id
-        self.quiz_read_fact=fact_for(topic,band) if self.question.kind!='curiosity' and self.bank.original_explanations.get(self.question.id)==self.question.explanation else self.question.explanation or fact_for(topic,band)
+        self.quiz_read_fact=self.question.explanation or fact_for(topic,band)
         self.question_history[key]=self.question.id
         self.quiz_mode='read'
         self.quiz_reward=False
@@ -237,14 +243,14 @@ class LearningUI:
             y=wrapped(s,self.question.prompt,(550,166),632,size,PAPER,True,leading=size+8)
             y=max(y+22,286)
             for i,option in enumerate(self.question.options):
-                self.button(f'{i+1}. {option}',(550,y+i*101,636,90),lambda n=i:self.answer_question(n),small=True,arrow=False,wrap=True)
+                self.button(Verbatim(f'{i+1}. '+str(tr(option))),(550,y+i*101,636,90),lambda n=i:self.answer_question(n),small=True,arrow=False,wrap=True)
         else:
             correct=self.quiz_mode=='correct'
             text(s,'¡Conocimiento recuperado!' if correct else 'Una pista para volver a pensar',(550,169),28,CYAN if correct else GOLD,True,serif=True)
             old_clip=s.get_clip()
             s.set_clip(pg.Rect(549,229,639,267))
             top=232-self.quiz_feedback_scroll
-            y=wrapped(s,'Respuesta: '+self.question.options[self.question.correct],(550,top),630,21,PAPER,True,leading=31)
+            y=wrapped(s,Verbatim(str(tr('Respuesta: '))+str(tr(self.question.options[self.question.correct]))),(550,top),630,21,PAPER,True,leading=31)
             y=wrapped(s,fact,(550,y+21),630,self.save.data['reading_size'],MUTED,leading=self.save.data['reading_size']+11)
             self.quiz_feedback_height=y-top
             s.set_clip(old_clip)

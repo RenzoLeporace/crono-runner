@@ -11,6 +11,15 @@ subagentes el 27 de octubre para las comprobaciones y cambios focales de esta
 sesión. Los hallazgos y cambios están en docs/HOJA-DE-RUTA.md y en las notas de
 contenido, mecánicas y Android.
 
+Actualización de idiomas: **204 comprobaciones verificadas**. La ejecución
+general pasó203/204 en51,122s; únicamente la prueba HTTP de salas encontró el
+bloqueo de socket del aislamiento. Esa misma prueba, sin modificarla, pasó
+fuera del aislamiento en0,708s. Registros: suite-localization.txt y
+localization-lan-test.txt en build/verification/0.9.3-desarrollo.
+Incluyen cobertura de cada pregunta/respuesta original en portugués, fechas,
+opciones diferentes, conservación de IDs y banco, guardado de idioma, editor
+bilingüe y pantallas PC/táctiles en ambos idiomas.
+
 ## Fuentes y compatibilidad
 
 Hay 50 mapas, 100 temas y 1800 registros de preguntas. Hay reutilización entre
@@ -60,6 +69,10 @@ es muy baja y no cierra la optimización. Aún faltan jefe y escena densa.
 siguen siendo0.9.2.** El APK de prueba vive en build/android, todavía no es una
 entrega final. Próximos pasos exactos en docs/HOJA-DE-RUTA.md.
 
+Lo anterior registra el punto previo a los idiomas: posteriormente se recompiló
+Windows y el APK con español/portugués de Brasil. La publicación GitHub continúa
+en0.9.2; las compilaciones0.9.3 locales siguen en desarrollo.
+
 ## Seguimiento físico: pausa y composición
 
 La APK de prueba más reciente se instaló correctamente en el J6, sin borrar datos.
@@ -74,3 +87,24 @@ RLE, el primer mapa a1480×720 subió de~1,3 a6,6–6,7FPS; composición p95 baj
 La regresión de píxeles del HUD pasa en seis mapas consecutivos; 197 pruebas totales.
 La APK coincide con77módulos y la entrada Android. Huella vigente: APK-CHECK.json.
 Entrega y Windows permanecen en0.9.2; esto es una compilación de prueba.
+
+## Idiomas y paquetes locales posteriores
+
+El EXE y el APK0.9.3 se recompilaron con el catálogo offline es/pt-BR. El modelo
+de traducción y sus herramientas no forman parte del runtime. Se conservaron
+24 capturas desde fuentes: menús, selector, mapa, pregunta, banco y editor,
+en dos idiomas y dos modos de entrada. La suite funcional se completó con
+la prueba LAN repetida fuera del aislamiento, como se detalla arriba.
+
+El intento de instalar esta última compilación en el J6 devolvió «no devices
+found»; no presentar la instalación previa como prueba física de los idiomas.
+La lectura en voz selecciona es o pt-BR si existe una voz offline del idioma;
+no se confirmó una voz portuguesa instalada en un dispositivo real.
+
+El empaquetado Windows comprobó36 capturas del EXE, incluidas preguntas en
+español/portugués, selector de idioma, dos modos de entrada y rutas de las
+guerras mundiales. ZIP íntegro y catálogo incluido.26 pruebas focales de
+idiomas/editor aprobaron después del último ajuste de nombres propios.
+Entrega local0.9.3 mantiene exactamente Proyecto/Windows/APK. Es una entrega
+de desarrollo; la publicación de GitHub continúa en0.9.2 y la optimización
+Android con jefes sigue abierta.

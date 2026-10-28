@@ -12,6 +12,23 @@ from .touch import DEFAULT_KEYS,KEY_LABELS
 from .storage import atomic_replace
 
 class SchoolSettingsUI:
+    def change_language(self,code):
+        from .i18n import set_language
+        set_language(code);self.save.data['language']=code;self.save.write()
+        from .mobile import bridge
+        native=bridge()
+        if native:native.setLanguage(code)
+
+    def language_settings(self):
+        from .i18n import LANGUAGES,language
+        s=self.canvas;s.fill((13,27,37))
+        text(s,'Idioma',(65,48),44,PAPER,True,serif=True)
+        wrapped(s,'Elige el idioma del juego y de los contenidos educativos.',(65,135),1120,27,CYAN)
+        for i,(code,label) in enumerate(LANGUAGES):
+            self.button(label,(65+i*585,245,555,115),lambda c=code:self.change_language(c),primary=language()==code,arrow=False)
+        wrapped(s,'Las preguntas originales se traducen sin conexión. Las preguntas y traducciones del docente conservan su texto; los guardados y logros no cambian.',(65,410),1110,23,PAPER,leading=34)
+        self.button('Volver',(65,625,1140,70),self.go_back,True)
+
     def init_school_settings(self):
         self.exchange_path=TextField('',500);self.pin_field=TextField('',64);self.delete_field=TextField('',12)
         self.pin_field.password=True

@@ -10,6 +10,7 @@ import random
 import sys
 from .education import LESSONS, SOURCES, Question, fact_for
 from .storage import atomic_replace
+from .i18n import Authored,tr,literal
 
 
 def content_path():
@@ -48,6 +49,20 @@ def validate_record(value):
         raise ValueError('Las tres respuestas deben ser diferentes.')
     record['options']=[o.strip() for o in options]
     record['kind']=value.get('kind','choice') if value.get('kind','choice') in ('choice','source','image','reason','chronology','curiosity') else 'choice'
+    # Optional additions preserve the exact old record shape/fingerprints.
+    language=value.get('language')
+    if language is not None:
+        if language not in ('es','pt-BR'):raise ValueError('Idioma de pregunta no válido.')
+        record['language']=language
+    translations=value.get('translations',{})
+    if not isinstance(translations,dict) or any(code not in ('es','pt-BR') for code in translations):
+        raise ValueError('Idioma de traducción no válido.')
+    if translations:
+        record['translations']={}
+        for code,translated in translations.items():
+            if not isinstance(translated,dict):raise ValueError('Traducción de pregunta no válida.')
+            translated=validate_record(dict(record,id=record['id'],translations={},**{k:translated.get(k,record[k]) for k in ('prompt','options','explanation','source')}))
+            record['translations'][code]={k:translated[k] for k in ('prompt','options','explanation','source')}
     return record
 
 
@@ -103,6 +118,24 @@ class QuestionBank:
     def get(self,question_id):
         return deepcopy(next(q for q in self.records if q['id']==question_id))
 
+    def display_record(self,record):
+        """Localize a view, never the editable/persisted canonical bank."""
+        result=deepcopy(record)
+        bundled=validate_record(record)==self.original_records.get(record['id'])
+        variants=record.get('translations',{});source_language=record.get('language','es')
+        def field(key,value,index=None):
+            choices={code:(v[key][index] if index is not None else v[key]) for code,v in variants.items()}
+            choices.setdefault(source_language,value)
+            return Authored(value,choices,bundled)
+        for key in ('prompt','explanation','source'):result[key]=field(key,record[key])
+        result['options']=[field('options',v,i) for i,v in enumerate(record['options'])]
+        return result
+
+    def question(self,record,order):
+        view=self.display_record(record)
+        return Question(record['id'],record['topic'],view['prompt'],tuple(view['options'][i] for i in order),
+                        order.index(record['correct']),view['explanation'],view['source'],record.get('kind','choice'))
+
     def filtered(self,era=-1,stage=-1,band=-1,query=''):
         query=query.casefold().strip()
         from .campaign import chapter_for_level,chapter_levels
@@ -110,7 +143,7 @@ class QuestionBank:
                 if (era<0 or chapter_for_level(q['topic']//2)==era)
                 and (stage<0 or chapter_levels(chapter_for_level(q['topic']//2)).index(q['topic']//2)==stage)
                 and (band<0 or q['band']==band)
-                and (not query or query in ' '.join([q['prompt'],*q['options'],q['explanation']]).casefold())]
+                and (not query or query in ' '.join([q['prompt'],*q['options'],q['explanation'],*[str(tr(v)) for v in self.display_record(q)['options']],str(tr(self.display_record(q)['prompt']))]).casefold())]
 
     def choose(self,topic,band,rng=None,previous=None):
         rng=rng or random
@@ -128,8 +161,7 @@ class QuestionBank:
         record=rng.choice(pool)
         order=list(range(3))
         rng.shuffle(order)
-        return Question(record['id'],topic,record['prompt'],tuple(record['options'][i] for i in order),
-                        order.index(record['correct']),record['explanation'],record['source'],record.get('kind','choice'))
+        return self.question(record,order)
 
     def backup(self):
         folder=self.path.parent/'respaldos'
