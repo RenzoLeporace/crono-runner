@@ -2,9 +2,13 @@
 
 **Beta educativa 0.9.3 en preparación**, creada por **Renzo Leporace**. © 2026 Renzo Leporace. Todos los derechos reservados.
 
-Crono viaja por el pasado para volver al presente. Explorar, comprender archivos y aplicar lo aprendido forman parte del avance: cada salida exige tres fragmentos, una misión contextual completa y al menos un archivo resuelto; en los mapas de cierre también hay que liberar un guardián ficticio.
+**CRONO** es un juego educativo de plataformas en 2D, desarrollado en Python con pygame-ce para Windows y Android. Para volver al presente, Crono debe explorar distintas épocas históricas, completar misiones y resolver archivos con preguntas sobre lo aprendido.
 
-Estado de desarrollo y próximos pasos: [Hoja de ruta](docs/HOJA-DE-RUTA.md). La publicación de GitHub sigue siendo 0.9.2. Las compilaciones locales 0.9.3 son de prueba; el rendimiento Android con jefes y muchas entidades sigue pendiente.
+- **Campaña histórica** · Niveles con mecánicas propias de cada época y rutas dedicadas a Argentina y Brasil.
+- **Aprendizaje adaptable** · Preguntas por edades, explicaciones de las respuestas y herramientas para que docentes editen y seleccionen contenidos.
+- **Modalidades de juego** · Campaña sin conexión y salas docentes en una red local.
+
+La publicación de GitHub sigue en **0.9.2**. La **0.9.3** está en preparación y sus compilaciones locales son de prueba. Consultá la [hoja de ruta](docs/HOJA-DE-RUTA.md) y los [cambios de la beta](docs/CAMBIOS-0.9.3.md).
 
 **Idiomas:** Configuración → Idioma permite elegir **Español** o **Português (Brasil)** en PC y Android, sin Internet. Incluye menús, tutorial, preguntas, explicaciones, curiosidades, skins y logros. Las preguntas propias del docente conservan su texto; el editor permite guardar traducciones independientes sin reemplazar la versión española. Más información en [Idiomas](docs/IDIOMAS.md).
 
@@ -14,7 +18,16 @@ La carpeta **Entrega contiene exactamente Proyecto, Windows y APK**. Esta estruc
 
 Windows: abre `Windows/CRONO - Ecos del tiempo.exe` conservando `_internal` a su lado. Android: instala el APK de `APK`, Android 8 o posterior, en horizontal. El APK incluye su motor y recursos sin requerir Internet al jugar. Los enlaces a fuentes se abren solo cuando los eliges.
 
-Proyecto incluye las fuentes para continuar el desarrollo. Instala `requirements.txt` con Python y ejecuta `Main.py`; `Jugar.bat` también permite iniciar desde fuente. Los datos de alumnos y bancos particulares no se distribuyen.
+### Ejecutar desde el código fuente
+
+Desde la raíz del repositorio o la carpeta `Proyecto` de una entrega:
+
+```sh
+python -m pip install -r requirements.txt
+python Main.py
+```
+
+En Windows también podés usar `Jugar.bat`. Los datos de alumnos y los bancos particulares quedan fuera de las entregas.
 
 ## Campaña, países y bonus
 
