@@ -1,5 +1,7 @@
 # CRONO · Ecos del tiempo
 
+<img src="tools/crono.png" alt="Ícono de CRONO, un reloj turquesa" width="112" height="112">
+
 **Beta educativa 0.9.3 en preparación**, creada por **Renzo Leporace**. © 2026 Renzo Leporace. Todos los derechos reservados.
 
 **CRONO** es un juego educativo de plataformas en 2D, desarrollado en Python con pygame-ce para Windows y Android. Para volver al presente, Crono debe explorar distintas épocas históricas, completar misiones y resolver archivos con preguntas sobre lo aprendido.
