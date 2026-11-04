@@ -38,7 +38,7 @@ for language in ('es','pt-BR'):
             raise RuntimeError(f'Locale executable check failed: {language}, {scene}')
         print(f'{language}/{scene}/{era}.{stage}: exit 0, locale and PNG checked',flush=True)
 
-files=[exe,*[ROOT/name for name in ('Jugar.bat','README.md','FUENTES.md','VERIFICACION.md','LICENCIAS.txt','COPYRIGHT.txt','docs/CAMBIOS-0.9.md','docs/CAMBIOS-0.9.1.md','docs/CAMBIOS-0.9.1-ANDROID.md','docs/CAMBIOS-0.9.3.md','docs/GUIA-DOCENTE.md','docs/IDIOMAS.md','docs/CAMBIOS-2026-10-27.md','docs/HOJA-DE-RUTA.md')],
+files=[exe,*[ROOT/name for name in ('Jugar.bat','README.md','CHANGELOG.md','FUENTES.md','LICENCIAS.txt','COPYRIGHT.txt','docs/GUIA-DOCENTE.md','docs/IDIOMAS.md','docs/HOJA-DE-RUTA.md')],
        ROOT/'contenido'/'LEEME.txt']
 for folder in ('_internal','licencias'):
     files.extend(p for p in (ROOT/folder).rglob('*') if p.is_file())

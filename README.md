@@ -1,89 +1,281 @@
-# CRONO · Ecos del tiempo
+<div align="center">
 
 <img src="tools/crono.png" alt="Ícono de CRONO, un reloj turquesa" width="112" height="112">
 
-**Beta educativa 0.9.3 en preparación**, creada por **Renzo Leporace**. © 2026 Renzo Leporace. Todos los derechos reservados.
+# CRONO · Ecos del tiempo
 
-**CRONO** es un juego educativo de plataformas en 2D, desarrollado en Python con pygame-ce para Windows y Android. Para volver al presente, Crono debe explorar distintas épocas históricas, completar misiones y resolver archivos con preguntas sobre lo aprendido.
+**Un juego educativo de plataformas en 2D para viajar por la historia.**
+Explorá diez épocas, completá misiones y resolvé archivos con preguntas adaptadas a cada edad.
 
-- **Campaña histórica** · Niveles con mecánicas propias de cada época y rutas dedicadas a Argentina y Brasil.
-- **Aprendizaje adaptable** · Preguntas por edades, explicaciones de las respuestas y herramientas para que docentes editen y seleccionen contenidos.
-- **Modalidades de juego** · Campaña sin conexión y salas docentes en una red local.
+![Versión](https://img.shields.io/badge/versión-0.9.3_beta-2ec4b6)
+![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)
+![pygame-ce](https://img.shields.io/badge/pygame--ce-2.5.7-5c8a3a)
+![Plataformas](https://img.shields.io/badge/plataformas-Windows_|_Android-1f425f)
+![Idiomas](https://img.shields.io/badge/idiomas-español_|_português-e0a458)
+![Pruebas](https://img.shields.io/badge/pruebas-210_aprobadas-2ea44f)
 
-La publicación de GitHub sigue en **0.9.2**. La **0.9.3** está en preparación y sus compilaciones locales son de prueba. Consultá la [hoja de ruta](docs/HOJA-DE-RUTA.md) y los [cambios de la beta](docs/CAMBIOS-0.9.3.md).
+[Descargar](#descargar-y-jugar) · [Capturas](#capturas) · [Para docentes](#para-docentes) · [Desarrollo](#desarrollo) · [Cambios](CHANGELOG.md)
 
-**Idiomas:** Configuración → Idioma permite elegir **Español** o **Português (Brasil)** en PC y Android, sin Internet. Incluye menús, tutorial, preguntas, explicaciones, curiosidades, skins y logros. Las preguntas propias del docente conservan su texto; el editor permite guardar traducciones independientes sin reemplazar la versión española. Más información en [Idiomas](docs/IDIOMAS.md).
+<img src="docs/img/menu.png" alt="Menú principal de CRONO con el título y el reloj del tiempo" width="860">
 
-## Entrega y ejecución
+</div>
 
-La carpeta **Entrega contiene exactamente Proyecto, Windows y APK**. Esta estructura se mantiene en futuras entregas salvo pedido explícito de Renzo. No hay versión iOS.
+---
 
-Windows: abre `Windows/CRONO - Ecos del tiempo.exe` conservando `_internal` a su lado. Android: instala el APK de `APK`, Android 8 o posterior, en horizontal. El APK incluye su motor y recursos sin requerir Internet al jugar. Los enlaces a fuentes se abren solo cuando los eliges.
+## Índice
 
-### Ejecutar desde el código fuente
+- [Sobre el juego](#sobre-el-juego)
+- [Capturas](#capturas)
+- [Características](#características)
+- [Épocas y campaña](#épocas-y-campaña)
+- [Mecánicas de época](#mecánicas-de-época)
+- [Aprender, mejorar y personalizar](#aprender-mejorar-y-personalizar)
+- [Para docentes](#para-docentes)
+- [Descargar y jugar](#descargar-y-jugar)
+- [Controles](#controles)
+- [Desarrollo](#desarrollo)
+- [Documentación](#documentación)
+- [Créditos y licencia](#créditos-y-licencia)
 
-Desde la raíz del repositorio o la carpeta `Proyecto` de una entrega:
+---
+
+## Sobre el juego
+
+Para volver al presente, Crono tiene que atravesar épocas históricas: desde el
+Primigenio y el antiguo Egipto hasta las guerras mundiales, la carrera espacial y la
+Argentina de 1983. En cada mapa explora, cumple una misión inspirada en la época y abre
+archivos con lecturas y preguntas sobre lo que aprendió.
+
+Está pensado para el aula y para jugar en casa: funciona **sin conexión**, adapta las
+preguntas a tres franjas de edad y permite que cada docente edite, seleccione y traduzca
+los contenidos.
+
+> **Estado:** beta educativa. La última publicación es la
+> [0.9.2](https://github.com/RenzoLeporace/crono-runner/releases); la **0.9.3** está en
+> desarrollo en `main`.
+
+## Capturas
+
+<table>
+  <tr>
+    <td><img src="docs/img/egipto.png" alt="Mapa de Egipto junto al Nilo con barcos y casas de adobe"></td>
+    <td><img src="docs/img/alejandria.png" alt="Puerto de Alejandría con barcos de vela sobre el mar"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Egipto</b> · el agua se agota en el trayecto</td>
+    <td align="center"><b>Alejandría</b> · bonus del juego base</td>
+  </tr>
+  <tr>
+    <td><img src="docs/img/andes.png" alt="Cruce de los Andes nevado con la barra de frío"></td>
+    <td><img src="docs/img/argentina-1983.png" alt="Calle de una ciudad argentina en 1983 con comercios"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Cruce de los Andes</b> · frío, abrigo y refugios</td>
+    <td align="center"><b>Argentina, 1983</b> · recuperación democrática</td>
+  </tr>
+  <tr>
+    <td><img src="docs/img/pregunta.png" alt="Archivo del ágora de Atenas con una pregunta y tres opciones"></td>
+    <td><img src="docs/img/epocas.png" alt="Selección de épocas con campaña, Argentina, Brasil, bonus y excursiones"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Archivos</b> · lectura y pregunta por edad</td>
+    <td align="center"><b>Épocas</b> · campaña, países, bonus y excursiones</td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/img/android.png" alt="Versión Android con controles táctiles y la siguiente tarea en pantalla" width="860"><br>
+  <b>Android</b> · controles táctiles grandes, una sola tarea a la vez y lectura en voz alta
+</p>
+
+## Características
+
+| | |
+| --- | --- |
+| 🗺️ **50 mapas** | Diez épocas principales, rutas de Argentina y Brasil, bonus y excursiones |
+| 📚 **1800 registros de preguntas** | 100 archivos y tres franjas de edad (6–9, 10–14, 15+) |
+| 🧭 **Una tarea a la vez** | Guía en el mapa con señal de destino, en PC y Android |
+| 🌎 **Dos idiomas sin conexión** | Español y portugués de Brasil, con traducciones docentes propias |
+| 👕 **19 apariencias y 13 mejoras** | Skins con fichas históricas y habilidades que se compran con lo aprendido |
+| 🏆 **60 logros** | Con premio final y rankings locales de clase e institución |
+| 🏫 **Salas docentes** | Partidas compartidas en la red local, entre Windows y Android |
+| 🎵 **Música original** | Nueve composiciones y 17 efectos de sonido |
+
+## Épocas y campaña
+
+Hay **50 mapas**: 30 de campaña principal, cuatro rutas principales argentinas, tres
+bonus argentinos, la Guerra de los Farrapos en Brasil, ocho bonus del juego base y cuatro
+grietas históricas. Además hay tres travesías marítimas que vuelven a su mapa de origen.
+
+Las diez épocas principales son **Primigenio, Deshielo, Egipto, Grecia, Medievo,
+Industria, Primera Guerra Mundial, Segunda Guerra Mundial, Guerra Fría y Actualidad**.
+
+- **Argentina:** 1810, 1816, Obligado y la recuperación democrática. San Martín abre los
+  Andes y Brown su ruta naval. Güemes se habilita al completar 1816.
+- **Brasil:** la Guerra de los Farrapos, 1835–1845.
+- **Bonus del juego base:** Alejandría, Maguncia, Siracusa, Tombuctú y Bletchley Park, que
+  se abren con rescates ficticios en otros mapas.
+- **Guerras mundiales:** 1914, Verdún y el armisticio; el Blitz, Stalingrado y Berlín; y la
+  excursión química de Ypres.
+- **Guerra Fría:** Berlín, el diálogo de 1989–1991 y la Luna, un desafío sin enemigos con
+  gravedad reducida, cráteres y la reparación del módulo.
+
+Cada mapa tiene 48 ecos, dos archivos, tres fragmentos, una curiosidad y un trabajo de
+campo: transportar provisiones, ordenar un catálogo, imprimir una página, accionar
+palancas, acompañar una custodia o leer señales en el momento justo.
+
+## Mecánicas de época
+
+| Época | Efecto en el juego |
+| --- | --- |
+| Primigenio | El barro frena la marcha; saltar y usar pasarelas ayuda. |
+| Deshielo | El frío llena una barra. El abrigo ralentiza la pérdida de calor y las hogueras y refugios la recuperan. |
+| Egipto | El agua se agota en el trayecto; pozos y sombra la reponen. |
+| Grecia | Los impulsos consumen esfuerzo; el descanso lo recupera. |
+| Medievo | La lámpara amplía la zona iluminada y se recarga junto a los faroles. |
+| Industria | Rejillas anunciadas expulsan vapor: hay que esperar o rodearlas. |
+| Guerras | Las alarmas anticipan impactos; hay que buscar los refugios marcados. |
+| Guerra Fría | Sincronización de antenas; en la Luna, baja gravedad y aterrizajes de precisión. |
+| Actualidad | Las placas energéticas recargan el impulso incluso en el aire. |
+| Argentina y Brasil | Mantener E junto a parapetos da cobertura; cada misión suma logística y comunicaciones. |
+
+Son reglas de juego contextualizadas, no simulaciones históricas ni físicas exactas.
+
+## Aprender, mejorar y personalizar
+
+- **Preguntas por edad** con respuestas mezcladas y explicaciones. Equivocarse da pistas,
+  no castigos.
+- El banco tiene **1800 registros** con reutilización entre edades, unos 600 enunciados
+  distintos. La franja menor no recibe el vocabulario avanzado.
+- Una **curiosidad** leída en el mapa vuelve como pregunta en el segundo archivo.
+- Las primeras respuestas dan **saber** para comprar **13 mejoras**; la misión y los
+  archivos también suman puntuación y premios.
+- Los **ecos** compran **19 apariencias** con fichas que explican su contexto histórico.
+  Las comprables se habilitan al completar su mapa.
+- **Accesibilidad:** asistencia motriz independiente de las preguntas, tamaño de lectura
+  ajustable y lectura en voz alta en Android.
+
+## Para docentes
+
+**Configuración → Zona docente** permite ver, añadir, editar, duplicar, importar,
+exportar y seleccionar preguntas. Las ediciones se conservan cuando el juego agrega temas
+nuevos, y cada pregunta puede tener su propia traducción al portugués.
+
+- Perfiles con alias, clase e institución, y PIN docente opcional.
+- Exportación CSV de respuestas y justificaciones.
+- Rankings locales de clase e institución.
+- **Salas en red local:** el docente aloja la sala desde Windows y los dispositivos se unen
+  con IP, puerto y código. Usa HTTP en una red de confianza, sin ranking global.
+- **Práctica docente:** recorre mapas, habilidades y apariencias sin gastar monedas ni
+  alterar los rankings.
+
+Guía completa: [docs/GUIA-DOCENTE.md](docs/GUIA-DOCENTE.md).
+
+## Descargar y jugar
+
+Las versiones publicadas están en **[Releases](https://github.com/RenzoLeporace/crono-runner/releases)**.
+
+| Plataforma | Cómo jugar |
+| --- | --- |
+| **Windows** | Extraé el ZIP completo y abrí `CRONO - Ecos del tiempo.exe`, con la carpeta `_internal` a su lado. |
+| **Android** | Instalá el APK (Android 8 o posterior) y jugá en horizontal. Para actualizar, instalalo encima de la versión anterior y se conservan los datos. |
+
+El juego incluye su motor y sus recursos: no necesita Internet para jugar. Los enlaces a
+fuentes solo se abren si los elegís.
+
+### Desde el código fuente
 
 ```sh
+git clone https://github.com/RenzoLeporace/crono-runner.git
+cd crono-runner
 python -m pip install -r requirements.txt
 python Main.py
 ```
 
-En Windows también podés usar `Jugar.bat`. Los datos de alumnos y los bancos particulares quedan fuera de las entregas.
+En Windows también podés abrir `Jugar.bat`.
 
-## Campaña, países y bonus
+**Idioma:** Configuración → Idioma permite elegir **Español** o **Português (Brasil)**.
+Más detalles en [docs/IDIOMAS.md](docs/IDIOMAS.md).
 
-Hay **50 mapas**: 30 de campaña principal, cuatro rutas principales argentinas, tres bonus argentinos, Farrapos en Brasil, ocho bonus del juego base por rescates y cuatro grietas históricas. Además existen tres travesías acuáticas separadas, con regreso a su mapa de origen.
+## Controles
 
-Las diez épocas principales son Primigenio, Deshielo, Egipto, Grecia, Medievo, Industria, Primera Guerra Mundial, Segunda Guerra Mundial, Guerra Fría y Actualidad. Argentina incluye 1810, 1816, Obligado y recuperación democrática; San Martín abre los Andes y Brown su ruta naval. Güemes se habilita al completar 1816. Brasil comienza con la Guerra de los Farrapos, 1835–1845.
+| Acción | PC | Android |
+| --- | --- | --- |
+| Moverse | A / D o flechas | Flechas en pantalla |
+| Saltar | Espacio | SALTAR |
+| Impulso | Shift | RAYO |
+| Disparar | F | PULSO |
+| Abrir libros y puestos | Pulsar E | Tocar USAR o la señal |
+| Trabajar, cubrirse, reparar | Mantener E | Mantener USAR |
+| Bajar por pasarelas | S o flecha abajo | BAJAR |
+| Historia y objetivos | H | ? |
+| Mejoras / Cuaderno | U / C | Desde la pausa |
+| Pausa | Esc | II |
 
-Los cinco bonus nuevos del juego base se abren mediante rescates ficticios: bibliotecaria en el templo egipcio → Alejandría; aprendiz en el mercado medieval → Maguncia; aprendiz del equilibrio en Olimpia → Siracusa; guardiana en el molino medieval → Tombuctú; analista en el mapa londinense del Blitz → Bletchley Park. Estas conexiones del reloj distinguen fechas y regiones; no afirman que el rescate sucediera históricamente.
+Las teclas se pueden reasignar en Configuración, y la guía del mapa muestra la tecla elegida.
 
-Cada mapa tiene 48 ecos, dos archivos, tres fragmentos, una curiosidad específica y un trabajo de campo físico. Los nuevos trabajos incluyen transportar provisiones, ordenar un catálogo al regresar, imprimir una página, usar palancas, acompañar una custodia y leer señales con el momento correcto.
+## Desarrollo
 
-La Guerra Fría se integra entre Guerras Mundiales y Actualidad, con Berlín, la Luna y el diálogo de 1989–1991. El mapa lunar no tiene enemigos ni jefe de combate: exige cruzar cráteres de hasta 510 píxeles, usar la baja gravedad y la inercia, recuperar tres piezas y reparar el módulo ficticio de Crono. Conserva los archivos históricos y los fragmentos. Los saltos usan aceleración de 1/6 y un impulso de traje ajustado para jugar, no una simulación física completa.
+### Estructura del proyecto
 
-## Mecánicas de época
+```text
+crono-runner/
+├── Main.py              # punto de entrada para PC
+├── crono/               # código del juego (78 módulos)
+│   ├── game.py          # bucle principal, estados y HUD
+│   ├── physics.py       # movimiento, colisiones y controles
+│   ├── levels.py        # rutas y mapas
+│   ├── education.py     # lecciones, archivos y fuentes
+│   ├── question_bank.py # banco de preguntas y ediciones docentes
+│   ├── i18n.py          # traducciones sin conexión
+│   └── ...
+├── android/             # entrada y proyecto Android
+├── assets/              # audio y catálogo de idiomas
+├── contenido/           # banco de preguntas local del docente
+├── tests/               # pruebas automáticas y mediciones de rendimiento
+├── tools/               # compilación, empaquetado y utilidades
+└── docs/                # guías, hoja de ruta e imágenes
+```
 
-| Época | Efecto sobre el juego |
+### Pruebas
+
+```sh
+python -m unittest discover -s tests
+```
+
+La suite tiene **210 pruebas**: recorre los 50 mapas con física real y cubre misiones,
+configuración, guardado, migraciones del banco, idiomas, salas LAN y regresiones de render.
+Las mediciones de rendimiento se reproducen con `tests/render_stress.py` y
+`tests/boss_stress.py`.
+
+### Compilación
+
+| Destino | Comandos |
 | --- | --- |
-| Primigenio | El barro reduce la marcha; saltar y usar pasarelas ayuda. |
-| Deshielo | El frío llena una barra y puede congelarte. El abrigo se encuentra más adelante y ralentiza la pérdida de calor; las hogueras y refugios permiten recuperarlo. |
-| Egipto | El agua disminuye en el trayecto; pozos y sombra la reponen. |
-| Grecia | Los impulsos consumen esfuerzo; el descanso facilita la recuperación. |
-| Medievo | La lámpara amplía la zona iluminada y se recarga junto a faroles. La geometría lejana sigue visible. |
-| Industria | Rejillas anunciadas expulsan vapor: hay que esperar o rodearlas. |
-| Guerras | Las alarmas anticipan impactos; busca los refugios marcados. |
-| Guerra Fría | Sincronización de antenas; en la Luna, gravedad reducida, aterrizajes de precisión y reparación sin combate. |
-| Actualidad | Las placas energéticas recargan el impulso incluso en el aire. |
-| Rutas argentinas y Brasil | Mantener E junto a parapetos proporciona cobertura. Las misiones particulares añaden logística, comunicaciones y otras acciones. |
+| Windows | `tools/build_beta.py` y `tools/package_beta.py` |
+| Android | `tools/prepare_android.py` y `tools/build_android.py` (SDK 34, JDK 17) |
+| Entrega | `tools/create_delivery.py` (carpetas Proyecto, Windows y APK) |
 
-El tutorial enseña cinco acciones. En su última etapa señala un libro abierto y solo pide interactuar al estar cerca. Una caja de preparación y un puesto de registro no son grietas: únicamente la entrada marítima del segundo puesto abre la navegación.
+El estado del desarrollo y los próximos pasos están en la
+[hoja de ruta](docs/HOJA-DE-RUTA.md).
 
-## Aprender, mejorar y personalizar
+## Documentación
 
-El banco incluye **1800 registros de preguntas en 100 archivos**, tres edades y selección aleatoria con respuestas mezcladas. Las preguntas tratan contenidos concretos, sin plantillas que cambian únicamente el título. El total incluye reutilización entre edades: no son 1800 preguntas ni hechos diferentes. Se filtra el vocabulario original avanzado para la banda menor y se conservan las elecciones docentes. Una curiosidad leída se pregunta en el segundo archivo, más adelante. Los errores dan explicaciones sin quitar energía. Las primeras respuestas dan saber para **13 mejoras**; la misión y los archivos también suman puntuación y premios únicos.
+| Documento | Contenido |
+| --- | --- |
+| [CHANGELOG.md](CHANGELOG.md) | Cambios de cada versión, con mediciones de rendimiento |
+| [docs/GUIA-DOCENTE.md](docs/GUIA-DOCENTE.md) | Zona docente, perfiles y salas |
+| [docs/IDIOMAS.md](docs/IDIOMAS.md) | Idiomas y traducciones docentes |
+| [FUENTES.md](FUENTES.md) | Fuentes históricas por tema |
+| [docs/FUENTES-HISTORIAS-2026-10-27.md](docs/FUENTES-HISTORIAS-2026-10-27.md) | Revisión de las guerras mundiales y Chernóbil |
+| [docs/HOJA-DE-RUTA.md](docs/HOJA-DE-RUTA.md) | Estado actual y próximos pasos |
 
-Los ecos permiten comprar apariencias. Hay **19 skins además de Crono**, contando la de Cronista obtenida por logros. Las 18 comprables se habilitan al terminar su mapa asociado, indicado en cada ficha. No se pierden las compras de partidas anteriores. Seis nuevas visten a Crono como gaúcho, Infernal, arriero, cartógrafo, telegrafista y molinero. Las fichas explican contexto y límites de la representación.
+## Créditos y licencia
 
-Los **60 logros** conservan el premio final Reloj del Cronista: energía máxima adicional y mayor atracción, desactivable. Las edades 6–9, 10–14 y 15+ ajustan preguntas y dificultad; Accesibilidad permite elegir asistencia motriz por separado. Hay todas las anclas en mínima, cuatro en media y dos en alta. La práctica docente muestra mapas, habilidades y skins sin consumir monedas ni alterar rankings reales.
+Creado por **[Renzo Leporace](https://github.com/RenzoLeporace)**, con aportes de
+**[Federico Viceconte](https://github.com/federicoviceconte5-jpg)**.
 
-## Docentes y salas
-
-Configuración → Zona docente permite ver preguntas y respuestas, añadir, editar, duplicar, importar, exportar y seleccionar contenidos. El banco formato 7 conserva las ediciones antiguas al añadir los temas nuevos. Hay perfiles con alias, clase e institución, exportación CSV de respuestas y justificaciones, PIN docente opcional y dos rankings locales: clase e institución.
-
-El docente aloja una sala desde Windows; los dispositivos Windows y Android de la misma LAN/WiFi se unen mediante IP, puerto y código. La red debe permitir comunicación entre dispositivos. El juego no modifica el firewall. La sala usa HTTP en una red de confianza y no tiene ranking global ni protección antitrampas. [Guía docente](docs/GUIA-DOCENTE.md).
-
-## Controles y desarrollo
-
-A/D o flechas: mover; Espacio: salto; Shift: impulso; F: disparo; tocar E: abrir libros y puestos; mantener E: herramientas, cobertura y trabajo de la misión; abajo: bajar por pasarelas; H: ayuda; U/C: mejoras/cuaderno; Esc: pausa. En Android, SALTAR es el botón principal de 156 píxeles. PULSO, RAYO y USAR mantienen su tamaño y orbitan por arriba y por la izquierda. BAJAR sirve solo para bajar.
-
-El mapa muestra una sola tarea inmediata, una señal hacia su destino y progreso visible al mantener USAR. El altavoz lee objetivos y preguntas si Android dispone de una voz española instalada sin red. La lectura y las respuestas usan tarjetas grandes. Los jefes reutilizan imágenes locales y conservan sus avisos y reacciones de daño. [Detalle de interfaz, contenido y mediciones](docs/CAMBIOS-0.9.3.md).
-
-El pulso base tiene alcance corto. Horizonte temporal amplía Crono de 330 a 500 píxeles y la nave de 540 a 800; siguen teniendo límite. El sonido incluye nueve composiciones originales y 17 efectos. La representación visual es original e ilustrativa; las misiones no sustituyen las fuentes.
-
-Pruebas: `python -m unittest discover -s tests`. Windows: `tools/build_beta.py` y `tools/package_beta.py`. Android: `tools/prepare_android.py` y `tools/build_android.py`, con SDK 34 y JDK 17. Entrega: `tools/create_delivery.py`. El contenedor web intermedio no es el APK instalable.
-
-[Novedades de la entrega](docs/CAMBIOS-0.9.3.md) · [Contenido 0.9](docs/CAMBIOS-0.9.md) · [Fuentes](FUENTES.md) · [Verificación](VERIFICACION.md) · [Licencias](LICENCIAS.txt) · [Derechos](COPYRIGHT.txt).
-
-Cambios del 27 de octubre: Primera Guerra (1914, Verdún, armisticio), Segunda Guerra (Blitz, Stalingrado, Berlín/posguerra), excursión química de Ypres y Chernóbil en lugar de repetir Apolo 11. Luna conserva su mapa propio y ahora incorpora oxígeno y tanque de reserva. Frío y abrigo también aparecen en Andes, Malvinas y Stalingrado. [Detalle](docs/CAMBIOS-2026-10-27.md).
+La representación visual es original e ilustrativa, y las misiones no sustituyen a las
+fuentes históricas. © 2026 Renzo Leporace. Todos los derechos reservados: ver
+[COPYRIGHT.txt](COPYRIGHT.txt). Las licencias de terceros están en
+[LICENCIAS.txt](LICENCIAS.txt) y en la carpeta [licencias](licencias/).
