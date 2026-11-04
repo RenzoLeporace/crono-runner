@@ -40,6 +40,13 @@ class PCGuidanceTests(unittest.TestCase):
             self.assertTrue(label);self.assertNotIn('toca ',label.lower())
             g.render()
             if g.pc_goal_rect:self.assertTrue(pg.Rect(0,0,1280,720).contains(g.pc_goal_rect),level)
+    def test_controls_hint_stays_clear_of_buttons_and_minimap(self):
+        for code in ('es','pt-BR'):
+            set_language(code);g=self.start();g.render();hint=g.controls_hint_rect
+            self.assertTrue(pg.Rect(0,0,1280,720).contains(hint))
+            for box,_,_ in g.buttons:self.assertFalse(hint.colliderect(box),(code,box))
+            self.assertFalse(hint.colliderect((30,667,245,39)))
+        g.world.time=30;g.render();self.assertIsNone(g.controls_hint_rect)
     def test_holding_the_bound_key_shows_progress_and_finishes_the_work(self):
         g=self.start(12,0);field=g.world.mechanic.field;g.world.mechanic.state['step']=3;field.collected={0,1,2}
         stand_at(g.world,g.world.mechanic.devices[2])

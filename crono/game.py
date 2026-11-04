@@ -554,8 +554,10 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         elif station:
             rect(s,(12,32,42),(W/2-210,H-110,420,38),5)
             text(s,'E  ·  Repasar archivo' if station[2] in self.world.answered else 'E  ·  Descubrir y responder',(W/2,H-91),16,CYAN,True,'center')
+        self.controls_hint_rect=None
         if self.world.time<24 and not self.touch_enabled():
-            text(s,'ESPACIO salto · SHIFT impulso · F disparo',(W/2,H-31),12,PAPER,False,'center')
+            # Above the minimap: the bottom centre belongs to the Historia button.
+            self.controls_hint_rect=text(s,'ESPACIO salto · SHIFT impulso · F disparo',(36,H-62),12,PAPER,False,'midleft')
 
     def menu(self):
         if self.touch_enabled():self.mobile_menu();return
