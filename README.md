@@ -273,7 +273,7 @@ El estado del desarrollo y los próximos pasos están en la
 ## Créditos y licencia
 
 Creado por **[Renzo Leporace](https://github.com/RenzoLeporace)**, con aportes de
-**[Federico Viceconte](https://github.com/federicoviceconte5-jpg)**.
+**[Federico Viceconte](https://github.com/FedericoViceconte)**.
 
 La representación visual es original e ilustrativa, y las misiones no sustituyen a las
 fuentes históricas. © 2026 Renzo Leporace. Todos los derechos reservados: ver
