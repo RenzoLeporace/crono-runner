@@ -82,12 +82,12 @@ mapas (PC 1280, Android 1281 y 1480) son idénticos a la versión anterior.
   rectángulos por cuadro pasan a ser 12 copias.
 
 Recorrido de 12 mapas caminando, 900 cuadros por mapa, tiempo del render en la PC de
-desarrollo (no son FPS del teléfono):
+desarrollo (no son FPS del teléfono). Promedio de dos tandas alternando ambas versiones:
 
 | | Mediana | p95 | p99 |
 | --- | ---: | ---: | ---: |
-| Android 1480×720 | 3,96 → 1,65 ms (−58 %) | 8,71 → 3,56 ms (−59 %) | 18,59 → 5,06 ms (−73 %) |
-| PC 1280×720 | 4,57 → 3,80 ms (−17 %) | 7,96 → 6,67 ms (−16 %) | 15,59 → 9,55 ms (−39 %) |
+| Android 1480×720 | 3,71 → 1,57 ms (−58 %) | 6,03 → 3,27 ms (−46 %) | 10,34 → 4,22 ms (−59 %) |
+| PC 1280×720 | 4,42 → 3,73 ms (−16 %) | 6,96 → 6,35 ms (−9 %) | 8,96 → 8,09 ms (−10 %) |
 
 Jefes recibiendo daño, p95 del render a 1600×720 (`python tests/boss_stress.py`):
 
