@@ -2,9 +2,13 @@
 import math
 from functools import lru_cache
 import pygame as pg
-from .art import text,rect,line,circle,polygon,diamond,PAPER,CYAN,GOLD,MUTED,INK
+from .art import text,rect,line,circle,polygon,diamond,font,PAPER,CYAN,GOLD,MUTED,INK
 from .learning_ui import wrapped,wrap_rows
-from .i18n import tr,literal
+from .i18n import tr,literal,language,Localized
+
+# The PC guide reuses mobile_goal and swaps touch wording for the bound keys, after translation.
+KEYBOARD_WORDS={'es':(('mantén USAR','mantén {use}'),('toca USAR','pulsa {use}'),('Toca PULSO','Pulsa {attack}')),
+                'pt-BR':(('segure USAR','segure {use}'),('toque em USAR','pressione {use}'),('Toque em PULSO','Pressione {attack}'))}
 
 
 @lru_cache(maxsize=32)
@@ -178,6 +182,39 @@ class ChildUI:
                 direction=1 if x>self.viewport_width/2 else -1
                 x=self.viewport_width-44 if direction>0 else 44
                 polygon(self.world_canvas,GOLD,[(x+direction*18,255),(x-direction*12,237),(x-direction*12,273)])
+
+    def key_label(self,action):return pg.key.name(self.key_for(action)).upper()
+
+    def pc_goal(self):
+        label,point,kind=self.mobile_goal();value=str(tr(label))
+        keys=dict(use=self.key_label('interact'),attack=self.key_label('attack'))
+        for touch,keyboard in KEYBOARD_WORDS.get(language(),KEYBOARD_WORDS['es']):value=value.replace(touch,keyboard.format(**keys))
+        return Localized(value),point,kind
+
+    def pc_story_hud(self,fighting):
+        s=self.canvas;w=self.world
+        if not fighting:
+            label,point,kind=self.pc_goal()
+            if point:
+                x,y=point[0]-self.camera,max(170,min(520,point[1]-128))
+                if 45<x<self.viewport_width-45:
+                    self.world_canvas.blit(icon_image(kind,GOLD,36),(int(x-18),int(y-48)))
+                    polygon(self.world_canvas,GOLD,[(x-10,y-6),(x+10,y-6),(x,y+8)])
+                else:
+                    direction=1 if x>self.viewport_width/2 else -1
+                    x=self.viewport_width-36 if direction>0 else 36
+                    polygon(self.world_canvas,GOLD,[(x+direction*16,300),(x-direction*10,284),(x-direction*10,316)])
+            if w.message_time<=0:
+                box=pg.Rect(28,99,min(760,font(15,True).size(label)[0]+62),36);self.pc_goal_rect=box
+                rect(s,(14,31,39),box,6);s.blit(icon_image(kind,GOLD,24),(box.x+12,box.y+6))
+                text(s,label,(box.x+46,box.centery),15,PAPER,True,'midleft')
+        work=w.mechanic.field.work_target()
+        if work:
+            rect(s,(13,30,40),(470,550,340,50),8)
+            key=self.key_label('interact')
+            text(s,str(tr('MANTÉN USAR')).replace('USAR',key) if work['ready'] else 'ESPERA LA SEÑAL',(640,559),15,PAPER,True,'midtop')
+            rect(s,(60,80,87),(490,582,300,9),4)
+            if work['progress']:rect(s,CYAN,(490,582,300*work['progress'],9),4)
 
     def mobile_story_panel(self):
         s=self.canvas;s.fill((13,28,39));w=self.world;m=w.mechanic

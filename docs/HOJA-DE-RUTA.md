@@ -57,9 +57,9 @@ No publicar una release final todavía: falta el rendimiento físico Android.
   controles con margen lateral y captura del dedo al saltar.
 - [x] Android: una tarea inmediata, señal de destino y lista corta de pasos
   dentro del mapa; tarjetas educativas grandes y lectura opcional con voz local.
-- [ ] **PC: falta portar esa guía simplificada al HUD del mapa**. Sus controles,
-  navegación y lectura están corregidos, pero no tiene todavía el mismo HUD
-  de una sola tarea. Se aclaró esto expresamente a Renzo.
+- [x] PC: el HUD del mapa muestra la misma tarea inmediata que Android
+  (`pc_goal` reutiliza `mobile_goal`) con las teclas configuradas, marca dorada
+  sobre el destino y barra al mantener E. Pruebas en tests/test_pc_guidance.py.
 - [x] E/USAR pulsado abre; mantenido realiza trabajo con barra de progreso.
   S/flecha abajo/BAJAR únicamente desciende por pasarelas delgadas.
 - [x] Escape vuelve al panel de origen, partida o pausa. Desbloquear/desactivar

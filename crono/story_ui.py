@@ -60,7 +60,7 @@ class StoryUI:
 
     def story_hud(self):
         if self.touch_enabled():return self.mobile_story_hud()
-        w=self.world;m=w.mechanic
+        w=self.world;self.pc_goal_rect=None
         if self.tutorial_active:
             rect(self.canvas,(16,39,46),(245,204,790,70),8)
             wrapped(self.canvas,f'TUTORIAL {self.tutorial_step+1}/5 · '+self.tutorial_instruction(),(265,217),750,18,CYAN,leading=25)
@@ -73,10 +73,8 @@ class StoryUI:
                         polygon(self.world_canvas,GOLD,[(x-9,y-158),(x+9,y-158),(x,y-146)])
                         text(self.world_canvas,'ARCHIVO · LIBRO',(x,y-209),14,PAPER,True,'center')
         else:
-            learned=bool({w.level_id*2,w.level_id*2+1}&w.answered)
             self.button(('✓' if w.story_ready else 'H')+' · Historia',(565,665,205,42),lambda:self.set_state('story'),small=True,arrow=False)
-            if not (w.boss and w.boss.active and w.boss.alive):
-                text(self.canvas,f'Historia: {m.state["step"]}/3 puestos · aplicación '+('✓' if m.field.done else 'pendiente')+' · archivo '+('✓' if learned else 'pendiente'),(36,111),14,CYAN if w.story_ready else GOLD)
+            self.pc_story_hud(bool(w.boss and w.boss.active and w.boss.alive))
 
     def story_panel(self):
         if self.touch_enabled():return self.mobile_story_panel()
