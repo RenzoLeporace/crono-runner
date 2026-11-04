@@ -12,7 +12,7 @@ Explorá diez épocas, completá misiones y resolvé archivos con preguntas adap
 ![pygame-ce](https://img.shields.io/badge/pygame--ce-2.5.7-5c8a3a)
 ![Plataformas](https://img.shields.io/badge/plataformas-Windows_|_Android-1f425f)
 ![Idiomas](https://img.shields.io/badge/idiomas-español_|_português-e0a458)
-![Pruebas](https://img.shields.io/badge/pruebas-215_aprobadas-2ea44f)
+[![Pruebas](https://github.com/RenzoLeporace/crono-runner/actions/workflows/ci.yml/badge.svg)](https://github.com/RenzoLeporace/crono-runner/actions/workflows/ci.yml)
 
 [Descargar](#descargar-y-jugar) · [Capturas](#capturas) · [Para docentes](#para-docentes) · [Desarrollo](#desarrollo) · [Cambios](CHANGELOG.md)
 
