@@ -6,7 +6,7 @@ Actualizada el **4 de noviembre de 2026**. Leer este archivo antes de continuar.
 
 - Última publicación en GitHub: **v0.9.2** (pre-release). El repositorio es público.
 - Fuentes en `main`: **0.9.3 en desarrollo**. No existe todavía la release v0.9.3.
-- **210 pruebas** pasan con `python -m unittest discover -s tests`.
+- **215 pruebas** pasan con `python -m unittest discover -s tests`.
 - Hay un APK de prueba firmado en `build/android/CRONO-Beta-Educativa-0.9.3-Android.apk`
   (local, no versionado). No presentarlo como entrega final. La huella vigente está en
   `build/verification/0.9.3-desarrollo/APK-CHECK.json`.
@@ -34,6 +34,15 @@ documentación publicada. `adb -d` selecciona el teléfono físico y no el emula
 **6,6–6,7 FPS**, p95 del cuadro 147 ms (actualización 13,5–13,8 ms, render 135 ms,
 composición 20–23 ms, copia 19,6–19,7 ms, flip 10,5 ms). Menú: 8,3–8,5 FPS, cuadro
 114–117 ms. Las mediciones con viewport 960 no son comparables con estas.
+
+**4 de noviembre · pendiente de medir en el J6.** En esa medición, composición (20–23 ms) y
+copia (19,6 ms) eran pasadas de pantalla completa. Ahora, en partida, la interfaz táctil se
+dibuja directo sobre el mundo y el mundo directo en la ventana, así que la composición y la
+copia deberían ser casi cero. Además, las piezas de arte se preparan de a una antes de entrar
+en pantalla. En la PC de desarrollo el render en Android bajó un 58 % en la mediana y un 73 %
+en el p99 (ver CHANGELOG.md). Hay que confirmarlo en el teléfono con `crono_performance=true`.
+Si `display_copy` no baja a cero, el formato de la ventana en pygbag no coincide con el del
+mundo y `world_fits_display()` lo está descartando.
 
 Lo que ya se corrigió y no hay que rehacer:
 

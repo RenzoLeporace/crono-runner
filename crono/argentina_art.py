@@ -263,6 +263,23 @@ def sky(stage):
         line(s,mix((50,65,65),(19,31,39),(yy-584)/(H-584)),(0,yy),(W,yy))
     return s
 
+def skyline(s,stage,x,h,top=0):
+    col=(105,126,121) if stage<2 else (65,83,99)
+    rect(s,col,(x,484-h-top,136,h+47))
+    if stage<2:polygon(s,(115,113,99),[(x-3,484-h-top),(x+24,471-h-top),(x+113,471-h-top),(x+140,484-h-top)])
+    else:
+        for xx in range(12,128,23):
+            for yy in range(int(495-h),481,25):rect(s,(130,132,120),(x+xx,yy-top,6,9))
+
+SKYLINE_KEY=(255,0,255)
+
+@lru_cache(maxsize=192)
+def skyline_block(stage,h):
+    # Distant buildings with their windows: hundreds of rectangles become one blit.
+    top=471-h;image=pg.Surface((144,60+h));image.fill(SKYLINE_KEY)
+    skyline(image,stage,3,h,top);image.set_colorkey(SKYLINE_KEY,pg.RLEACCEL)
+    return image
+
 def background(s,stage,camera,t):
     s.blit(sky(stage),(0,0))
     # Low terrain or estuary, deliberately no alpine mountains in Buenos Aires.
@@ -286,12 +303,10 @@ def background(s,stage,camera,t):
     offset=camera*.15
     for n in range(int(offset//140)-1,int(offset//140)+math.ceil(W/140)+1):
         x=n*140-offset;h=48+(n*37)%72 if stage<2 else 100+(n*47)%110
-        col=(105,126,121) if stage<2 else (65,83,99)
-        rect(s,col,(x,484-h,136,h+47))
-        if stage<2:polygon(s,(115,113,99),[(x-3,484-h),(x+24,471-h),(x+113,471-h),(x+140,484-h)])
-        else:
-            for xx in range(12,128,23):
-                for yy in range(int(495-h),481,25):rect(s,(130,132,120),(x+xx,yy,6,9))
+        # Coordinates truncate toward zero, so a cached block is pixel-identical
+        # once its left overhang is on screen; the edge block is drawn as before.
+        if x>=3:s.blit(skyline_block(stage,h),(int(x)-3,471-h))
+        else:skyline(s,stage,x,h)
     rect(s,(105,104,87) if stage<2 else (67,75,81),(0,539,W,45))
     for j in range(6):
         yy=547+j*7
@@ -300,16 +315,27 @@ def background(s,stage,camera,t):
 def _place(s,img,x,base):
     if -img.get_width()<x<W:s.blit(img,(int(x),int(base-img.get_height())))
 
-def street(s,world,camera,t):
-    stage=world.stage
-    offset=camera*.55
+def house_slots(world,camera):
     # Independent, varied house fronts replace the repeating monumental building.
-    first=int(offset//267)-2
-    landmark_camera=world.data['zones'][2][0] if stage<2 else world.width-W
-    landmark_x=landmark_camera*.55+620
+    stage=world.stage;offset=camera*.55;first=int(offset//267)-2
+    landmark_x=landmark_position(world)
     for n in range(first,first+math.ceil(W/267)+3):
         wx=n*267
         if abs(wx-landmark_x)<(540 if stage!=1 else 395):continue
+        yield n,wx
+
+def landmark_position(world):
+    landmark_camera=world.data['zones'][2][0] if world.stage<2 else world.width-W
+    return landmark_camera*.55+620
+
+def landmark_builders(stage):
+    return (recova,cabildo) if stage==0 else (tucuman_house,) if stage==1 else (congress,)
+
+def street(s,world,camera,t):
+    stage=world.stage
+    offset=camera*.55
+    landmark_x=landmark_position(world)
+    for n,wx in house_slots(world,camera):
         img=house(stage,n)
         _place(s,img,wx-offset,565+(n%3-1)*4)
     if stage==0:

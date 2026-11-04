@@ -39,15 +39,34 @@ class ViewportUI:
         rgb=self.display.get_masks()[:3]
         alpha=0xffffffff ^ (rgb[0]|rgb[1]|rgb[2])
         self.ui_canvas=pg.Surface((1280,720),pg.SRCALPHA,32,(*rgb,alpha));self.canvas=self.ui_canvas
-        self.world_canvas=pg.Surface((width,720));self.display=pg.display.set_mode((width,720),pg.RESIZABLE)
+        self.world_canvas=self.offscreen_world=pg.Surface((width,720));self.display=pg.display.set_mode((width,720),pg.RESIZABLE)
         set_render_width(width,True)
         self.menu_world_background=None;self.mobile_menu_background=None
         if hasattr(self,'artist'):self.artist.mobile_layer=None
+
+    def world_fits_display(self):
+        # A window of the same size and format can be the world canvas itself,
+        # which saves a full-screen copy every frame. Resized windows still scale.
+        world=self.offscreen_world;display=self.display
+        return display.get_size()==world.get_size() and display.get_bitsize()==world.get_bitsize() and display.get_masks()==world.get_masks()
 
     def present(self):
         profiling=getattr(self,'perf_enabled',False)
         started=perf_counter() if profiling else 0
         width=self.viewport_width;world=self.world_canvas
+        if world is self.display:
+            if not self.direct_ui:
+                ui=self.ui_canvas;touch_hud=self.touch_enabled()
+                ui.set_colorkey((0,0,0,0) if touch_hud else None)
+                ui.set_alpha(None if touch_hud else 255)
+                if self.ui_scale!=1:ui=pg.transform.scale(ui,(width,round(720*self.ui_scale)))
+                world.blit(ui,self.ui_offset)
+            composed=perf_counter() if profiling else 0
+            pg.display.flip()
+            if profiling:
+                ended=perf_counter()
+                self.perf_present=dict(compose=(composed-started)*1000,display_copy=0,flip=(ended-composed)*1000,present=(ended-started)*1000)
+            return
         if self.state not in ('play','voyage'):
             if self.touch_enabled():
                 key=(self.world.index,self.world.stage,width)
@@ -68,7 +87,7 @@ class ViewportUI:
         composed=perf_counter() if profiling else 0
         dw,dh=self.display.get_size();ratio=min(dw/width,dh/720)
         size=(max(1,round(width*ratio)),max(1,round(720*ratio)))
-        self.display.fill((8,24,33))
+        if size!=(dw,dh):self.display.fill((8,24,33))
         picture=world if size==world.get_size() else pg.transform.scale(world,size) if self.touch_enabled() else pg.transform.smoothscale(world,size)
         self.display.blit(picture,((dw-size[0])//2,(dh-size[1])//2))
         copied=perf_counter() if profiling else 0

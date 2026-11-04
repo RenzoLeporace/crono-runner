@@ -198,6 +198,43 @@ class Artist:
         image.set_alpha(255,pg.RLEACCEL)
         return image
 
+    def prepare_ahead(self,world,camera,width,drawn=True):
+        # Build at most one piece of art that is about to enter the view, so a
+        # new district never pays for a whole screen of cached pictures at once.
+        # Slow phones otherwise freeze for a moment the first time each one appears.
+        if getattr(self,'prepared_for',None)!=(id(world),width):
+            self.prepared_for=(id(world),width);self.prepared=set();self.prepared_all=False
+        if self.prepared_all:return
+        lo,hi=camera-width,camera+2*width;pending=False;nearest=None
+        for p in world.platforms:
+            key=('platform',int(p.rect.w),int(p.rect.h),int(p.origin),p.moving)
+            if key in self.prepared:continue
+            pending=True
+            if p.rect.right<lo or p.rect.left>hi:continue
+            # Whatever enters the view soonest goes first. The scene has just
+            # drawn (and cached) what is already on screen.
+            distance=max(0,p.rect.left-camera-width,camera-p.rect.right)
+            if distance==0 and drawn:self.prepared.add(key);continue
+            if nearest is None or distance<nearest[0]:nearest=(distance,key,p)
+        if nearest:
+            self.prepared.add(nearest[1]);self.platform_image(nearest[2],world.index,world.stage);return
+        if world.index==7:
+            from .argentina_art import house,house_slots,landmark_builders,landmark_position
+            for future in (camera+width,camera+2*width):
+                for n,_ in house_slots(world,future):
+                    if ('house',n) not in self.prepared:
+                        self.prepared.add(('house',n));house(world.stage,n);return
+            for build in landmark_builders(world.stage):
+                if build not in self.prepared:
+                    pending=True
+                    if abs(landmark_position(world)-(camera+width)*.55)<3*width:self.prepared.add(build);build();return
+        elif world.index<7:
+            from .period_art import landmark,module
+            for seed in range(6):
+                if ('module',seed) not in self.prepared:self.prepared.add(('module',seed));module(world.index,world.stage,seed);return
+            if 'landmark' not in self.prepared:self.prepared.add('landmark');landmark(world.index,world.stage);return
+        self.prepared_all=not pending and world.index!=7
+
     def scenery(self, surface, world, camera, time):
         era = palette_for(world.index,world.stage)
         if world.level_id==0 and not getattr(world,'mobile_render',False):

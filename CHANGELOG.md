@@ -65,6 +65,30 @@ FPS de Android ni garantizan una frecuencia mínima en todos los dispositivos.
 
 ### Rendimiento
 
+**Cuadro más liviano en Android y PC**, con los mismos píxeles: 1050 cuadros de los 50
+mapas (PC 1280, Android 1281 y 1480) son idénticos a la versión anterior.
+
+- **Interfaz táctil dibujada directamente sobre el mundo.** Antes cada cuadro borraba una capa
+  de 1280×720, la componía con color clave y copiaba el mundo a la pantalla. Como sus paneles
+  son opacos, ahora se dibuja encima del mundo en el orden correcto.
+- **El mundo se dibuja directo en la ventana** cuando tienen el mismo tamaño y formato, lo que
+  ahorra una copia de pantalla completa por cuadro en Android y en PC. La pantalla solo se
+  limpia si hay franjas negras.
+- **Preparación adelantada:** las plataformas, casas, módulos y monumentos que están por
+  aparecer se construyen de a una por cuadro, empezando por lo más cercano, y también durante
+  la presentación del mapa. Antes se construían todas juntas al entrar en una zona nueva: en
+  Maguncia se encadenaban cuadros de 150, 57 y 54 ms.
+- Los edificios del horizonte en los mapas argentinos son imágenes en caché: unos 500
+  rectángulos por cuadro pasan a ser 12 copias.
+
+Recorrido de 12 mapas caminando, 900 cuadros por mapa, tiempo del render en la PC de
+desarrollo (no son FPS del teléfono):
+
+| | Mediana | p95 | p99 |
+| --- | ---: | ---: | ---: |
+| Android 1480×720 | 3,96 → 1,65 ms (−58 %) | 8,71 → 3,56 ms (−59 %) | 18,59 → 5,06 ms (−73 %) |
+| PC 1280×720 | 4,57 → 3,80 ms (−17 %) | 7,96 → 6,67 ms (−16 %) | 15,59 → 9,55 ms (−39 %) |
+
 Jefes recibiendo daño, p95 del render a 1600×720 (`python tests/boss_stress.py`):
 
 | Jefe | Antes | Después |

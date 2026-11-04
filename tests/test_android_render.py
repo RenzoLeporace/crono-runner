@@ -25,7 +25,8 @@ class AndroidRenderTests(unittest.TestCase):
         pg.quit();self.temp.cleanup()
 
     def test_touch_hud_fast_composition_preserves_pixels_across_map_changes(self):
-        g=self.g
+        # The keyed composition still serves narrow screens and voyages; wide play draws directly.
+        g=self.g;g.direct_touch_hud=False
         for level in (0,2,3,23,44,48):
             g.load(*divmod(level,3));g.begin();g.tutorial_active=False;g.render()
             source=g.ui_canvas

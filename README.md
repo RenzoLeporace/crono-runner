@@ -12,7 +12,7 @@ Explorá diez épocas, completá misiones y resolvé archivos con preguntas adap
 ![pygame-ce](https://img.shields.io/badge/pygame--ce-2.5.7-5c8a3a)
 ![Plataformas](https://img.shields.io/badge/plataformas-Windows_|_Android-1f425f)
 ![Idiomas](https://img.shields.io/badge/idiomas-español_|_português-e0a458)
-![Pruebas](https://img.shields.io/badge/pruebas-210_aprobadas-2ea44f)
+![Pruebas](https://img.shields.io/badge/pruebas-215_aprobadas-2ea44f)
 
 [Descargar](#descargar-y-jugar) · [Capturas](#capturas) · [Para docentes](#para-docentes) · [Desarrollo](#desarrollo) · [Cambios](CHANGELOG.md)
 
@@ -243,7 +243,7 @@ crono-runner/
 python -m unittest discover -s tests
 ```
 
-La suite tiene **210 pruebas**: recorre los 50 mapas con física real y cubre misiones,
+La suite tiene **215 pruebas**: recorre los 50 mapas con física real y cubre misiones,
 configuración, guardado, migraciones del banco, idiomas, salas LAN y regresiones de render.
 Las mediciones de rendimiento se reproducen con `tests/render_stress.py` y
 `tests/boss_stress.py`.

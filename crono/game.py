@@ -33,6 +33,7 @@ def duration(seconds):
 
 
 class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,SchoolSettingsUI,TeacherUI,LearningUI,AtlasUI):
+    direct_touch_hud=True
     def __init__(self, headless=False, save_file=None,bank_file=None):
         pg.mixer.pre_init(22050,-16,1,512)
         pg.init()
@@ -789,7 +790,8 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
     def render(self):
         self.canvas=self.ui_canvas
         self.canvas.set_colorkey(None);self.canvas.set_alpha(255)
-        self.buttons=[]
+        self.buttons=[];self.direct_ui=False
+        self.world_canvas=self.display if self.state=='play' and self.world_fits_display() else self.offscreen_world
         if self.state=='menu':
             self.menu()
         elif self.state=='chapters':
@@ -798,6 +800,8 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
             self.help()
         elif self.state=='intro':
             self.intro()
+            # The map presentation is static: use it to prepare the first districts.
+            if self.intro_time>.3:self.artist.prepare_ahead(self.world,self.camera,self.viewport_width,drawn=False)
         elif self.state=='pause':
             self.pause()
         elif self.state=='complete':
@@ -846,28 +850,40 @@ class Game(ViewportUI,SeaUI,StoryUI,MobileUI,CommunityUI,ExpansionUI,TouchUI,Sch
         elif self.state=='mobile_more':self.mobile_more()
         else:
             self.artist.scene(self.world_canvas,self.world,self.camera,self.time)
-            self.canvas.fill((0,0,0,0))
+            self.artist.prepare_ahead(self.world,self.camera,self.viewport_width)
+            # The touch HUD is made of opaque cut-outs, so it can be drawn straight
+            # onto the world: no full-screen clear and colour-keyed composition.
+            # World-space layers keep their order beneath it.
+            direct=self.touch_enabled() and self.ui_scale==1 and self.direct_touch_hud
+            if direct:
+                self.story_hud();self.draw_touch();self.draw_flash()
+                self.canvas=self.world_canvas.subsurface(pg.Rect(self.ui_offset,(W,H)));self.direct_ui=True
+            else:self.canvas.fill((0,0,0,0))
             for x,y,vx,vy,life,color in self.particles:
                 circle(self.canvas,color,(x-self.camera,y),max(1,min(3,life*5)))
             self.hud()
-            self.story_hud()
-            if self.touch_enabled():self.draw_touch()
-            if self.flash>0:
-                if self.touch_enabled():
-                    overlay=getattr(self,'mobile_flash_layer',None)
-                    if overlay is None or overlay.get_width()!=self.viewport_width:
-                        overlay=pg.Surface((self.viewport_width,H));overlay.fill((205,92,83));self.mobile_flash_layer=overlay
-                    overlay.set_alpha(int(80*self.flash/.22));self.world_canvas.blit(overlay,(0,0))
-                else:
-                    overlay=pg.Surface((W,H),pg.SRCALPHA)
-                    overlay.fill((205,92,83,int(80*self.flash/.22)))
-                    self.canvas.blit(overlay,(0,0))
+            if not direct:
+                self.story_hud()
+                if self.touch_enabled():self.draw_touch()
+                self.draw_flash()
         if self.notice_time>0:
             rect(self.canvas,(17,33,43),(W/2-390,H-78,780,42),5)
             text(self.canvas,self.notice,(W/2,H-57),15,GOLD,False,'center')
         if self.save.warning and self.state=='pause':
             text(self.canvas,self.save.warning,(W/2,H-35),14,GOLD,False,'center')
         self.present()
+
+    def draw_flash(self):
+        if self.flash<=0:return
+        if self.touch_enabled():
+            overlay=getattr(self,'mobile_flash_layer',None)
+            if overlay is None or overlay.get_width()!=self.viewport_width:
+                overlay=pg.Surface((self.viewport_width,H));overlay.fill((205,92,83));self.mobile_flash_layer=overlay
+            overlay.set_alpha(int(80*self.flash/.22));self.world_canvas.blit(overlay,(0,0))
+        else:
+            overlay=pg.Surface((W,H),pg.SRCALPHA)
+            overlay.fill((205,92,83,int(80*self.flash/.22)))
+            self.canvas.blit(overlay,(0,0))
 
     def run(self):
         while self.running:

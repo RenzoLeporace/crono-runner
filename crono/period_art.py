@@ -389,19 +389,20 @@ def background(s,era,stage,camera,t):
     s.blit(sky(era,stage),(0,0));pal=palette_for(era,stage)
     for layer in range(2):
         off=camera*(.035+layer*.04)
+        col=mix(pal.far,pal.horizon,.22) if not layer else pal.far
         for n in range(int(off//620)-1,int(off//620)+math.ceil(W/620)+1):
             x=n*620-off;h=90+(n*47)%100
-            col=mix(pal.far,pal.horizon,.22) if not layer else pal.far
             polygon(s,col,[(x-50,560),(x+61,480-h*.3),(x+182,460-h),(x+328,480-h*.6),(x+500,509),(x+670,560),(x+670,584),(x-50,584)])
     if era==0 and stage==0 or era==2 and stage==1:
         rect(s,mix(pal.far,(40,116,134),.5),(0,512,W,72))
+        ripple=mix(pal.horizon,pal.near,.6)
         for n in range(30):
             x=(n*111-camera*.12+t*5)%W;y=520+n%7*9
-            line(s,mix(pal.horizon,pal.near,.6),(x,y),(x+37,y),1)
+            line(s,ripple,(x,y),(x+37,y),1)
     if pal.kind!='cave':
+        col=mix(pal.sky,pal.horizon,.3)
         for n in range(5):
             x=(n*377-camera*.07+t*(1+n%3))%1700-200;y=149+n%3*49
-            col=mix(pal.sky,pal.horizon,.3)
             polygon(s,col,[(x,y+9),(x+43,y-2),(x+122,y-12),(x+200,y),(x+249,y+12)])
 
 def landscape(s,world,camera,t):
