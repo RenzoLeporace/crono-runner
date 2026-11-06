@@ -63,6 +63,25 @@ FPS de Android ni garantizan una frecuencia mínima en todos los dispositivos.
 - Fuentes contrastadas, entre otras, de NASA, British Museum, Dirección Nacional Electoral,
   Gobierno de Mendoza y UNESCO. Catálogo completo en [FUENTES.md](FUENTES.md).
 
+### Versión para el navegador
+
+- El juego se compila a WebAssembly con pygbag, como el APK, y se publica en GitHub Pages
+  (`tools/build_web.py` y `.github/workflows/web.yml`). El motor de Python y pygame viaja junto
+  a la página, sin depender del CDN de pygbag.
+- `web/crono-web.js` ofrece el mismo puente que la app de Android con APIs del navegador:
+  guardados y bancos docentes en IndexedDB, voz con `speechSynthesis`, cuadro de texto en
+  pantallas táctiles, importación con el selector de archivos y exportación como descarga.
+  El código de `crono/` no cambia.
+- Con teclado se juega con el HUD de PC; en celulares y tablets se activan los controles
+  táctiles (también con `?tactil=1`). Las salas LAN responden con un aviso, porque una página
+  HTTPS no puede conectarse a la red local.
+- 5 pruebas nuevas en `tests/test_web.py` (220 en total) y 7 del puente con
+  `node --test web/crono-web.test.mjs`. Una de ellas comprueba que el puente web tenga todos
+  los métodos `@JavascriptInterface` del de Android.
+- Medición en Chrome sin ventana a 1280×720 (render por software): menú 34–35 FPS; primer mapa
+  caminando 26 FPS con p95 de 45 ms por cuadro con el HUD de PC, y p95 de 7,6 ms con los
+  controles táctiles y el render liviano de Android.
+
 ### Rendimiento
 
 **Cuadro más liviano en Android y PC**, con los mismos píxeles: 1050 cuadros de los 50

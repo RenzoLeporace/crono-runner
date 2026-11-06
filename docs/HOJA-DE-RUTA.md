@@ -1,18 +1,30 @@
 # Hoja de ruta para retomar CRONO
 
-Actualizada el **4 de noviembre de 2026**. Leer este archivo antes de continuar.
+Actualizada el **6 de noviembre de 2026**. Leer este archivo antes de continuar.
 
 ## Estado actual
 
 - Última publicación en GitHub: **v0.9.2** (pre-release). El repositorio es público.
 - Fuentes en `main`: **0.9.3 en desarrollo**. No existe todavía la release v0.9.3.
-- **215 pruebas** pasan con `python -m unittest discover -s tests`.
+- **220 pruebas** pasan con `python -m unittest discover -s tests`.
 - Hay un APK de prueba firmado en `build/android/CRONO-Beta-Educativa-0.9.3-Android.apk`
   (local, no versionado). No presentarlo como entrega final. La huella vigente está en
   `build/verification/0.9.3-desarrollo/APK-CHECK.json`.
 - `Entrega` contiene la entrega anterior (Proyecto / Windows / APK). Actualizar las tres
   carpetas juntas cuando se cierre la 0.9.3.
 - Los cambios de la 0.9.3 están resumidos en [CHANGELOG.md](../CHANGELOG.md).
+
+## Versión web
+
+- `tools/build_web.py` compila el sitio en `.web-build/sitio` con pygbag 0.9.3 (mismo runtime
+  que el APK, servido desde `./runtime/`). `--servir` lo abre en http://127.0.0.1:8000.
+- `.github/workflows/web.yml` la compila en cada cambio de `main`. **Pendiente:** activar una
+  vez Settings → Pages → Source: **GitHub Actions** para que se publique en
+  https://renzoleporace.github.io/crono-runner/. Hasta entonces el workflow deja el sitio como
+  artefacto descargable y un aviso, sin fallar.
+- El puente `web/crono-web.js` replica `MainActivity.Bridge`. Si se agrega un método
+  `@JavascriptInterface`, `tests/test_web.py` falla hasta sumarlo también en la web.
+- La versión web no forma parte de la entrega (Proyecto / Windows / APK).
 
 ## Prioridades
 

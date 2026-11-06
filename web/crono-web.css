@@ -1,0 +1,39 @@
+/* CRONO en el navegador: el juego ocupa toda la ventana, como en la app de Android. */
+html, body { margin: 0; padding: 0; overflow: hidden; touch-action: none; background: #102a38; }
+#canvas {
+  touch-action: none; position: fixed !important; inset: 0 !important;
+  width: 100vw !important; height: 100dvh !important; max-width: none !important; max-height: none !important;
+}
+#canvas:focus { outline: none; }
+#infobox { font: 20px system-ui, sans-serif; border-radius: 12px; }
+#html { display: none; }
+
+/* En el celular se juega en horizontal. */
+#crono-rotate { display: none; }
+@media (orientation: portrait) and (pointer: coarse) {
+  #crono-rotate {
+    display: grid; position: fixed; inset: 0; z-index: 90; place-items: center; padding: 24px;
+    text-align: center; background: #102a38; color: #e4edda; font: 22px/1.5 system-ui, sans-serif;
+  }
+}
+
+/* Cuadro para escribir en pantallas táctiles y aviso al salir. */
+.crono-dialogo {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px;
+  background: rgb(5 14 20 / 78%); color: #e4edda; font: 20px/1.5 system-ui, sans-serif; text-align: center;
+}
+.crono-dialogo form {
+  width: min(560px, 100%); display: grid; gap: 14px; padding: 22px; text-align: left;
+  background: #0d1b25; border: 2px solid #2ec4b6; border-radius: 16px;
+}
+.crono-dialogo p { margin: 0; font-weight: 700; color: #b4f3e9; }
+.crono-dialogo input, .crono-dialogo textarea {
+  font: inherit; color: #0d1b25; background: #f4f1e6; border: 0; border-radius: 10px; padding: 12px 14px;
+}
+.crono-dialogo textarea { min-height: 140px; resize: vertical; }
+.crono-dialogo div { display: flex; justify-content: flex-end; gap: 10px; }
+.crono-dialogo button {
+  font: inherit; font-weight: 700; padding: 10px 20px; border-radius: 10px; cursor: pointer;
+  border: 2px solid #2ec4b6; background: transparent; color: #e4edda;
+}
+.crono-dialogo button[type="submit"] { background: #2ec4b6; color: #0d1b25; }

@@ -10,11 +10,12 @@ Explorá diez épocas, completá misiones y resolvé archivos con preguntas adap
 ![Versión](https://img.shields.io/badge/versión-0.9.3_beta-2ec4b6)
 ![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)
 ![pygame-ce](https://img.shields.io/badge/pygame--ce-2.5.7-5c8a3a)
-![Plataformas](https://img.shields.io/badge/plataformas-Windows_|_Android-1f425f)
+![Plataformas](https://img.shields.io/badge/plataformas-Windows_|_Android_|_navegador-1f425f)
 ![Idiomas](https://img.shields.io/badge/idiomas-español_|_português-e0a458)
 [![Pruebas](https://github.com/RenzoLeporace/crono-runner/actions/workflows/ci.yml/badge.svg)](https://github.com/RenzoLeporace/crono-runner/actions/workflows/ci.yml)
+[![Versión web](https://github.com/RenzoLeporace/crono-runner/actions/workflows/web.yml/badge.svg)](https://github.com/RenzoLeporace/crono-runner/actions/workflows/web.yml)
 
-[Descargar](#descargar-y-jugar) · [Capturas](#capturas) · [Para docentes](#para-docentes) · [Desarrollo](#desarrollo) · [Cambios](CHANGELOG.md)
+**[▶ Jugar en el navegador](https://renzoleporace.github.io/crono-runner/)** · [Descargar](#descargar-y-jugar) · [Capturas](#capturas) · [Para docentes](#para-docentes) · [Desarrollo](#desarrollo) · [Cambios](CHANGELOG.md)
 
 <img src="docs/img/menu.png" alt="Menú principal de CRONO con el título y el reloj del tiempo" width="860">
 
@@ -179,9 +180,24 @@ Las versiones publicadas están en **[Releases](https://github.com/RenzoLeporace
 | --- | --- |
 | **Windows** | Extraé el ZIP completo y abrí `CRONO - Ecos del tiempo.exe`, con la carpeta `_internal` a su lado. |
 | **Android** | Instalá el APK (Android 8 o posterior) y jugá en horizontal. Para actualizar, instalalo encima de la versión anterior y se conservan los datos. |
+| **Navegador** | Abrí la **[versión web](https://renzoleporace.github.io/crono-runner/)**, sin instalar nada. Con teclado se juega como en PC; en celulares y tablets aparecen los controles táctiles. |
 
 El juego incluye su motor y sus recursos: no necesita Internet para jugar. Los enlaces a
 fuentes solo se abren si los elegís.
+
+### Versión web
+
+Es el mismo juego compilado a WebAssembly con [pygbag](https://github.com/pygame-web/pygbag),
+como la app de Android. La primera carga descarga unos 26 MB y después el navegador la
+guarda en caché.
+
+- **Progreso:** perfiles, avance y bancos docentes quedan guardados en ese navegador
+  (IndexedDB). Borrar los datos del sitio los elimina; en una ventana privada no se conservan.
+- **Lectura en voz alta** con las voces del navegador, e importación y exportación de bancos
+  con el selector de archivos y las descargas.
+- **Salas docentes:** una página web no puede conectarse a la red local, así que para las
+  salas se usan las apps de Windows o Android.
+- Para probar los controles táctiles con el mouse: agregá `?tactil=1` a la dirección.
 
 ### Desde el código fuente
 
@@ -230,6 +246,7 @@ crono-runner/
 │   ├── i18n.py          # traducciones sin conexión
 │   └── ...
 ├── android/             # entrada y proyecto Android
+├── web/                 # entrada, puente y estilos de la versión para el navegador
 ├── assets/              # audio y catálogo de idiomas
 ├── contenido/           # banco de preguntas local del docente
 ├── tests/               # pruebas automáticas y mediciones de rendimiento
@@ -243,8 +260,10 @@ crono-runner/
 python -m unittest discover -s tests
 ```
 
-La suite tiene **215 pruebas**: recorre los 50 mapas con física real y cubre misiones,
-configuración, guardado, migraciones del banco, idiomas, salas LAN y regresiones de render.
+La suite tiene **220 pruebas**: recorre los 50 mapas con física real y cubre misiones,
+configuración, guardado, migraciones del banco, idiomas, salas LAN, regresiones de render y la
+versión web (incluido que su puente ofrezca todos los métodos del de Android). El puente del
+navegador tiene además sus propias pruebas: `node --test web/crono-web.test.mjs`.
 Las mediciones de rendimiento se reproducen con `tests/render_stress.py` y
 `tests/boss_stress.py`.
 
@@ -254,7 +273,11 @@ Las mediciones de rendimiento se reproducen con `tests/render_stress.py` y
 | --- | --- |
 | Windows | `tools/build_beta.py` y `tools/package_beta.py` |
 | Android | `tools/prepare_android.py` y `tools/build_android.py` (SDK 34, JDK 17) |
+| Navegador | `pip install pygbag==0.9.3` y `tools/build_web.py --servir` (sitio en `.web-build/sitio`) |
 | Entrega | `tools/create_delivery.py` (carpetas Proyecto, Windows y APK) |
+
+GitHub Actions compila la versión web en cada cambio de `main` y la publica en GitHub Pages
+(`.github/workflows/web.yml`).
 
 El estado del desarrollo y los próximos pasos están en la
 [hoja de ruta](docs/HOJA-DE-RUTA.md).

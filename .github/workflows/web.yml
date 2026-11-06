@@ -1,0 +1,72 @@
+# Compila la versión para el navegador en cada cambio de main y la publica en GitHub Pages.
+# Para publicar hay que activar una vez Settings → Pages → Source: GitHub Actions. Mientras
+# Pages no esté activado, la compilación queda como artefacto descargable y el workflow no falla.
+name: Versión web
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  compilar:
+    name: Compilar
+    runs-on: ubuntu-latest
+    outputs:
+      publicar: ${{ steps.pages.outputs.publicar }}
+    env:
+      SDL_VIDEODRIVER: dummy
+      SDL_AUDIODRIVER: dummy
+      PYGAME_HIDE_SUPPORT_PROMPT: '1'
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: pip
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Instalar dependencias
+        run: python -m pip install -r requirements.txt pygbag==0.9.3
+      - name: Pruebas de la versión web
+        run: python -m unittest tests.test_web -v
+      - name: Compilar con pygbag
+        run: python tools/build_web.py
+      - name: Revisar si GitHub Pages está activado
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tipo=$(gh api "repos/${GITHUB_REPOSITORY}/pages" --jq .build_type 2>/dev/null || true)
+          if [ "$tipo" = "workflow" ]; then
+            echo "publicar=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publicar=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=GitHub Pages sin activar::La versión web se compiló pero no se publicó. Activá Settings → Pages → Source: GitHub Actions; mientras tanto, descargala desde los artefactos de esta ejecución."
+          fi
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: .web-build/sitio
+
+  publicar:
+    name: Publicar
+    needs: compilar
+    if: needs.compilar.outputs.publicar == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
