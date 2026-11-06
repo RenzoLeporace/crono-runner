@@ -18,10 +18,10 @@ Actualizada el **6 de noviembre de 2026**. Leer este archivo antes de continuar.
 
 - `tools/build_web.py` compila el sitio en `.web-build/sitio` con pygbag 0.9.3 (mismo runtime
   que el APK, servido desde `./runtime/`). `--servir` lo abre en http://127.0.0.1:8000.
-- `.github/workflows/web.yml` la compila en cada cambio de `main`. **Pendiente:** activar una
-  vez Settings → Pages → Source: **GitHub Actions** para que se publique en
-  https://renzoleporace.github.io/crono-runner/. Hasta entonces el workflow deja el sitio como
-  artefacto descargable y un aviso, sin fallar.
+- `.github/workflows/web.yml` la compila en cada cambio de `main` y la publica en
+  https://renzoleporace.github.io/crono-runner/ (Pages activado el 6 de noviembre de 2026 con
+  Source: GitHub Actions). Si Pages se desactiva, el workflow deja el sitio como artefacto
+  descargable y un aviso, sin fallar.
 - El puente `web/crono-web.js` replica `MainActivity.Bridge`. Si se agrega un método
   `@JavascriptInterface`, `tests/test_web.py` falla hasta sumarlo también en la web.
 - La versión web no forma parte de la entrega (Proyecto / Windows / APK).
